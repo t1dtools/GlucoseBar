@@ -2,6 +2,8 @@
 
 GlucoseBar is a macOS 14+ Menu Bar application for monitoring your or your loved ones CGM readings at a glance.
 
+You can download GlucoseBar from the [releases section](https://github.com/t1dtools/GlucoseBar/releases) here on GitHub, or hopefully soon from the macOS App Store.
+
 ## CGM Providers
 
 Name | Supported | Notes
