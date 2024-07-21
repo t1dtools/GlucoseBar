@@ -14,3 +14,6 @@ Libre LinkUp | ⏳️ | Basic functionality is in, but I need testing help from 
 
 If you have requests for any other CGM data providers, please get in touch through a ticket.
 
+## Disclaimer
+
+GlucoseBar is for monitoring purposes only. Do not use the data from GlucoseBar for medical decisions.
