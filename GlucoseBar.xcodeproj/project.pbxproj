@@ -1,0 +1,520 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 60;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		830C4D062B0166F8000A0E87 /* DexcomShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = 830C4D052B0166F8000A0E87 /* DexcomShare.swift */; };
+		834621282ADDACB20024048E /* Simulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834621272ADDACB20024048E /* Simulator.swift */; };
+		8346212A2ADDACC20024048E /* Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834621292ADDACC20024048E /* Provider.swift */; };
+		8363136E2ABF8CAA0047C99D /* GlucoseEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8363136D2ABF8CAA0047C99D /* GlucoseEntry.swift */; };
+		836313742ABF99210047C99D /* DispatchTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836313732ABF99210047C99D /* DispatchTimer.swift */; };
+		836313762AC0808E0047C99D /* Glucose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836313752AC0808E0047C99D /* Glucose.swift */; };
+		836351842ABF6A9000BDAA96 /* GlucoseBarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836351832ABF6A9000BDAA96 /* GlucoseBarApp.swift */; };
+		836351882ABF6A9000BDAA96 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 836351872ABF6A9000BDAA96 /* Assets.xcassets */; };
+		8363518B2ABF6A9000BDAA96 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8363518A2ABF6A9000BDAA96 /* Preview Assets.xcassets */; };
+		8381599D2BE4257F00A228F3 /* MainAppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8381599C2BE4257F00A228F3 /* MainAppView.swift */; };
+		838B25DF2BF0146F00D10DDA /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 838B25DE2BF0146F00D10DDA /* WelcomeView.swift */; };
+		83A172382BD6F905003C5C7E /* MenuBarExtraAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 83A172372BD6F905003C5C7E /* MenuBarExtraAccess */; };
+		83A3301A2AC9F69B00222445 /* GraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A330192AC9F69B00222445 /* GraphView.swift */; };
+		83A3301C2AC9F70100222445 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A3301B2AC9F70100222445 /* SettingsView.swift */; };
+		83B737A22BE9728F00B84A75 /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 83B737A12BE9728F00B84A75 /* LaunchAtLogin */; };
+		83DF71B22AEDA9EB00FC0566 /* Nightscout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DF71B12AEDA9EB00FC0566 /* Nightscout.swift */; };
+		83E323812AC21DDD00CB5206 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E323802AC21DDD00CB5206 /* Settings.swift */; };
+		83EC4AC62BE972D9007285C7 /* NightscoutKit in Frameworks */ = {isa = PBXBuildFile; productRef = 83EC4AC52BE972D9007285C7 /* NightscoutKit */; };
+		83F888412B1A888000A50E74 /* LibreLinkUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F888402B1A888000A50E74 /* LibreLinkUp.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		830C4D052B0166F8000A0E87 /* DexcomShare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DexcomShare.swift; sourceTree = "<group>"; };
+		834621272ADDACB20024048E /* Simulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Simulator.swift; sourceTree = "<group>"; };
+		834621292ADDACC20024048E /* Provider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Provider.swift; sourceTree = "<group>"; };
+		8363136D2ABF8CAA0047C99D /* GlucoseEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseEntry.swift; sourceTree = "<group>"; };
+		836313732ABF99210047C99D /* DispatchTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DispatchTimer.swift; sourceTree = "<group>"; };
+		836313752AC0808E0047C99D /* Glucose.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Glucose.swift; sourceTree = "<group>"; };
+		836351802ABF6A9000BDAA96 /* GlucoseBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GlucoseBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		836351832ABF6A9000BDAA96 /* GlucoseBarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseBarApp.swift; sourceTree = "<group>"; wrapsLines = 1; };
+		836351872ABF6A9000BDAA96 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		8363518A2ABF6A9000BDAA96 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		8363518C2ABF6A9000BDAA96 /* GlucoseBar.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GlucoseBar.entitlements; sourceTree = "<group>"; };
+		8381599C2BE4257F00A228F3 /* MainAppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainAppView.swift; sourceTree = "<group>"; };
+		838B25DE2BF0146F00D10DDA /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
+		83A330192AC9F69B00222445 /* GraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphView.swift; sourceTree = "<group>"; };
+		83A3301B2AC9F70100222445 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		83DF71B12AEDA9EB00FC0566 /* Nightscout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Nightscout.swift; sourceTree = "<group>"; };
+		83E323802AC21DDD00CB5206 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
+		83F888402B1A888000A50E74 /* LibreLinkUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibreLinkUp.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8363517D2ABF6A9000BDAA96 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83EC4AC62BE972D9007285C7 /* NightscoutKit in Frameworks */,
+				83B737A22BE9728F00B84A75 /* LaunchAtLogin in Frameworks */,
+				83A172382BD6F905003C5C7E /* MenuBarExtraAccess in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		830C4D032B0166E0000A0E87 /* DexcomShare */ = {
+			isa = PBXGroup;
+			children = (
+				830C4D052B0166F8000A0E87 /* DexcomShare.swift */,
+			);
+			path = DexcomShare;
+			sourceTree = "<group>";
+		};
+		834621252ADDAC930024048E /* Providers */ = {
+			isa = PBXGroup;
+			children = (
+				83F8883F2B1A86BA00A50E74 /* LibreLinkUp */,
+				830C4D032B0166E0000A0E87 /* DexcomShare */,
+				83DF71B02AEDA9DD00FC0566 /* Nightscout */,
+				834621262ADDAC9E0024048E /* Simulator */,
+				834621292ADDACC20024048E /* Provider.swift */,
+			);
+			path = Providers;
+			sourceTree = "<group>";
+		};
+		834621262ADDAC9E0024048E /* Simulator */ = {
+			isa = PBXGroup;
+			children = (
+				834621272ADDACB20024048E /* Simulator.swift */,
+			);
+			path = Simulator;
+			sourceTree = "<group>";
+		};
+		836351772ABF6A9000BDAA96 = {
+			isa = PBXGroup;
+			children = (
+				836351822ABF6A9000BDAA96 /* GlucoseBar */,
+				836351812ABF6A9000BDAA96 /* Products */,
+				83B7379E2BE4420F00B84A75 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		836351812ABF6A9000BDAA96 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				836351802ABF6A9000BDAA96 /* GlucoseBar.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		836351822ABF6A9000BDAA96 /* GlucoseBar */ = {
+			isa = PBXGroup;
+			children = (
+				834621252ADDAC930024048E /* Providers */,
+				836351832ABF6A9000BDAA96 /* GlucoseBarApp.swift */,
+				836351872ABF6A9000BDAA96 /* Assets.xcassets */,
+				8363518C2ABF6A9000BDAA96 /* GlucoseBar.entitlements */,
+				836351892ABF6A9000BDAA96 /* Preview Content */,
+				8363136D2ABF8CAA0047C99D /* GlucoseEntry.swift */,
+				836313732ABF99210047C99D /* DispatchTimer.swift */,
+				836313752AC0808E0047C99D /* Glucose.swift */,
+				83E323802AC21DDD00CB5206 /* Settings.swift */,
+				83A330192AC9F69B00222445 /* GraphView.swift */,
+				83A3301B2AC9F70100222445 /* SettingsView.swift */,
+				8381599C2BE4257F00A228F3 /* MainAppView.swift */,
+				838B25DE2BF0146F00D10DDA /* WelcomeView.swift */,
+			);
+			path = GlucoseBar;
+			sourceTree = "<group>";
+		};
+		836351892ABF6A9000BDAA96 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				8363518A2ABF6A9000BDAA96 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		83B7379E2BE4420F00B84A75 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		83DF71B02AEDA9DD00FC0566 /* Nightscout */ = {
+			isa = PBXGroup;
+			children = (
+				83DF71B12AEDA9EB00FC0566 /* Nightscout.swift */,
+			);
+			path = Nightscout;
+			sourceTree = "<group>";
+		};
+		83F8883F2B1A86BA00A50E74 /* LibreLinkUp */ = {
+			isa = PBXGroup;
+			children = (
+				83F888402B1A888000A50E74 /* LibreLinkUp.swift */,
+			);
+			path = LibreLinkUp;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8363517F2ABF6A9000BDAA96 /* GlucoseBar */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8363518F2ABF6A9000BDAA96 /* Build configuration list for PBXNativeTarget "GlucoseBar" */;
+			buildPhases = (
+				8363517C2ABF6A9000BDAA96 /* Sources */,
+				8363517D2ABF6A9000BDAA96 /* Frameworks */,
+				8363517E2ABF6A9000BDAA96 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GlucoseBar;
+			packageProductDependencies = (
+				83A172372BD6F905003C5C7E /* MenuBarExtraAccess */,
+				83B737A12BE9728F00B84A75 /* LaunchAtLogin */,
+				83EC4AC52BE972D9007285C7 /* NightscoutKit */,
+			);
+			productName = GlucoseBar;
+			productReference = 836351802ABF6A9000BDAA96 /* GlucoseBar.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		836351782ABF6A9000BDAA96 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1530;
+				TargetAttributes = {
+					8363517F2ABF6A9000BDAA96 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = 8363517B2ABF6A9000BDAA96 /* Build configuration list for PBXProject "GlucoseBar" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 836351772ABF6A9000BDAA96;
+			packageReferences = (
+				836313682ABF824C0047C99D /* XCLocalSwiftPackageReference "../swift-deps/NightscoutKit" */,
+				8312CEA72AC78C7900CD4FC9 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
+				83A172362BD6F905003C5C7E /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */,
+			);
+			productRefGroup = 836351812ABF6A9000BDAA96 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8363517F2ABF6A9000BDAA96 /* GlucoseBar */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8363517E2ABF6A9000BDAA96 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8363518B2ABF6A9000BDAA96 /* Preview Assets.xcassets in Resources */,
+				836351882ABF6A9000BDAA96 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8363517C2ABF6A9000BDAA96 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				836313742ABF99210047C99D /* DispatchTimer.swift in Sources */,
+				83E323812AC21DDD00CB5206 /* Settings.swift in Sources */,
+				8363136E2ABF8CAA0047C99D /* GlucoseEntry.swift in Sources */,
+				830C4D062B0166F8000A0E87 /* DexcomShare.swift in Sources */,
+				83A3301C2AC9F70100222445 /* SettingsView.swift in Sources */,
+				83F888412B1A888000A50E74 /* LibreLinkUp.swift in Sources */,
+				836313762AC0808E0047C99D /* Glucose.swift in Sources */,
+				834621282ADDACB20024048E /* Simulator.swift in Sources */,
+				8381599D2BE4257F00A228F3 /* MainAppView.swift in Sources */,
+				838B25DF2BF0146F00D10DDA /* WelcomeView.swift in Sources */,
+				8346212A2ADDACC20024048E /* Provider.swift in Sources */,
+				836351842ABF6A9000BDAA96 /* GlucoseBarApp.swift in Sources */,
+				83A3301A2AC9F69B00222445 /* GraphView.swift in Sources */,
+				83DF71B22AEDA9EB00FC0566 /* Nightscout.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		8363518D2ABF6A9000BDAA96 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_LSUIElement = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		8363518E2ABF6A9000BDAA96 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_LSUIElement = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		836351902ABF6A9000BDAA96 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = GlucoseBar/GlucoseBar.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 44;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_ASSET_PATHS = "\"GlucoseBar/Preview Content\"";
+				DEVELOPMENT_TEAM = HAR373MZHM;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = GlucoseBar;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = t1d.tools.GlucoseBar;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		836351912ABF6A9000BDAA96 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = GlucoseBar/GlucoseBar.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 44;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_ASSET_PATHS = "\"GlucoseBar/Preview Content\"";
+				DEVELOPMENT_TEAM = HAR373MZHM;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = GlucoseBar;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = t1d.tools.GlucoseBar;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		8363517B2ABF6A9000BDAA96 /* Build configuration list for PBXProject "GlucoseBar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8363518D2ABF6A9000BDAA96 /* Debug */,
+				8363518E2ABF6A9000BDAA96 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8363518F2ABF6A9000BDAA96 /* Build configuration list for PBXNativeTarget "GlucoseBar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				836351902ABF6A9000BDAA96 /* Debug */,
+				836351912ABF6A9000BDAA96 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		836313682ABF824C0047C99D /* XCLocalSwiftPackageReference "../swift-deps/NightscoutKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "../swift-deps/NightscoutKit";
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8312CEA72AC78C7900CD4FC9 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/LaunchAtLogin-Modern";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+		83A172362BD6F905003C5C7E /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/orchetect/MenuBarExtraAccess";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.5;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		83A172372BD6F905003C5C7E /* MenuBarExtraAccess */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 83A172362BD6F905003C5C7E /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */;
+			productName = MenuBarExtraAccess;
+		};
+		83B737A12BE9728F00B84A75 /* LaunchAtLogin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8312CEA72AC78C7900CD4FC9 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */;
+			productName = LaunchAtLogin;
+		};
+		83EC4AC52BE972D9007285C7 /* NightscoutKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 836313682ABF824C0047C99D /* XCLocalSwiftPackageReference "../swift-deps/NightscoutKit" */;
+			productName = NightscoutKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 836351782ABF6A9000BDAA96 /* Project object */;
+}

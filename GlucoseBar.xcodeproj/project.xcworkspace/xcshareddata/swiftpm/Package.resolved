@@ -1,0 +1,33 @@
+{
+  "originHash" : "41fccdc00685a58240c84eb80ad08027abc0c5ffa78f449e6a115de61c3bad3e",
+  "pins" : [
+    {
+      "identity" : "launchatlogin-modern",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sindresorhus/LaunchAtLogin-Modern",
+      "state" : {
+        "branch" : "main",
+        "revision" : "9c41991631605c8ccfe0347bbcb5c659169f2ec5"
+      }
+    },
+    {
+      "identity" : "menubarextraaccess",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/orchetect/MenuBarExtraAccess",
+      "state" : {
+        "revision" : "f5896b47e15e114975897354c7e1082c51a2bffd",
+        "version" : "1.0.5"
+      }
+    },
+    {
+      "identity" : "oxygen",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/mpangburn/Oxygen",
+      "state" : {
+        "branch" : "master",
+        "revision" : "b3c7a6ead1400e4799b16755d23c9905040d4acc"
+      }
+    }
+  ],
+  "version" : 3
+}
