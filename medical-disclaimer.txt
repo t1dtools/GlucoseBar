@@ -1,0 +1,25 @@
+MEDICAL DISCLAIMER
+
+This application is intended for informational purposes only and should not be used as a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.
+
+ACCURACY OF INFORMATION
+
+While we strive to ensure that the data presented by this application is accurate, we cannot guarantee the accuracy, completeness, or timeliness of the glucose readings or any other information provided by CGM services. Users should verify any readings with their primary CGM solution.
+
+DATA INTEGRATION
+
+This application integrates data from various CGM solutions. It is the user’s responsibility to ensure their CGM service is compatible with this application and that the device is functioning properly. We are not responsible for any discrepancies or malfunctions in the data provided by third-party CGM services.
+
+USER RESPONSIBILITY
+
+Users are solely responsible for managing their health and should not make any medical decisions based on the information provided by this application. This application should not be relied upon as the sole basis for managing diabetes or any other health condition.
+
+LIMITATION OF LIABILITY
+
+To the maximum extent permitted by applicable law, the developers, distributors, and associated parties of this application disclaim any liability for any direct, indirect, incidental, consequential, or special damages arising out of or in connection with your access to or use of this application, even if advised of the possibility of such damages.
+
+CHANGES TO THE DISCLAIMER
+
+We reserve the right to modify this disclaimer at any time. Users are encouraged to review this disclaimer periodically for any changes. Continued use of this application constitutes acceptance of any changes to this disclaimer.
+
+By using this application, you acknowledge that you have read, understood, and agree to this disclaimer.

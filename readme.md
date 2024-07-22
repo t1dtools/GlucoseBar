@@ -17,3 +17,5 @@ If you have requests for any other CGM data providers, please get in touch throu
 ## Disclaimer
 
 GlucoseBar is for monitoring purposes only. Do not use the data from GlucoseBar for medical decisions.
+
+See the full disclaimer in the [medical disclaimer](medical-disclaimer.txt).
