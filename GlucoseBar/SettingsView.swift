@@ -151,11 +151,15 @@ struct GeneralSettings: View {
                 }
                 Spacer()
                 HStack {
+                    Button("Quit GlucoseBar") {
+                        NSApplication.shared.terminate(nil)
+                    }
                     Spacer()
                     Button("Save") {
                         s.save()
                     }
-                }
+                }.padding(.top, 10)
+                Spacer()
                 Text("\(Bundle.main.appName) Version: \(Bundle.main.appVersionLong) (\(Bundle.main.appBuild)) ").font(.footnote).padding(2)
             }
         }.frame(minWidth: 475, maxWidth: 475, minHeight: 395, maxHeight: 395)
