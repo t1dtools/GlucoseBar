@@ -44,6 +44,7 @@
 		838B25DE2BF0146F00D10DDA /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		83A330192AC9F69B00222445 /* GraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphView.swift; sourceTree = "<group>"; };
 		83A3301B2AC9F70100222445 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		83D76EC62C4DB616006639EF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		83DF71B12AEDA9EB00FC0566 /* Nightscout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Nightscout.swift; sourceTree = "<group>"; };
 		83E323802AC21DDD00CB5206 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		83F888402B1A888000A50E74 /* LibreLinkUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibreLinkUp.swift; sourceTree = "<group>"; };
@@ -111,6 +112,7 @@
 		836351822ABF6A9000BDAA96 /* GlucoseBar */ = {
 			isa = PBXGroup;
 			children = (
+				83D76EC62C4DB616006639EF /* Info.plist */,
 				834621252ADDAC930024048E /* Providers */,
 				836351832ABF6A9000BDAA96 /* GlucoseBarApp.swift */,
 				836351872ABF6A9000BDAA96 /* Assets.xcassets */,

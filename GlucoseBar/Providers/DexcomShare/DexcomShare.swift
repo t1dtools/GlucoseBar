@@ -321,9 +321,9 @@ class DexcomShare: Provider {
     private func authenticate() async {
         self.logger.debug("DexcomShare.authenticate")
 
-//        DispatchQueue.main.async {
-        self.providerIssue = nil
-//        }
+        DispatchQueue.main.async {
+            self.providerIssue = nil
+        }
 
         // Do we need a full refresh?
         if self.accountID == "" {
