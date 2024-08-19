@@ -68,16 +68,16 @@ class Provider: ObservableObject, @unchecked Sendable {
         return false
     }
 
-    @ViewBuilder
-    func getConnectionView(s: SettingsStore) -> some View {
-        @ObservedObject var settings: SettingsStore = s
-
-        Picker("", selection: $settings.libreConnectionID) {
-            ForEach(self.connections, id: \.patientID) {
-                Text("\($0.firstName) \($0.lastName)").tag($0.patientID)
-            }
-        }
-    }
+//    @ViewBuilder
+//    func getConnectionView(s: SettingsStore) -> some View {
+//        @ObservedObject var settings: SettingsStore = s
+//
+//        Picker("", selection: $settings.libreConnectionID) {
+//            ForEach(self.connections, id: \.patientID) {
+//                Text("\($0.firstName) \($0.lastName)").padding()//.tag($0.patientID)
+//            }
+//        }
+//    }
 
     internal func startTimer() {
         let _ = Timer.publish(every: readingInterval, on: .main, in: .default)

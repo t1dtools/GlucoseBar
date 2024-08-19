@@ -175,6 +175,7 @@ struct CGMSettings: View {
     @State var cgmCredentialsError: Bool = false
     @State var cgmCredentialsSuccess: Bool = false
     @State var validatedProvider: CGMProvider = .null
+    @State var showValidationAndErrorBox: Bool = false
 
     internal var logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "provider")
 
@@ -185,7 +186,7 @@ struct CGMSettings: View {
                     Text("CGM Provider").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 10)
                     Picker("", selection: $s.cgmProvider) {
                         ForEach(CGMProvider.allCases) { provider in
-                            if provider != .null && provider != .librelinkup {
+                            if provider != .null {
                                 Text(provider.presentable).tag(provider)
                             }
                         }
@@ -240,28 +241,55 @@ struct CGMSettings: View {
                         Text("These credentials are the ones from your primary Dexcom account. You must also have at least one follower in the Dexcom app.").font(.footnote).fixedSize(horizontal: false, vertical: true)
                     }
 
-//                    if s.cgmProvider == .librelinkup {
-//                        HStack {
-//                            Text("Email").frame(width: 130, alignment: .leading)
-//                            Spacer()
-//                            TextField("", text: $s.libreUsername).autocorrectionDisabled(true)
-//                                .textFieldStyle(RoundedBorderTextFieldStyle())
-//                        }
-//                        HStack {
-//                            Text("Password").frame(width: 130, alignment: .leading)
-//                            Spacer()
-//                            SecureField("", text: $s.librePassword).textFieldStyle(RoundedBorderTextFieldStyle())
-//                        }
-//                        HStack {
+                    if s.cgmProvider == .librelinkup {
+                        HStack {
+                            Text("Email").frame(width: 130, alignment: .leading)
+                            Spacer()
+                            TextField("", text: $s.libreUsername).autocorrectionDisabled(true)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                        }
+                        HStack {
+                            Text("Password").frame(width: 130, alignment: .leading)
+                            Spacer()
+                            SecureField("", text: $s.librePassword).textFieldStyle(RoundedBorderTextFieldStyle())
+                        }
+                        HStack {
+
+                            Text("Following:").frame(width: 130, alignment: .topLeading)
+                            Spacer()
+//                            if cgmCredentialsSuccess && g.provider.connections.count > 0 {
+                            ScrollView {
+                                Picker("", selection: $s.libreConnectionID) {
+
+                                    ForEach(g.provider.connections, id: \.patientID) { patient in
+                                        Text("\(patient.firstName) \(patient.lastName)").tag(patient.patientID)
+                                    }
+//                                    ForEach(CGMProvider.allCases) { provider in
+////                                        if provider != .null {
+//                                        Text(provider.presentable).frame(width: 330, height: 15, alignment: .leading).tag(provider)
+////                                        }
+//                                    }
+                                }.pickerStyle(RadioGroupPickerStyle()).padding(.vertical, 10)
+                            }.frame(width: 330, height: 75, alignment: .topLeading)
+                                 // Work around since normal selects close the settings window on us 🤪
+
 //                            Text("Following").frame(width: 130, alignment: .leading)
 //                            Spacer()
-//                            if cgmCredentialsSuccess {
+
+                                
+//                                Text("Hello mf'er \(g.provider.connections)")
+//                                Picker("", selection: $s.libreConnectionID) {
+//                                    ForEach(g.provider.connections, id: \.patientID) {
+//                                        Text("\($0.firstName) \($0.lastName)").tag($0.patientID)
+//                                    }
+//                                }.pickerStyle(SegmentedPickerStyle())
+
 //                                g.provider.getConnectionView(s: s)
 //                            } else {
 //                                Text("Please click \"Test Connection\" to display following options.").font(.footnote)
 //                            }
-//                        }
-//                    }
+                        }
+                    }
                     Spacer()
                     HStack {
                         if s.cgmProvider != .simulator {
@@ -290,6 +318,7 @@ struct CGMSettings: View {
 
                             Button(action: {
                                 isValidating = true
+                                showValidationAndErrorBox = true
                                 Task {
                                     validatedProvider = s.cgmProvider
                                     let providerTest = await s.testCGMProvider()
@@ -298,20 +327,33 @@ struct CGMSettings: View {
                                     cgmCredentialsSuccess = providerTest
                                     isValidating = false
                                     s.validSettings = providerTest
-
-                                    self.logger.debug("test complete. \(g.provider.connectionID)")
                                 }
                             }) {
                                 Text("Test Connection")
-                            }.disabled(isValidating) // TODO: State var for if it's currently testing
+                            }.disabled(isValidating).alert(
+                                (g.provider.providerIssue == nil ? "Validating credentials..." : g.provider.providerIssue) ?? "Unknown Issue with \(s.cgmProvider.presentable)",
+                                isPresented: $showValidationAndErrorBox
+                            ) {
+//                                if g.provider.providerIssue != nil {
+//                                    Button("OK") {
+//                                        showValidationAndErrorBox = false
+//                                    }
+//                                }
+
+                                Button("Close") {
+                                    showValidationAndErrorBox = false
+                                }.disabled(isValidating)
+                            }
                         }
-                        if g.provider.providerIssue != nil {
-                            Text("Provider issue: \(g.provider.providerIssue ?? "Unknown")")
-                        }
-                        if !isValidating && cgmCredentialsError && s.cgmProvider == validatedProvider {
-                            Text("Invalid credentials or service unreachable").foregroundColor(.orange)
-                            Image(systemName: "exclamationmark.triangle").foregroundColor(.orange)
-                        }
+                        // { Anything inside these brackets should be shown in an overlay kinda thing
+                            if g.provider.providerIssue != nil {
+                                Text("\(g.provider.providerIssue ?? "Unknown Issue")")
+                            }
+                            if !isValidating && cgmCredentialsError && s.cgmProvider == validatedProvider && g.provider.providerIssue == nil {
+                                Text("Invalid credentials or service unreachable").foregroundColor(.orange)
+                                Image(systemName: "exclamationmark.triangle").foregroundColor(.orange)
+                            }
+                        // }
                         if !isValidating && cgmCredentialsSuccess && s.cgmProvider == validatedProvider {
                             HStack {
                                 Text("Connection OK").foregroundColor(.green)

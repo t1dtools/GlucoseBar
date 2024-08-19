@@ -201,13 +201,9 @@ class LibreLinkUp: Provider {
 
         if !isAuthValid() {
             logger.debug("calling authenticate from fetch")
-            authenticate(completion: { success, _ in
-                if success {
-                    Task {
-                        await self.fetch()
-                    }
-                }
-            })
+            if await authenticate() {
+                await self.fetch()
+            }
             return
         }
 
@@ -350,7 +346,7 @@ class LibreLinkUp: Provider {
 //
 //    }
 
-    private func getConnections() async {
+    private func getConnections() async -> (connections: [LibreLinkUp.LibreLinkUpConnectionsResponse], success: Bool) {
         self.logger.debug("LibreLinkUp.getConnections")
 
         let path = "/connections"
@@ -363,7 +359,8 @@ class LibreLinkUp: Provider {
 
             if res.statusCode > 499 {
                 // TODO: Handle error
-                return
+                self.logger.error("High status code, not yet handled")
+                return (connections: [], success: false)
             }
 
             do {
@@ -371,33 +368,44 @@ class LibreLinkUp: Provider {
 
                 switch result.status {
                 case 0:
-                    self.logger.info("Status 0, updating values")
-                    // TODO: Success
-                    self.logger.info("Connection count: \(self.connections.count)")
-                    self.connections = result.data!
-                    self.connectionID = self.connections.first!.patientID
-                    self.logger.debug("got connections: \(self.connections)")
-                    return
+//                    DispatchQueue.main.async {
+                        self.logger.info("Status 0, updating values")
+                        // TODO: Success
+                        self.logger.info("Connection count: \(self.connections.count)")
+                        self.connections = result.data!
+                        self.connectionID = result.data!.first?.patientID ?? ""// self.connections.first?.patientID ?? ""
+                        self.logger.debug("got connections: \(self.connections)")
+//                    }
+                    return (connections: result.data!, success: true)
+//                    return true
                 case 920: // Version bump needed
                           //                    self.logger.info("Version too low, bumping and retrying")
                           //                    self.lluVersion = result.data!.minimumVersion ?? "0"
                           //                    completion(false, true)
-                    return
+                    return (connections: [], success: false)
+//                    return false
                 default:
                     self.logger.debug("Default case triggered for status: \(result.status)")
                 }
             } catch {
                 self.logger.error("failed handling decode and actions from response \(String(describing: error))")
-                self.logger.debug("DEBUG: \(String(data: data, encoding: .utf8)!)")
-                return
+                self.logger.error("DEBUG: \(String(data: data, encoding: .utf8)!)")
+                return (connections: [], success: false)
+//                return false
             }
         } catch {
-
+            self.logger.error("Catastrophic failure creating request.")
+            return (connections: [], success: false)
+//            return false
         }
+
+        return (connections: [], success: false)
+//        return false
     }
 
-    private func authenticate(completion: @escaping (_ success: Bool, _ tryAgain: Bool?) -> Void) {
+    private func authenticate() async -> Bool {
         self.logger.debug("LibreLinkUp.authenticate")
+        self.providerIssue = nil
 
         let path = "/auth/login"
         let requestBody = LibreLinkUpAuthRequest(email: self.username, password: self.password)
@@ -408,95 +416,103 @@ class LibreLinkUp: Provider {
             request.httpBody = jsonData
         } catch {
             logger.info("failed marshalling json, aborting authenticate")
-            completion(false, false)
-            return
+            return false
         }
 
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let data = data else {
-                self.logger.error("authenitcation error: \(String(describing: error))")
-                completion(false, false)
-                return
-            }
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            self.logger.error("DEBUG: \(String(data: data, encoding: .utf8)!)")
 
             let res = response as! HTTPURLResponse
             if res.statusCode > 499 {
-                // TODO: Handle error
-                completion(false, false)
-                return
+                self.logger.error("Response code in 500 range. Dunno what to do! Code: \(res.statusCode)")
+                return false
             }
 
-            do {
-                let result = try JSONDecoder().decode(LibreLinkUpResponse<LibreLinkUpAuthResponse>.self, from: data)
-
-                switch result.status {
-                case 0:
-                    // TODO: Success
-                    // Check if redirect
-                    if let redirect = result.data!.redirect, let region = result.data!.region, redirect, !region.isEmpty {
-                        self.apiRegion = result.data!.region!
-                        self.authenticate(completion: completion)
-                        return
-                    }
-
-                    guard let authToken = result.data!.authTicket?.token,
-                          !authToken.isEmpty else {
-                        self.logger.error("auth response did not satisfy requirements")
-                        completion(false, false)
-                        return
-                    }
-
-                    // COMPLETED AUTH
-                    self.auth = result.data!.authTicket!
-
-                    // Getting connections
-                    Task {
-                        await self.getConnections()
-                        completion(true, false)
-                    }
-                    return
-                case 2:
-                    // Bad credentials?
-                    self.logger.info("Bad credentials")
-                    completion(false, false)
-                    return
-                case 4:
-                    // TODO: Request TOU
-                    self.logger.info("TOU needs calling")
-                    completion(false, true)
-                    return
-                case 920: // Version bump needed
-                    self.logger.info("Version too low, bumping and retrying")
-                    self.lluVersion = result.data!.data?.minimumVersion ?? "0"
-                    completion(false, true)
-                    return
-                default:
-                    self.logger.debug("Default case triggered for status: \(result.status)")
-
+            if res.statusCode > 399 {
+                self.logger.error("Response code in 400 range. Something wrong? Rate limiting? Code: \(res.statusCode)")
+                if res.statusCode == 430 || res.statusCode == 429 {
+                    self.logger.error("Rate limited, surfacing to user.")
+                    self.providerIssue = "Libre LinkUp is rate limiting us. Please try again in 5 minutes or more."
                 }
-            } catch {
-                self.logger.error("failed handling decode and actions from response: \(String(describing: error))")
-                completion(false, false)
-                return
+                return false
             }
+
+
+            let result = try JSONDecoder().decode(LibreLinkUpResponse<LibreLinkUpAuthResponse>.self, from: data)
+
+            switch result.status {
+            case 0:
+                // TODO: Success
+                // Check if redirect
+                if let redirect = result.data!.redirect, let region = result.data!.region, redirect, !region.isEmpty {
+                    self.apiRegion = result.data!.region!
+                    return await self.authenticate()
+                }
+
+                guard let authToken = result.data!.authTicket?.token,
+                      !authToken.isEmpty else {
+                    self.logger.error("auth response did not satisfy requirements")
+                    return false
+                }
+
+                // COMPLETED AUTH
+                self.auth = result.data!.authTicket!
+
+                // Getting connections
+//                Task {
+                let conns = await self.getConnections()
+                self.connections = conns.connections
+                return conns.success
+//                    return await self.getConnections()
+//                }
+            case 2:
+                // Bad credentials?
+                self.logger.info("Bad credentials")
+                return false
+            case 4:
+                // TODO: Request TOU
+                self.logger.info("TOU needs calling")
+//                    return await self.authenticate()
+                return false
+
+            case 920: // Version bump needed
+                self.logger.info("Version too low, bumping and retrying")
+                self.lluVersion = result.data!.data?.minimumVersion ?? "0"
+                return await self.authenticate()
+            default:
+                self.logger.debug("Default case triggered for status: \(result.status)")
+
+            }
+        } catch {
+            self.logger.error("failed handling decode and actions from response: \(String(describing: error))")
         }
-        task.resume()
+
+        return false
     }
 
-//    override internal func verifyCredentials(completion: @escaping (_ result: Bool) -> Void) {
-//        self.logger.debug("librelinkup.verifyCredentials")
-//        self.authenticate(completion: {authSuccess, tryAgain in
-//            if authSuccess {
-//                self.logger.debug("librelinkup auth success: \(self.connectionID)")
-//                completion(true)
-//                return
-//            }
-//
-//            self.logger.debug("librelinkup auth failure")
-//            completion(false)
-//            return
-//        })
-//    }
+    override internal func verifyCredentials() async -> Bool {
+        self.logger.debug("librelinkup.verifyCredentials")
+        let authSuccess = await self.authenticate()
+
+        if authSuccess {
+            self.logger.debug("librelinkup auth success: \(self.connectionID)")
+
+            let conns = await self.getConnections()
+//            let connectionSuccess = await self.getConnections()
+            if conns.success {
+                self.connections = conns.connections
+                self.logger.debug("librelinkup got connections successfully")
+                return true
+            }
+
+            return false
+        }
+
+        self.logger.debug("librelinkup auth failure")
+        return false
+
+    }
 
     override public func isAuthValid() -> Bool {
         if auth == nil {

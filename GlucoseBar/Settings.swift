@@ -28,9 +28,10 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 
     // Libre LinkUp
     @Published var libreServer: String = ""
-    @Published var libreUsername: String = "your@email.com"
-    @Published var librePassword: String = ""
+    @Published var libreUsername: String = "andreas+de@stokholm.me"
+    @Published var librePassword: String = "verylongpassword1"
     @Published var libreConnectionID: String = ""
+    @Published var libreConnections: [LibreLinkUp.LibreLinkUpConnectionsResponse] = []
 
     @Published var showTimeSince: Bool = false
     @Published var showDelta: Bool = true
