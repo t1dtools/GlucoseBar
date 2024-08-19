@@ -124,13 +124,11 @@ struct GlucoseBarApp: App {
             applyColor = true
         }
 
-        var configuration: NSImage.SymbolConfiguration
+        let configuration = NSImage.SymbolConfiguration(pointSize: 16, weight: .light)
         if applyColor {
-            configuration = NSImage.SymbolConfiguration(pointSize: 16, weight: .light)
-                .applying(.init(paletteColors: [color]))
-        } else {
-            configuration = NSImage.SymbolConfiguration(pointSize: 16, weight: .light)
+            configuration.applying(.init(paletteColors: [color]))
         }
+
         let image = NSImage(systemSymbolName: symbol, accessibilityDescription: accessibilityDescription)
         let titleImage = image?.withSymbolConfiguration(configuration) ?? NSImage(systemSymbolName: symbol, accessibilityDescription: accessibilityDescription)!
 
