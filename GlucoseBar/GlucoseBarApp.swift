@@ -71,6 +71,7 @@ func printFormattedGlucose(settings: SettingsStore, glucose: Double) -> String {
 @main
 struct GlucoseBarApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @Environment(\.colorScheme) private var colorScheme
 
     @State private var title: Text = Text("GlucoseBar")
     @State private var hasSettings: Bool = true
