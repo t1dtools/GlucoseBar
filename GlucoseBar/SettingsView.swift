@@ -122,9 +122,9 @@ struct GeneralSettings: View {
                 HStack {
                     (
                         Text("Shows a ") +
-                        Text(Image(systemName: "drop")).foregroundStyle(.red) +
+                        Text(Image(systemName: "drop")) +
                         Text(" when low, a ") +
-                        Text(Image(systemName: "drop.fill")).foregroundStyle(.yellow) +
+                        Text(Image(systemName: "drop.fill")) +
                         Text(" when high, and otherwise ") +
                         Text(Image(systemName: "drop.halffull"))
                      ).font(.footnote)

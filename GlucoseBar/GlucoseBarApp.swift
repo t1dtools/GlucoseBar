@@ -109,31 +109,21 @@ struct GlucoseBarApp: App {
     }
 
     func CreateTitleImage() -> NSImage {
-        var color = NSColor.white
-        var applyColor = false
         var accessibilityDescription = "In range"
         var symbol = "drop.halffull"
         if g.glucose > s.highThreshold {
-            color = NSColor.yellow
             accessibilityDescription = "Above range"
             symbol = "drop.fill"
-            applyColor = true
         } else if g.glucose < s.lowThreshold {
-            color = NSColor.red
             accessibilityDescription = "Below range"
             symbol = "drop"
-            applyColor = true
         }
 
         let configuration = NSImage.SymbolConfiguration(pointSize: 16, weight: .light)
-        if applyColor {
-            configuration.applying(.init(paletteColors: [color]))
-        }
-
         let image = NSImage(systemSymbolName: symbol, accessibilityDescription: accessibilityDescription)
-        let titleImage = image?.withSymbolConfiguration(configuration) ?? NSImage(systemSymbolName: symbol, accessibilityDescription: accessibilityDescription)!
+        let titleImage = image?.withSymbolConfiguration(configuration)!
 
-        return titleImage
+        return titleImage!
     }
 
     var body: some Scene {
