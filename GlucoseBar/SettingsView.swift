@@ -176,6 +176,9 @@ struct CGMSettings: View {
     @State var cgmCredentialsSuccess: Bool = false
     @State var validatedProvider: CGMProvider = .null
 
+    @FocusState var nsSecretFailedValidationFocus: Bool
+    @State var nsSecretFailedValidation: Bool = false
+
     internal var logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "provider")
 
     var body: some View {
@@ -208,6 +211,13 @@ struct CGMSettings: View {
                             Text("Token").frame(width: 130, alignment: .leading)
                             Spacer()
                             TextField("", text: $s.nsSecret).textFieldStyle(RoundedBorderTextFieldStyle())
+                                .focused($nsSecretFailedValidationFocus)
+                        }
+                        if nsSecretFailedValidation {
+                            HStack {
+                                Text("The Token is required for GlucoseBar to function correctly. Please ensure your Nightscout instance has one set up and use it here.").font(.footnote).foregroundColor(.red)
+                                Spacer()
+                            }
                         }
                         HStack {
                             Text("This token needs to have the permission \"readable\" in Nightscout.").font(.footnote)
@@ -289,6 +299,13 @@ struct CGMSettings: View {
                             }
 
                             Button(action: {
+                                nsSecretFailedValidation = false
+                                if s.cgmProvider == .nightscout && s.nsSecret.count == 0 {
+                                    logger.info("Nightscout without token, tell user to fix and abort")
+                                    nsSecretFailedValidation = true
+                                    return
+                                }
+
                                 isValidating = true
                                 Task {
                                     validatedProvider = s.cgmProvider
@@ -326,6 +343,12 @@ struct CGMSettings: View {
                         }
                         Spacer()
                         Button("Save") {
+                            nsSecretFailedValidation = false
+                            if s.cgmProvider == .nightscout && s.nsSecret.count == 0 {
+                                logger.info("Nightscout without token, tell user to fix and abort")
+                                nsSecretFailedValidation = true
+                                return
+                            }
                             s.save()
                         }.disabled(isValidating)
                     }
