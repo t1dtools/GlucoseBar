@@ -68,8 +68,8 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         }
 
         // Libre LinkUp
-        self.libreUsername = defaults.string(forKey: "libreUsername") ?? "your@email.com"
-        self.librePassword = defaults.string(forKey: "librePassword") ?? ""
+        self.libreUsername = defaults.string(forKey: "libreUsername") ?? "andreas+de@stokholm.me" //"your@email.com"
+        self.librePassword = defaults.string(forKey: "librePassword") ?? "verylongpassword1" // ""
         self.libreConnectionID = defaults.string(forKey: "libreConnectionID") ?? ""
         self.libreServer = defaults.string(forKey: "libreServer") ?? ""
 

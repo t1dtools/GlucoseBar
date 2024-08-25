@@ -162,7 +162,7 @@ struct GeneralSettings: View {
                 Spacer()
                 Text("\(Bundle.main.appName) Version: \(Bundle.main.appVersionLong) (\(Bundle.main.appBuild)) ").font(.footnote).padding(2)
             }
-        }.frame(minWidth: 475, maxWidth: 475, minHeight: 395, maxHeight: 395)
+        }.frame(minWidth: 475, maxWidth: 475, minHeight: 400, maxHeight: 400)
     }
 }
 
@@ -176,6 +176,9 @@ struct CGMSettings: View {
     @State var cgmCredentialsSuccess: Bool = false
     @State var validatedProvider: CGMProvider = .null
     @State var showValidationAndErrorBox: Bool = false
+
+    @FocusState var nsSecretFailedValidationFocus: Bool
+    @State var nsSecretFailedValidation: Bool = false
 
     internal var logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "provider")
 
@@ -330,35 +333,64 @@ struct CGMSettings: View {
                                 }
                             }) {
                                 Text("Test Connection")
-                            }.disabled(isValidating).alert(
-                                (g.provider.providerIssue == nil ? "Validating credentials..." : g.provider.providerIssue) ?? "Unknown Issue with \(s.cgmProvider.presentable)",
-                                isPresented: $showValidationAndErrorBox
+                            }.disabled(isValidating).sheet(
+                                isPresented: $showValidationAndErrorBox,
+                                onDismiss: nil
                             ) {
-//                                if g.provider.providerIssue != nil {
-//                                    Button("OK") {
-//                                        showValidationAndErrorBox = false
-//                                    }
-//                                }
-
-                                Button("Close") {
-                                    showValidationAndErrorBox = false
-                                }.disabled(isValidating)
+                                ScrollView {
+                                    VStack {
+                                        if isValidating {
+                                            ProgressView()
+                                                .controlSize(.small)
+                                                .progressViewStyle(CircularProgressViewStyle())
+                                            Text("Validating...").padding(.top)
+                                        }
+                                        if !isValidating && g.provider.providerIssue != nil {
+                                            Image(systemName: "exclamationmark.triangle")
+                                                .resizable()
+                                                .scaledToFill()
+                                                .frame(width:50, height:50)
+                                                .foregroundColor(.orange).padding(.top)
+                                            Text("\(g.provider.providerIssue ?? "Unknown Issue").").padding(.top)
+                                            Button("Dismiss") {
+                                                showValidationAndErrorBox = false
+                                            }.padding(.top, 5)
+                                        }
+                                        if !isValidating && cgmCredentialsError && s.cgmProvider == validatedProvider && g.provider.providerIssue == nil {
+                                            Image(systemName: "exclamationmark.triangle")
+                                                .resizable()
+                                                .scaledToFill()
+                                                .frame(width:50, height:50)
+                                                .foregroundColor(.orange).padding(.top)
+                                            Text("Invalid credentials or service unreachable.").padding(.top)
+                                            if s.cgmProvider == .librelinkup {
+                                                Text("If you have had multiple authentication failures, this might just be a temporary issue. Please try again in a little while.")
+                                                    .fixedSize(horizontal: false, vertical: true).font(.footnote).padding(.top)
+                                            }
+                                            Button("Dismiss") {
+                                                showValidationAndErrorBox = false
+                                            }.padding(.top, 5)
+                                        }
+                                        if !isValidating && cgmCredentialsSuccess && s.cgmProvider == validatedProvider {
+                                            Image(systemName: "checkmark.circle")
+                                                .resizable()
+                                                .scaledToFill()
+                                                .frame(width:50, height:50)
+                                                .foregroundColor(.green)
+                                            Text("Connection OK").padding(.top).foregroundColor(.green)
+                                            Button("Dismiss") {
+                                                showValidationAndErrorBox = false
+                                            }.padding(.top, 5)
+                                        }
+                                    }.padding()
+                                }.frame(width: 300, height: 200)
                             }
                         }
-                        // { Anything inside these brackets should be shown in an overlay kinda thing
-                            if g.provider.providerIssue != nil {
-                                Text("\(g.provider.providerIssue ?? "Unknown Issue")")
-                            }
-                            if !isValidating && cgmCredentialsError && s.cgmProvider == validatedProvider && g.provider.providerIssue == nil {
-                                Text("Invalid credentials or service unreachable").foregroundColor(.orange)
-                                Image(systemName: "exclamationmark.triangle").foregroundColor(.orange)
-                            }
-                        // }
                         if !isValidating && cgmCredentialsSuccess && s.cgmProvider == validatedProvider {
-                            HStack {
-                                Text("Connection OK").foregroundColor(.green)
-                                Image(systemName: "checkmark.circle").foregroundColor(.green)
-                            }
+                            Image(systemName: "checkmark.circle").foregroundColor(.green)
+                        }
+                        if (!isValidating && g.provider.providerIssue != nil) || (!isValidating && cgmCredentialsError && s.cgmProvider == validatedProvider && g.provider.providerIssue == nil) {
+                            Image(systemName: "exclamationmark.triangle").foregroundColor(.orange)
                         }
                         if isValidating {
                             ProgressView()
