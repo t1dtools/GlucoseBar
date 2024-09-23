@@ -69,8 +69,12 @@ struct MainAppView: View {
         if g.error != "" && s.validSettings && vs.isOnline {
             VStack {
                 Text("Error").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 10).foregroundColor(.red)
-//                Text("\(g.error)").padding(.top, 10).fixedSize(horizontal: false, vertical: true).foregroundColor(.red).fontWeight(.heavy).padding(.bottom, 10)
                 Text("Check the settings and make sure your CGM source (\(s.cgmProvider.presentable)) is responding.").fixedSize(horizontal: false, vertical: true)
+
+                if g.provider.providerIssue != nil {
+                    Text("Additional Info: \(g.provider.providerIssue!)").fixedSize(horizontal: false, vertical: true).padding(.top)
+                }
+
                 Spacer()
                 HStack {
                     SettingsButton()
