@@ -35,21 +35,20 @@ struct GraphView: View {
     func getGraphData() -> [GraphEntry] {
         var data: [GraphEntry] = [];
         if (g.entries != nil) {
-
-            let entryCount = s.graphMinutes/5-1
-
-            for i in 0..<entryCount {
-                if (g.entries!.count > i) {
-                    let entry = g.entries![i]
-                    let glu = convertGlucose(s, glucose: entry.glucose)
-
-                    var delta = 0.0
-                    if entry.changeRate != nil {
-                        delta = entry.changeRate!
-                    }
-
-                    data.append(GraphEntry(date: entry.date, value: glu, trend: entry.trend ?? .notComputable, delta: delta))
+            for entry in g.entries! {
+                // Check if entry!.date is longer in the past than s.graphMinutes
+                if -1 * entry.date.timeIntervalSinceNow > Double(s.graphMinutes) * 60 {
+                    continue
                 }
+
+                let glu = convertGlucose(s, glucose: entry.glucose)
+
+                var delta = 0.0
+                if entry.changeRate != nil {
+                    delta = entry.changeRate!
+                }
+
+                data.append(GraphEntry(date: entry.date, value: glu, trend: entry.trend ?? .notComputable, delta: delta))
             }
         }
 
