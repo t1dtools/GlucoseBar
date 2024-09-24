@@ -433,7 +433,7 @@ class LibreLinkUp: Provider {
                 self.logger.error("Response code in 400 range. Something wrong? Rate limiting? Code: \(res.statusCode)")
                 if res.statusCode == 430 || res.statusCode == 429 {
                     self.logger.error("Rate limited, surfacing to user.")
-                    self.providerIssue = "Libre LinkUp is rate limiting us. Please try again in 5 minutes or more."
+                    self.providerIssue = "Libre LinkUp is rate limiting you. Please close GlucoseBar try again in 5 minutes or more."
                 }
                 return false
             }
