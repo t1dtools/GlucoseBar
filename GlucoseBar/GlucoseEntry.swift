@@ -87,7 +87,7 @@ public struct GlucoseEntry: Hashable {
             case .downDownDown:
                 return "↓↓"
             case .notComputable:
-                return "?"
+                return "↔"
             case .rateOutOfRange:
                 return "?"
             }
