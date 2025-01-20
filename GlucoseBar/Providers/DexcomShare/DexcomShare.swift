@@ -179,9 +179,7 @@ class DexcomShare: Provider {
         input.forEach { dxEntry in
             var wt = dxEntry.WT.replacingOccurrences(of: "Date(", with: "")
             wt = wt.replacingOccurrences(of: ")", with: "")
-            // Adding 5 minutes on the timestamp because Dexcom servers for some reason return all entries with time skewed 5 minutes.
-            // Note that the readings are correct in time, the time attached to them is however 5 minutes too early
-            let date = Date(timeIntervalSince1970: (Double(wt)! / 1000) + 300)
+            let date = Date(timeIntervalSince1970: (Double(wt)! / 1000))
 
             var trend = GlucoseEntry.GlucoseTrend(direction: "invalid")
             if dxEntry.Trend != "" {
