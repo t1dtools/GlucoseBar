@@ -39,6 +39,10 @@ class Glucose: ObservableObject, Sendable {
         timer.suspend()
         timer.eventHandler = { [self] in
 
+            if provider.isAuthenticating {
+                return
+            }
+
             if self.settings.cgmProvider != self.provider.type {
                 self.setSettings(settings)
             }

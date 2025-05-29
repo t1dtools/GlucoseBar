@@ -32,14 +32,23 @@ public enum CGMProvider: String, CaseIterable, Identifiable {
     }
 }
 
+struct ProviderAuth: Decodable {
+    var token: String
+    var expiry: Double
+}
+
 class Provider: ObservableObject, @unchecked Sendable {
 
     var type: CGMProvider = .null
     internal var readingInterval: Double = 300 // Seconds between readings
     internal var logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "provider")
     @Published var GlucoseEntries: [GlucoseEntry] = []
+    @Published var GlucoseSourceExtras: [Any] = []
     @Published public var providerIssue: String?
     @Published public var lastFetch: Date = Date().addingTimeInterval(TimeInterval(-5*60))
+    @Published public var isAuthenticating: Bool = false
+
+    @Published internal var auth: ProviderAuth?
 
     // TODO: How to move this out of this file and keep it accessible for Settings UI?
     @Published var connections: [LibreLinkUp.LibreLinkUpConnectionsResponse] = []

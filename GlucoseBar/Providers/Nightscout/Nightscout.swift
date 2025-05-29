@@ -7,10 +7,9 @@
 
 import Foundation
 
-class Nightscout: Provider {
+class Nightscout: Provider, @unchecked Sendable {
 
     private var isAuthenticated = false
-    private var auth: NightscoutAuthResponse?
     public var validSettings: Bool = true
     public var settingsError: String = ""
 
@@ -63,8 +62,10 @@ class Nightscout: Provider {
     override internal func fetch() async {
         logger.debug("Nightscout.fetch")
         if token.count > 0 && !isAuthValid() {
-            logger.debug("calling authenticate from fetch")
             await authenticate()
+            while isAuthenticating {
+                usleep(1000)
+            }
             await self.fetch()
             return
         }
@@ -230,7 +231,7 @@ class Nightscout: Provider {
         }
 
         if auth!.token != "" {
-            let expiryTime = Date(timeIntervalSince1970: auth!.exp)
+            let expiryTime = Date(timeIntervalSince1970: auth!.expiry)
 
             self.logger.debug("nightscout token expiry: \(expiryTime.formatted())")
             return expiryTime.timeIntervalSinceNow > 0
@@ -241,10 +242,18 @@ class Nightscout: Provider {
 
     private func authenticate() async {
 
+        if isAuthenticating {
+            self.logger.info("Already authenticating actively. Returning.")
+            return
+        }
+
+        isAuthenticating = true
+
         if !baseURL.hasPrefix("https://") && !baseURL.hasPrefix("http://") {
             DispatchQueue.main.async {
                 self.providerIssue = "Invalid Nightscout URL. Must start with either http:// or https://"
             }
+            isAuthenticating = false
             return
         }
 
@@ -272,20 +281,30 @@ class Nightscout: Provider {
                 }
 
                 self.providerIssue = providerError
+                isAuthenticating = false
                 return
             } else {
+                self.logger.debug("status code under 300: \(res.statusCode). Body: \(data)")
                 do {
                     let result = try JSONDecoder().decode(NightscoutAuthResponse.self, from: data)
-                    self.auth = result
+                    DispatchQueue.main.async {
+                        self.auth = ProviderAuth(token: result.token, expiry: result.exp)
+                    }
+
+                    isAuthenticating = false
+                    self.logger.debug("Authentication is now successful. No more now please!")
                     return
                 } catch {
                     self.providerIssue = "Unable to parse response from Nightscout: \(String(describing: error))"
+                    isAuthenticating = false
                     return
                 }
             }
         } catch {
             self.providerIssue = "Nightscout Error: \(String(describing: error))"
         }
+
+        isAuthenticating = false
     }
 
     override internal func verifyCredentials() async -> Bool {
