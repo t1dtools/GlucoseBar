@@ -319,6 +319,8 @@ class DexcomShare: Provider {
     private func authenticate() async {
         self.logger.debug("DexcomShare.authenticate")
 
+        isAuthenticating = true
+
         DispatchQueue.main.async {
             self.providerIssue = nil
         }
@@ -328,17 +330,20 @@ class DexcomShare: Provider {
             await getAccountID()
             await self.authenticate()
 
+            isAuthenticating = false
             return
         }
 
         if self.sessionID == "" {
             await getSessionID()
         }
+
+        isAuthenticating = false
     }
 
     override internal func verifyCredentials() async -> Bool {
         self.logger.debug("dexcomshare.verifyCredentials")
-        
+
         await self.getAccountID()
         if self.accountID != "" {
             await self.getSessionID()

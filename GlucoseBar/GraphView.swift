@@ -8,12 +8,15 @@
 import Foundation
 import SwiftUI
 import Charts
+import OSLog
 
 struct GraphView: View {
 
     @ObservedObject var g: Glucose
     @EnvironmentObject var s: SettingsStore
     @EnvironmentObject var vs: ViewState
+
+    internal var logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "provider")
 
     @State private var hoveredTime: Date?
     @State private var hoveredValue: Double?
@@ -24,14 +27,14 @@ struct GraphView: View {
     init(glucose: Glucose) {
         self.g = glucose
     }
-    
+
     struct GraphEntry {
         var date: Date
         var value: Double
         var trend: GlucoseEntry.GlucoseTrend
         var delta: Double
     }
-    
+
     func getGraphData() -> [GraphEntry] {
         var data: [GraphEntry] = [];
         if (g.entries != nil) {
@@ -48,6 +51,7 @@ struct GraphView: View {
                         delta = entry.changeRate!
                     }
 
+//                    self.logger.info("Trend: \(entry)")
                     data.append(GraphEntry(date: entry.date, value: glu, trend: entry.trend ?? .notComputable, delta: delta))
                 }
             }
