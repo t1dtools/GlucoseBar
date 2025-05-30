@@ -20,9 +20,13 @@ struct GraphView: View {
     @State private var hoveredTrend: GlucoseEntry.GlucoseTrend?
     @State private var hoveredDelta: Double?
     @State private var isHovering: Bool = false
+    @State private var legends: [String : Color] = [:]
+    
+    var gse: GlucoseSourceExtraProperties = GlucoseSourceExtraProperties()
 
     init(glucose: Glucose) {
         self.g = glucose
+        self.gse = glucose.provider.GlucoseSourceExtras
     }
     
     struct GraphEntry {
@@ -30,9 +34,15 @@ struct GraphView: View {
         var value: Double
         var trend: GlucoseEntry.GlucoseTrend
         var delta: Double
+        var color: Color
+        var isForecast: Bool
     }
     
     func getGraphData() -> [GraphEntry] {
+
+        let highThresholdRuleMark = convertGlucose(s, glucose: s.highThreshold)
+        let lowThresholdRuleMark = convertGlucose(s, glucose: s.lowThreshold)
+
         var data: [GraphEntry] = [];
         if (g.entries != nil) {
 
@@ -47,12 +57,66 @@ struct GraphView: View {
                     if entry.changeRate != nil {
                         delta = entry.changeRate!
                     }
+                    
+                    // TODO: Dynamic color support here
+                    var color = Color.green
+                    if entry.glucose > highThresholdRuleMark {
+                        color = .yellow
+                    } else if entry.glucose < lowThresholdRuleMark {
+                        color = .red
+                    }
 
-                    data.append(GraphEntry(date: entry.date, value: glu, trend: entry.trend ?? .notComputable, delta: delta))
+                    data.append(GraphEntry(date: entry.date, value: glu, trend: entry.trend ?? .notComputable, delta: delta, color: color, isForecast: false))
                 }
             }
         }
-
+        
+        let latestEntryDate = data.first?.date ?? Date()
+        
+        if gse.forecasts.zt != nil {
+            for i in 0..<gse.forecasts.zt!.count {
+                let entry = gse.forecasts.zt![i]
+                let glu = convertGlucose(s, glucose: Double(entry))
+                
+                let date = Calendar.current.date(byAdding: .minute, value: (i + 1) * 5, to: latestEntryDate)!
+                
+                data.append(GraphEntry(date: date, value: glu, trend: .notComputable, delta: 1.0, color: .purple, isForecast: true))
+            }
+        }
+        
+        if gse.forecasts.uam != nil {
+            for i in 0..<gse.forecasts.uam!.count {
+                let entry = gse.forecasts.uam![i]
+                let glu = convertGlucose(s, glucose: Double(entry))
+                
+                let date = Calendar.current.date(byAdding: .minute, value: (i + 1) * 5, to: latestEntryDate)!
+                
+                data.append(GraphEntry(date: date, value: glu, trend: .notComputable, delta: 2.0, color: .orange, isForecast: true))
+            }
+        }
+        
+        if gse.forecasts.cob != nil {
+            for i in 0..<gse.forecasts.cob!.count {
+                let entry = gse.forecasts.cob![i]
+                let glu = convertGlucose(s, glucose: Double(entry))
+                
+                let date = Calendar.current.date(byAdding: .minute, value: (i + 1) * 5, to: latestEntryDate)!
+                
+                data.append(GraphEntry(date: date, value: glu, trend: .notComputable, delta: 3.0, color: .yellow, isForecast: true))
+            }
+        }
+        
+        if gse.forecasts.iob != nil {
+            for i in 0..<gse.forecasts.iob!.count {
+                let entry = gse.forecasts.iob![i]
+                let glu = convertGlucose(s, glucose: Double(entry))
+                
+                let date = Calendar.current.date(byAdding: .minute, value: (i + 1) * 5, to: latestEntryDate)!
+                
+                data.append(GraphEntry(date: date, value: glu, trend: .notComputable, delta: 4.0, color: .blue, isForecast: true))
+            }
+        }
+        
         return data
     }
 
@@ -95,7 +159,7 @@ struct GraphView: View {
             if s.hoverableGraph {
                 VStack {
                     Text("\(Text(headlineTime, format: .dateTime.hour().minute()))").font(.subheadline)
-                    Text("\(printFormattedGlucose(settings: s, glucose: headlineGlucose)) \(headlineTrend.arrows != "?" ? headlineTrend.arrows : "")").font(.largeTitle)
+                    Text("\(printFormattedGlucose(settings: s, glucose: headlineGlucose)) \(headlineTrend.arrows != "↔" ? headlineTrend.arrows : "")").font(.largeTitle)
                 }.padding(.top, 15)
             }
 
@@ -130,15 +194,26 @@ struct GraphView: View {
                 RuleMark(y: .value("High", highThresholdRuleMark)).foregroundStyle(.yellow).lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
                 RuleMark(y: .value("Low", lowThresholdRuleMark)).foregroundStyle(.red).lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
                 ForEach(data, id: \.date) { point in
-                    PointMark(
-                        x: .value("Time", point.date),
-                        y: .value("Glucose", point.value)
-                    )
-                    .lineStyle(StrokeStyle(lineWidth: 2.0))
-                    .foregroundStyle(point.value > highThresholdRuleMark ? .yellow : point.value < lowThresholdRuleMark ? .red : .green)
-                    .interpolationMethod(.cardinal)
-                    .symbolSize(30)
-                    .interpolationMethod(.catmullRom)
+                    if point.isForecast {
+                        PointMark(
+                            x: .value("Time", point.date),
+                            y: .value("Glucose", point.value)
+                        ).lineStyle(StrokeStyle(lineWidth: 1.0))
+                            .foregroundStyle(point.color)
+                            .interpolationMethod(.cardinal)
+                            .symbolSize(30)
+                            .interpolationMethod(.catmullRom)
+                    } else {
+                        PointMark(
+                            x: .value("Time", point.date),
+                            y: .value("Glucose", point.value)
+                        ).lineStyle(StrokeStyle(lineWidth: 2.0))
+                            .foregroundStyle(point.color)
+                            .interpolationMethod(.cardinal)
+                            .symbolSize(30)
+                            .interpolationMethod(.catmullRom)
+                    }
+                    
                 }
                 if s.hoverableGraph {
                     if let hoveredTime, let hoveredValue {
@@ -149,6 +224,7 @@ struct GraphView: View {
                     }
                 }
             }
+            .chartLegend(position: .bottom, alignment: .leading, spacing: 8)
             .chartYScale(domain: [minY <= defaultMinGlucose ? minY : defaultMinGlucose, maxY >= defaultMaxGlucose ? (maxY + maxYMargin) : defaultMaxGlucose])
             .chartYAxis {
                 AxisMarks(values: .automatic(desiredCount:8)) {
@@ -182,11 +258,16 @@ struct GraphView: View {
                                 let date = entry.date
                                 let timeDiff = date.timeIntervalSince(hTime!)
                                 if timeDiff < 60 && timeDiff > 0 {
-                                    hoveredValue = entry.value
-                                    hoveredTime = entry.date
-                                    hoveredTrend = entry.trend
-                                    hoveredDelta = entry.delta
-                                    isHovering = true
+                                    if !entry.isForecast {
+                                        hoveredValue = entry.value
+                                        hoveredTime = entry.date
+                                        hoveredTrend = entry.trend
+                                        hoveredDelta = entry.delta
+                                        isHovering = true
+                                    } else {
+                                        hoveredTime = nil
+                                        isHovering = false
+                                    }
                                 }
                             }
 
@@ -195,7 +276,11 @@ struct GraphView: View {
                             isHovering = false
                         }
                     }
-            }
+            }.chartForegroundStyleScale(["UAM": .orange,
+                                         "ZT": .purple,
+                                         "IOB": .blue,
+                                         "COB": .yellow]
+            ).chartLegend(data.last?.isForecast ?? false ? .visible : .hidden)
             .padding()
         }
     }

@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		830C4D062B0166F8000A0E87 /* DexcomShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = 830C4D052B0166F8000A0E87 /* DexcomShare.swift */; };
+		831CC8312DE268CC00E04180 /* Trio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 831CC8302DE268C900E04180 /* Trio.swift */; };
+		831CC8332DE269C800E04180 /* GlucoseSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 831CC8322DE269C500E04180 /* GlucoseSource.swift */; };
 		834621282ADDACB20024048E /* Simulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834621272ADDACB20024048E /* Simulator.swift */; };
 		8346212A2ADDACC20024048E /* Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834621292ADDACC20024048E /* Provider.swift */; };
 		8363136E2ABF8CAA0047C99D /* GlucoseEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8363136D2ABF8CAA0047C99D /* GlucoseEntry.swift */; };
@@ -22,6 +24,7 @@
 		83A3301A2AC9F69B00222445 /* GraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A330192AC9F69B00222445 /* GraphView.swift */; };
 		83A3301C2AC9F70100222445 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A3301B2AC9F70100222445 /* SettingsView.swift */; };
 		83B737A22BE9728F00B84A75 /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 83B737A12BE9728F00B84A75 /* LaunchAtLogin */; };
+		83CA4BBA2DE26ED3003E5A24 /* DeviceStatusResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CA4BB92DE26ECA003E5A24 /* DeviceStatusResponse.swift */; };
 		83DF71B22AEDA9EB00FC0566 /* Nightscout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DF71B12AEDA9EB00FC0566 /* Nightscout.swift */; };
 		83E323812AC21DDD00CB5206 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E323802AC21DDD00CB5206 /* Settings.swift */; };
 		83EC4AC62BE972D9007285C7 /* NightscoutKit in Frameworks */ = {isa = PBXBuildFile; productRef = 83EC4AC52BE972D9007285C7 /* NightscoutKit */; };
@@ -30,6 +33,8 @@
 
 /* Begin PBXFileReference section */
 		830C4D052B0166F8000A0E87 /* DexcomShare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DexcomShare.swift; sourceTree = "<group>"; };
+		831CC8302DE268C900E04180 /* Trio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trio.swift; sourceTree = "<group>"; };
+		831CC8322DE269C500E04180 /* GlucoseSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseSource.swift; sourceTree = "<group>"; };
 		834621272ADDACB20024048E /* Simulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Simulator.swift; sourceTree = "<group>"; };
 		834621292ADDACC20024048E /* Provider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Provider.swift; sourceTree = "<group>"; };
 		8363136D2ABF8CAA0047C99D /* GlucoseEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseEntry.swift; sourceTree = "<group>"; };
@@ -44,6 +49,7 @@
 		838B25DE2BF0146F00D10DDA /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		83A330192AC9F69B00222445 /* GraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphView.swift; sourceTree = "<group>"; };
 		83A3301B2AC9F70100222445 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		83CA4BB92DE26ECA003E5A24 /* DeviceStatusResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusResponse.swift; sourceTree = "<group>"; };
 		83D76EC62C4DB616006639EF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		83DF71B12AEDA9EB00FC0566 /* Nightscout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Nightscout.swift; sourceTree = "<group>"; };
 		83E323802AC21DDD00CB5206 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
@@ -148,6 +154,9 @@
 		83DF71B02AEDA9DD00FC0566 /* Nightscout */ = {
 			isa = PBXGroup;
 			children = (
+				83CA4BB92DE26ECA003E5A24 /* DeviceStatusResponse.swift */,
+				831CC8322DE269C500E04180 /* GlucoseSource.swift */,
+				831CC8302DE268C900E04180 /* Trio.swift */,
 				83DF71B12AEDA9EB00FC0566 /* Nightscout.swift */,
 			);
 			path = Nightscout;
@@ -241,10 +250,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				831CC8312DE268CC00E04180 /* Trio.swift in Sources */,
+				831CC8332DE269C800E04180 /* GlucoseSource.swift in Sources */,
 				836313742ABF99210047C99D /* DispatchTimer.swift in Sources */,
 				83E323812AC21DDD00CB5206 /* Settings.swift in Sources */,
 				8363136E2ABF8CAA0047C99D /* GlucoseEntry.swift in Sources */,
 				830C4D062B0166F8000A0E87 /* DexcomShare.swift in Sources */,
+				83CA4BBA2DE26ED3003E5A24 /* DeviceStatusResponse.swift in Sources */,
 				83A3301C2AC9F70100222445 /* SettingsView.swift in Sources */,
 				83F888412B1A888000A50E74 /* LibreLinkUp.swift in Sources */,
 				836313762AC0808E0047C99D /* Glucose.swift in Sources */,
@@ -410,7 +422,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = t1d.tools.GlucoseBar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -446,7 +458,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = t1d.tools.GlucoseBar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

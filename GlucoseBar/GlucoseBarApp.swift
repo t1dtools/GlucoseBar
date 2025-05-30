@@ -60,6 +60,14 @@ func formatDeltaForDisplay(settings: SettingsStore, delta: Double) -> String {
     return delta > 0 ? String(format: "+%.0f", delta) : String(format: "%.0f", delta)
 }
 
+func formatIOBForDisplay(iob: Double) -> String {
+    return String(format: "%.1f", iob)
+}
+
+func formatCOBForDisplay(cob: Double) -> String {
+    return String(format: "%.0f", cob)
+}
+
 func printFormattedGlucose(settings: SettingsStore, glucose: Double) -> String {
     if (settings.glucoseUnit == .mmoll) {
         return String(format: "%.1f mmol/L", glucose)
@@ -88,7 +96,21 @@ struct GlucoseBarApp: App {
         if s.showDelta {
             t += " " + formatDeltaForDisplay(settings: s, delta: g.delta)
         }
-
+        
+        if g.provider.RemoteGlucoseSource == .trio {
+            if g.provider.GlucoseSourceExtras.iob != nil {
+                t += " " + formatIOBForDisplay(iob: g.provider.GlucoseSourceExtras.iob!) + "u"
+            }
+            
+            if g.provider.GlucoseSourceExtras.cob != nil && g.provider.GlucoseSourceExtras.cob! > 0 {
+                t += " " + formatCOBForDisplay(cob: g.provider.GlucoseSourceExtras.cob!) + "g"
+            }
+            
+            if g.provider.GlucoseSourceExtras.eventualGlucose != nil {
+                t += " (" + formatGlucoseForDisplay(settings: s, glucose: g.provider.GlucoseSourceExtras.eventualGlucose!) + ")"
+            }
+        }
+        
         if s.showTimeSince && vs.isOnline {
             t += " (\(g.glucoseAge))"
 

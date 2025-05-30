@@ -207,9 +207,9 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         case .dexcomshare:
             self.logger.debug("testCGMProvider.dexcomshare")
             provider = DexcomShare(username: self.dxEmail, password: self.dxPassword, server: self.dxServer)
-        case .librelinkup:
-            self.logger.debug("testCGMProvider.librelinkup")
-            provider = LibreLinkUp(username: self.libreUsername, password: self.librePassword)
+//        case .librelinkup:
+//            self.logger.debug("testCGMProvider.librelinkup")
+//            provider = LibreLinkUp(username: self.libreUsername, password: self.librePassword)
         default:
             self.logger.debug("testCGMProvider.simulator")
             provider = Simulator("")

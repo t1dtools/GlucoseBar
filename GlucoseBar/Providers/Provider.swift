@@ -32,24 +32,55 @@ public enum CGMProvider: String, CaseIterable, Identifiable {
     }
 }
 
+struct ProviderAuth: Decodable {
+    var token: String
+    var expiry: Double
+}
+
+struct GlucoseSourceExtraProperties {
+    var iob: Double? = nil
+    var cob: Double? = nil
+    var eventualGlucose: Double? = nil
+    var reason: String? = nil
+    var forecasts: OpenAPSForecasts = OpenAPSForecasts(iob: nil, cob: nil, zt: nil, uam: nil)
+}
+
+struct OpenAPSForecasts: Decodable {
+    var iob: [Int]?
+    var cob: [Int]?
+    var zt: [Int]?
+    var uam: [Int]?
+}
+
 class Provider: ObservableObject, @unchecked Sendable {
 
     var type: CGMProvider = .null
+    var isBaseProvider: Bool = true
     internal var readingInterval: Double = 300 // Seconds between readings
     internal var logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "provider")
+    @Published var RemoteGlucoseSource: GlucoseSourceDevice = .null
     @Published var GlucoseEntries: [GlucoseEntry] = []
+    @Published var GlucoseSourceExtras: GlucoseSourceExtraProperties = GlucoseSourceExtraProperties()
     @Published public var providerIssue: String?
     @Published public var lastFetch: Date = Date().addingTimeInterval(TimeInterval(-5*60))
 
     // TODO: How to move this out of this file and keep it accessible for Settings UI?
-    @Published var connections: [LibreLinkUp.LibreLinkUpConnectionsResponse] = []
+//    @Published var connections: [LibreLinkUp.LibreLinkUpConnectionsResponse] = []
     @Published var connectionID: String = ""
 
     init() {
+        if self.isBaseProvider {
+            return
+        }
+        
         Task {
             await self.fetch()
         }
         startTimer()
+    }
+    
+    internal func startTimer() {
+        let _ = Timer.publish(every: readingInterval, on: .main, in: .default)
     }
     
     func verifyCredentials() async -> Bool {
@@ -68,20 +99,16 @@ class Provider: ObservableObject, @unchecked Sendable {
         return false
     }
 
-    @ViewBuilder
-    func getConnectionView(s: SettingsStore) -> some View {
-        @ObservedObject var settings: SettingsStore = s
-
-        Picker("", selection: $settings.libreConnectionID) {
-            ForEach(self.connections, id: \.patientID) {
-                Text("\($0.firstName) \($0.lastName)").tag($0.patientID)
-            }
-        }
-    }
-
-    internal func startTimer() {
-        let _ = Timer.publish(every: readingInterval, on: .main, in: .default)
-    }
+//    @MainActor @ViewBuilder
+//    func getConnectionView(s: SettingsStore) -> some View {
+//        @ObservedObject var settings: SettingsStore = s
+//
+//        Picker("", selection: $settings.libreConnectionID) {
+//            ForEach(self.connections, id: \.patientID) {
+//                Text("\($0.firstName) \($0.lastName)").tag($0.patientID)
+//            }
+//        }
+//    }
     
     internal func fetch() async {
         self.logger.error("Base fetch function called. This should only happen once. Multiple occurrences of this message means that your CGM provider implementation does not have it's own `fetch` implementation.")

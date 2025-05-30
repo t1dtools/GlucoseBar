@@ -13,13 +13,16 @@ class Nightscout: Provider {
     private var auth: NightscoutAuthResponse?
     public var validSettings: Bool = true
     public var settingsError: String = ""
+//    public var RemoteGlucoseSource: GlucoseSourceDevice = .null
 
     private var lastFullFetch: Date = Date()
 
     var baseURL: String
     var token: String
+    var isTrio: Bool = false
     
     init(baseURL: String, token: String) {
+        
         // Do some basic validation
         if baseURL.isEmpty {
             validSettings = false
@@ -39,6 +42,7 @@ class Nightscout: Provider {
         }
         
         super.init()
+        self.isBaseProvider = false
         self.type = .nightscout
     }
 
@@ -63,7 +67,6 @@ class Nightscout: Provider {
     override internal func fetch() async {
         logger.debug("Nightscout.fetch")
         if token.count > 0 && !isAuthValid() {
-            logger.debug("calling authenticate from fetch")
             await authenticate()
             await self.fetch()
             return
@@ -149,6 +152,14 @@ class Nightscout: Provider {
                                 }
                                 self.logger.debug("Latest glucose entry: \(String(describing: self.GlucoseEntries.first?.glucose))")
                             }
+                        }
+                    }
+                    
+                    if RemoteGlucoseSource != .null {
+                        let gs = GlucoseSource(baseURL: self.baseURL, token: self.auth?.token ?? "invalid")
+                        let gse = await gs.getGlucoseSourceExtras()
+                        DispatchQueue.main.async {
+                            self.GlucoseSourceExtras = gse
                         }
                     }
                 } catch {
@@ -263,6 +274,7 @@ class Nightscout: Provider {
 
             let res = response as! HTTPURLResponse
             if res.statusCode > 299 {
+                self.logger.debug("status code over 299: \(res.statusCode). Body: \(data)")
                 var providerError = ""
                 do {
                     let result = try JSONDecoder().decode(NightscoutAuthErrorResponse.self, from: data)
@@ -277,6 +289,21 @@ class Nightscout: Provider {
                 do {
                     let result = try JSONDecoder().decode(NightscoutAuthResponse.self, from: data)
                     self.auth = result
+
+                    DispatchQueue.main.async {
+                        self.auth = ProviderAuth(token: result.token, expiry: result.exp)
+                    }
+
+                    isAuthenticating = false
+                    self.logger.debug("Authentication is now successful. No more now please!")
+                    
+                    // Check glucose source device to see if we support extra features
+                    let gs = GlucoseSource(baseURL: self.baseURL, token: result.token)
+                    let source = await gs.checkDeviceStatusForGSE()
+                    if source != GlucoseSourceDevice.null {
+                        RemoteGlucoseSource = source
+                    }
+
                     return
                 } catch {
                     self.providerIssue = "Unable to parse response from Nightscout: \(String(describing: error))"
