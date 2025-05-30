@@ -42,6 +42,7 @@ struct GlucoseSourceExtraProperties {
     var cob: Double? = nil
     var eventualGlucose: Double? = nil
     var reason: String? = nil
+    var enactedAt: Date? = nil
     var forecasts: OpenAPSForecasts = OpenAPSForecasts(iob: nil, cob: nil, zt: nil, uam: nil)
 }
 
@@ -63,6 +64,8 @@ class Provider: ObservableObject, @unchecked Sendable {
     @Published var GlucoseSourceExtras: GlucoseSourceExtraProperties = GlucoseSourceExtraProperties()
     @Published public var providerIssue: String?
     @Published public var lastFetch: Date = Date().addingTimeInterval(TimeInterval(-5*60))
+    @Published public var isAuthenticating: Bool = false
+    @Published var auth: ProviderAuth?
 
     // TODO: How to move this out of this file and keep it accessible for Settings UI?
 //    @Published var connections: [LibreLinkUp.LibreLinkUpConnectionsResponse] = []

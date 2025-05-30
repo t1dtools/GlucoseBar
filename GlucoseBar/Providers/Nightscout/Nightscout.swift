@@ -7,13 +7,11 @@
 
 import Foundation
 
-class Nightscout: Provider {
+class Nightscout: Provider, @unchecked Sendable {
 
     private var isAuthenticated = false
-    private var auth: NightscoutAuthResponse?
     public var validSettings: Bool = true
     public var settingsError: String = ""
-//    public var RemoteGlucoseSource: GlucoseSourceDevice = .null
 
     private var lastFullFetch: Date = Date()
 
@@ -241,7 +239,7 @@ class Nightscout: Provider {
         }
 
         if auth!.token != "" {
-            let expiryTime = Date(timeIntervalSince1970: auth!.exp)
+            let expiryTime = Date(timeIntervalSince1970: auth!.expiry)
 
             self.logger.debug("nightscout token expiry: \(expiryTime.formatted())")
             return expiryTime.timeIntervalSinceNow > 0
@@ -261,6 +259,7 @@ class Nightscout: Provider {
 
         DispatchQueue.main.async {
             self.providerIssue = nil
+            self.isAuthenticating = true
         }
 
         self.logger.debug("Nightscout.authenticate")
@@ -288,7 +287,7 @@ class Nightscout: Provider {
             } else {
                 do {
                     let result = try JSONDecoder().decode(NightscoutAuthResponse.self, from: data)
-                    self.auth = result
+                    self.auth = ProviderAuth(token: result.token, expiry: result.exp)
 
                     DispatchQueue.main.async {
                         self.auth = ProviderAuth(token: result.token, expiry: result.exp)

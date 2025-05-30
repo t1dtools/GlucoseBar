@@ -134,6 +134,18 @@ struct GraphView: View {
         return glucose
     }
 
+    func relativeTime(time: Date) -> String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .short
+        formatter.formattingContext = .middleOfSentence
+
+        if time.timeIntervalSinceNow > -60 {
+            return "< 1 min. ago"
+        }
+
+        return formatter.localizedString(for: time, relativeTo: Date())
+    }
+
     @FocusState var buttonFocusState
 
     var body: some View {
@@ -155,12 +167,50 @@ struct GraphView: View {
 
         let graphDataDuration = (-1 * (g.entries?.last?.date.timeIntervalSinceNow ?? 1) / 60 / 60).rounded()
 
+        let loopColor: Color = .green
+
         VStack {
             if s.hoverableGraph {
-                VStack {
-                    Text("\(Text(headlineTime, format: .dateTime.hour().minute()))").font(.subheadline)
-                    Text("\(printFormattedGlucose(settings: s, glucose: headlineGlucose)) \(headlineTrend.arrows != "↔" ? headlineTrend.arrows : "")").font(.largeTitle)
-                }.padding(.top, 15)
+                HStack {
+                    VStack {
+                        Text("\(Text(headlineTime, format: .dateTime.hour().minute()))").font(.subheadline)
+                        Text("\(printFormattedGlucose(settings: s, glucose: headlineGlucose)) \(headlineTrend.arrows != "↔" ? headlineTrend.arrows : "")").font(.largeTitle)
+                    }.padding(.leading, 25)
+
+                    if s.cgmProvider == .nightscout && g.provider.RemoteGlucoseSource == .trio {
+                        Spacer()
+                        Grid(alignment: .leading, horizontalSpacing: 15, verticalSpacing: 15) {
+                            GridRow {
+                                if g.provider.GlucoseSourceExtras.iob != nil {
+                                    HStack {
+                                        Image(systemName: "syringe.fill").foregroundColor(.blue)
+                                        Text(formatIOBForDisplay(iob: g.provider.GlucoseSourceExtras.iob!) + " U")
+                                    }
+                                }
+                                if g.provider.GlucoseSourceExtras.cob != nil {
+                                    HStack {
+                                        Image(systemName: "fork.knife").foregroundColor(.orange)
+                                        Text(formatCOBForDisplay(cob: g.provider.GlucoseSourceExtras.cob!) + " g")
+                                    }
+                                }
+                            }
+                            GridRow {
+                                if g.provider.GlucoseSourceExtras.enactedAt != nil {
+                                    HStack {
+                                        Image(systemName: "circle").foregroundColor(loopColor)
+                                        Text("\(relativeTime(time: g.provider.GlucoseSourceExtras.enactedAt!))")
+                                    }.frame(alignment: .leading).padding(.bottom, 5).padding(.top, 3)
+                                }
+                                if g.provider.GlucoseSourceExtras.eventualGlucose != nil {
+                                    HStack {
+                                        Image(systemName: "arrow.right.circle")
+                                        Text(formatGlucoseForDisplay(settings: s, glucose: g.provider.GlucoseSourceExtras.eventualGlucose!))
+                                    }
+                                }
+                            }
+                        }.padding(.trailing, 25).padding(.top, 15)
+                    }
+                }.padding()
             }
 
             HStack {

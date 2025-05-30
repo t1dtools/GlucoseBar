@@ -142,21 +142,27 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
                     if enacted.predBGs.iob != nil {
                         forecasts.iob = enacted.predBGs.iob
                     }
-                    
+
                     if enacted.predBGs.cob != nil {
                         forecasts.cob = enacted.predBGs.cob
                     }
-                    
+
                     if enacted.predBGs.zt != nil {
                         forecasts.zt = enacted.predBGs.zt
                     }
-                    
+
                     if enacted.predBGs.uam != nil {
                         forecasts.uam = enacted.predBGs.uam
                     }
+
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+                    dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+                    dateFormatter.timeZone = TimeZone.init(secondsFromGMT: 0)
                     
-                    
-                    return GlucoseSourceExtraProperties(iob: enacted.iob, cob: enacted.cob, eventualGlucose: enacted.eventualBG, reason: enacted.reason, forecasts: forecasts)
+                    let ts = dateFormatter.date(from: enacted.deliverAt)
+
+                    return GlucoseSourceExtraProperties(iob: enacted.iob, cob: enacted.cob, eventualGlucose: enacted.eventualBG, reason: enacted.reason, enactedAt: ts, forecasts: forecasts)
                 }
             } catch {
                 self.logger.error("Unable to decode NS response when checking for GSE: \(String(describing: error))")
@@ -164,8 +170,7 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
         } catch {
             self.logger.error("Error parsing NS response: \(String(describing: error))")
         }
-        
+
         return empty
     }
-    
 }

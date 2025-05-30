@@ -61,6 +61,9 @@ func formatDeltaForDisplay(settings: SettingsStore, delta: Double) -> String {
 }
 
 func formatIOBForDisplay(iob: Double) -> String {
+    if iob < 0 {
+        return String(format: "%.2f", iob)
+    }
     return String(format: "%.1f", iob)
 }
 
@@ -97,19 +100,19 @@ struct GlucoseBarApp: App {
             t += " " + formatDeltaForDisplay(settings: s, delta: g.delta)
         }
         
-        if g.provider.RemoteGlucoseSource == .trio {
-            if g.provider.GlucoseSourceExtras.iob != nil {
-                t += " " + formatIOBForDisplay(iob: g.provider.GlucoseSourceExtras.iob!) + "u"
-            }
-            
-            if g.provider.GlucoseSourceExtras.cob != nil && g.provider.GlucoseSourceExtras.cob! > 0 {
-                t += " " + formatCOBForDisplay(cob: g.provider.GlucoseSourceExtras.cob!) + "g"
-            }
-            
-            if g.provider.GlucoseSourceExtras.eventualGlucose != nil {
-                t += " (" + formatGlucoseForDisplay(settings: s, glucose: g.provider.GlucoseSourceExtras.eventualGlucose!) + ")"
-            }
-        }
+//        if g.provider.RemoteGlucoseSource == .trio {
+//            if g.provider.GlucoseSourceExtras.iob != nil {
+//                t += " " + formatIOBForDisplay(iob: g.provider.GlucoseSourceExtras.iob!) + "u"
+//            }
+//            
+//            if g.provider.GlucoseSourceExtras.cob != nil && g.provider.GlucoseSourceExtras.cob! > 0 {
+//                t += " " + formatCOBForDisplay(cob: g.provider.GlucoseSourceExtras.cob!) + "g"
+//            }
+//            
+//            if g.provider.GlucoseSourceExtras.eventualGlucose != nil {
+//                t += " (" + formatGlucoseForDisplay(settings: s, glucose: g.provider.GlucoseSourceExtras.eventualGlucose!) + ")"
+//            }
+//        }
         
         if s.showTimeSince && vs.isOnline {
             t += " (\(g.glucoseAge))"
