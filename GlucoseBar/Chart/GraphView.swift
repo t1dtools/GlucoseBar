@@ -21,27 +21,20 @@ struct GraphView: View {
     @State private var hoveredDelta: Double?
     @State private var isHovering: Bool = false
     @State private var legends: [String : Color] = [:]
-    
+
+    let colorScheme: GlucoseColorScheme = .dynamicColor // pull from s.colorScheme once settings exist
+
     var gse: GlucoseSourceExtraProperties = GlucoseSourceExtraProperties()
 
     init(glucose: Glucose) {
         self.g = glucose
         self.gse = glucose.provider.GlucoseSourceExtras
     }
-    
-    struct GraphEntry {
-        var date: Date
-        var value: Double
-        var trend: GlucoseEntry.GlucoseTrend
-        var delta: Double
-        var color: Color
-        var isForecast: Bool
-    }
-    
+
     func getGraphData() -> [GraphEntry] {
 
-        let highThresholdRuleMark = convertGlucose(s, glucose: s.highThreshold)
-        let lowThresholdRuleMark = convertGlucose(s, glucose: s.lowThreshold)
+        let highThresholdRuleMark = Decimal(convertGlucose(s, glucose: s.highThreshold))
+        let lowThresholdRuleMark = Decimal(convertGlucose(s, glucose: s.lowThreshold))
 
         var data: [GraphEntry] = [];
         if (g.entries != nil) {
@@ -57,66 +50,60 @@ struct GraphView: View {
                     if entry.changeRate != nil {
                         delta = entry.changeRate!
                     }
-                    
-                    // TODO: Dynamic color support here
-                    var color = Color.green
-                    if entry.glucose > highThresholdRuleMark {
-                        color = .yellow
-                    } else if entry.glucose < lowThresholdRuleMark {
-                        color = .red
-                    }
 
-                    data.append(GraphEntry(date: entry.date, value: glu, trend: entry.trend ?? .notComputable, delta: delta, color: color, isForecast: false))
+                    let color = getDynamicGlucoseColor(glucoseValue: Decimal(entry.glucose), highGlucoseColorValue: highThresholdRuleMark, lowGlucoseColorValue: lowThresholdRuleMark, targetGlucose: 90, glucoseColorScheme: colorScheme)
+
+                    data.append(GraphEntry(date: entry.date, value: glu, trend: entry.trend ?? .notComputable, delta: delta, color: color, forecastType: .none))
                 }
             }
         }
-        
+
         let latestEntryDate = data.first?.date ?? Date()
-        
+
         if gse.forecasts.zt != nil {
             for i in 0..<gse.forecasts.zt!.count {
                 let entry = gse.forecasts.zt![i]
                 let glu = convertGlucose(s, glucose: Double(entry))
-                
+
                 let date = Calendar.current.date(byAdding: .minute, value: (i + 1) * 5, to: latestEntryDate)!
-                
-                data.append(GraphEntry(date: date, value: glu, trend: .notComputable, delta: 1.0, color: .purple, isForecast: true))
+
+                data.append(GraphEntry(date: date, value: glu, trend: .notComputable, delta: 0.0, color: .purple, forecastType: .zb))
             }
         }
-        
+
         if gse.forecasts.uam != nil {
             for i in 0..<gse.forecasts.uam!.count {
                 let entry = gse.forecasts.uam![i]
                 let glu = convertGlucose(s, glucose: Double(entry))
-                
+
                 let date = Calendar.current.date(byAdding: .minute, value: (i + 1) * 5, to: latestEntryDate)!
-                
-                data.append(GraphEntry(date: date, value: glu, trend: .notComputable, delta: 2.0, color: .orange, isForecast: true))
+
+                data.append(GraphEntry(date: date, value: glu, trend: .notComputable, delta: 0.0, color: .orange, forecastType: .uam))
             }
         }
-        
+
         if gse.forecasts.cob != nil {
             for i in 0..<gse.forecasts.cob!.count {
                 let entry = gse.forecasts.cob![i]
                 let glu = convertGlucose(s, glucose: Double(entry))
-                
+
                 let date = Calendar.current.date(byAdding: .minute, value: (i + 1) * 5, to: latestEntryDate)!
-                
-                data.append(GraphEntry(date: date, value: glu, trend: .notComputable, delta: 3.0, color: .yellow, isForecast: true))
+
+                data.append(GraphEntry(date: date, value: glu, trend: .notComputable, delta: 0.0, color: .yellow, forecastType: .cob))
             }
         }
-        
+
         if gse.forecasts.iob != nil {
             for i in 0..<gse.forecasts.iob!.count {
                 let entry = gse.forecasts.iob![i]
                 let glu = convertGlucose(s, glucose: Double(entry))
-                
+
                 let date = Calendar.current.date(byAdding: .minute, value: (i + 1) * 5, to: latestEntryDate)!
-                
-                data.append(GraphEntry(date: date, value: glu, trend: .notComputable, delta: 4.0, color: .blue, isForecast: true))
+
+                data.append(GraphEntry(date: date, value: glu, trend: .notComputable, delta: 0.0, color: .blue, forecastType: .iob))
             }
         }
-        
+
         return data
     }
 
@@ -132,18 +119,6 @@ struct GraphView: View {
         }
 
         return glucose
-    }
-
-    func relativeTime(time: Date) -> String {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .short
-        formatter.formattingContext = .middleOfSentence
-
-        if time.timeIntervalSinceNow > -60 {
-            return "< 1 min. ago"
-        }
-
-        return formatter.localizedString(for: time, relativeTo: Date())
     }
 
     @FocusState var buttonFocusState
@@ -167,8 +142,6 @@ struct GraphView: View {
 
         let graphDataDuration = (-1 * (g.entries?.last?.date.timeIntervalSinceNow ?? 1) / 60 / 60).rounded()
 
-        let loopColor: Color = .green
-
         VStack {
             if s.hoverableGraph {
                 HStack {
@@ -179,36 +152,7 @@ struct GraphView: View {
 
                     if s.cgmProvider == .nightscout && g.provider.RemoteGlucoseSource == .trio {
                         Spacer()
-                        Grid(alignment: .leading, horizontalSpacing: 15, verticalSpacing: 15) {
-                            GridRow {
-                                if g.provider.GlucoseSourceExtras.iob != nil {
-                                    HStack {
-                                        Image(systemName: "syringe.fill").foregroundColor(.blue)
-                                        Text(formatIOBForDisplay(iob: g.provider.GlucoseSourceExtras.iob!) + " U")
-                                    }
-                                }
-                                if g.provider.GlucoseSourceExtras.cob != nil {
-                                    HStack {
-                                        Image(systemName: "fork.knife").foregroundColor(.orange)
-                                        Text(formatCOBForDisplay(cob: g.provider.GlucoseSourceExtras.cob!) + " g")
-                                    }
-                                }
-                            }
-                            GridRow {
-                                if g.provider.GlucoseSourceExtras.enactedAt != nil {
-                                    HStack {
-                                        Image(systemName: "circle").foregroundColor(loopColor)
-                                        Text("\(relativeTime(time: g.provider.GlucoseSourceExtras.enactedAt!))")
-                                    }.frame(alignment: .leading).padding(.bottom, 5).padding(.top, 3)
-                                }
-                                if g.provider.GlucoseSourceExtras.eventualGlucose != nil {
-                                    HStack {
-                                        Image(systemName: "arrow.right.circle")
-                                        Text(formatGlucoseForDisplay(settings: s, glucose: g.provider.GlucoseSourceExtras.eventualGlucose!))
-                                    }
-                                }
-                            }
-                        }.padding(.trailing, 25).padding(.top, 15)
+                        TrioGridView(g: g).environmentObject(s)
                     }
                 }.padding()
             }
@@ -241,30 +185,18 @@ struct GraphView: View {
             }.padding().frame(alignment: .leading)
 
             Chart {
-                RuleMark(y: .value("High", highThresholdRuleMark)).foregroundStyle(.yellow).lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
-                RuleMark(y: .value("Low", lowThresholdRuleMark)).foregroundStyle(.red).lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
-                ForEach(data, id: \.date) { point in
-                    if point.isForecast {
-                        PointMark(
-                            x: .value("Time", point.date),
-                            y: .value("Glucose", point.value)
-                        ).lineStyle(StrokeStyle(lineWidth: 1.0))
-                            .foregroundStyle(point.color)
-                            .interpolationMethod(.cardinal)
-                            .symbolSize(30)
-                            .interpolationMethod(.catmullRom)
-                    } else {
-                        PointMark(
-                            x: .value("Time", point.date),
-                            y: .value("Glucose", point.value)
-                        ).lineStyle(StrokeStyle(lineWidth: 2.0))
-                            .foregroundStyle(point.color)
-                            .interpolationMethod(.cardinal)
-                            .symbolSize(30)
-                            .interpolationMethod(.catmullRom)
+                if true {
+                    if colorScheme == .staticColor {
+                        RuleMark(y: .value("High", highThresholdRuleMark)).foregroundStyle(.orange).lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
+                        RuleMark(y: .value("Low", lowThresholdRuleMark)).foregroundStyle(.red).lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
+                    } else if colorScheme == .dynamicColor {
+                        RuleMark(y: .value("High", highThresholdRuleMark)).foregroundStyle(dynamicPurple).lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
+                        RuleMark(y: .value("Low", lowThresholdRuleMark)).foregroundStyle(dynamicRed).lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
                     }
-                    
                 }
+
+                DrawGlucose(data: data)
+                DrawForecast(data: data)
                 if s.hoverableGraph {
                     if let hoveredTime, let hoveredValue {
                         PointMark(
@@ -274,7 +206,6 @@ struct GraphView: View {
                     }
                 }
             }
-            .chartLegend(position: .bottom, alignment: .leading, spacing: 8)
             .chartYScale(domain: [minY <= defaultMinGlucose ? minY : defaultMinGlucose, maxY >= defaultMaxGlucose ? (maxY + maxYMargin) : defaultMaxGlucose])
             .chartYAxis {
                 AxisMarks(values: .automatic(desiredCount:8)) {
@@ -308,7 +239,7 @@ struct GraphView: View {
                                 let date = entry.date
                                 let timeDiff = date.timeIntervalSince(hTime!)
                                 if timeDiff < 60 && timeDiff > 0 {
-                                    if !entry.isForecast {
+                                    if entry.forecastType == .none {
                                         hoveredValue = entry.value
                                         hoveredTime = entry.date
                                         hoveredTrend = entry.trend
@@ -330,7 +261,7 @@ struct GraphView: View {
                                          "ZT": .purple,
                                          "IOB": .blue,
                                          "COB": .yellow]
-            ).chartLegend(data.last?.isForecast ?? false ? .visible : .hidden)
+            ).chartLegend(data.last?.forecastType != .none ?? nil ? .visible : .hidden)
             .padding()
         }
     }

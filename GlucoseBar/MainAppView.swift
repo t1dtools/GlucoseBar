@@ -26,6 +26,7 @@ struct MainAppView: View {
                 Text("Quit")
             }.contentShape(Rectangle())
         }
+        .contentShape(Rectangle())
         .buttonStyle(.plain)
         .padding()
         .focusEffectDisabled()
