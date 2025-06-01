@@ -7,7 +7,7 @@
 
 import Foundation
 
-class Simulator: Provider {
+class Simulator: Provider, @unchecked Sendable {
 
     init(_ input: String?) {
         super.init()

@@ -44,6 +44,14 @@ class ViewState: ObservableObject, @unchecked Sendable {
     }
 }
 
+func convertGlucose(_ settings: SettingsStore, glucose: Double) -> Double {
+    if settings.glucoseUnit == .mmoll {
+        return glucose / 18
+    }
+
+    return glucose
+}
+
 func formatGlucoseForDisplay(settings: SettingsStore, glucose: Double) -> String {
     if (settings.glucoseUnit == .mmoll) {
         return String(format: "%.1f", glucose/18)
@@ -101,15 +109,15 @@ struct GlucoseBarApp: App {
         }
 
         if g.provider.RemoteGlucoseSource == .trio {
-            if g.provider.GlucoseSourceExtras.iob != nil {
+            if s.trioBarShowIOB && g.provider.GlucoseSourceExtras.iob != nil {
                 t += " " + formatIOBForDisplay(iob: g.provider.GlucoseSourceExtras.iob!) + "u"
             }
 
-            if g.provider.GlucoseSourceExtras.cob != nil && g.provider.GlucoseSourceExtras.cob! > 0 {
+            if s.trioBarShowCOB && g.provider.GlucoseSourceExtras.cob != nil && g.provider.GlucoseSourceExtras.cob! > 0 {
                 t += " " + formatCOBForDisplay(cob: g.provider.GlucoseSourceExtras.cob!) + "g"
             }
 
-            if g.provider.GlucoseSourceExtras.eventualGlucose != nil {
+            if s.trioBarShowEventualGlucose && g.provider.GlucoseSourceExtras.eventualGlucose != nil {
                 t += " (" + formatGlucoseForDisplay(settings: s, glucose: g.provider.GlucoseSourceExtras.eventualGlucose!) + ")"
             }
         }

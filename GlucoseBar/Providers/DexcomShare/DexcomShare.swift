@@ -29,7 +29,7 @@ public enum DexcomServer: String, CaseIterable, Identifiable {
     }
 }
 
-class DexcomShare: Provider {
+class DexcomShare: Provider, @unchecked Sendable {
 
     private var isAuthenticated = false
     private var accountID: String = ""

@@ -21,6 +21,20 @@ public enum GlucoseSourceDevice: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
+public enum ForecastDisplay: String, CaseIterable, Identifiable {
+    case cone
+    case lines
+    public var id: String { self.rawValue }
+    public var presentable: String {
+        switch self {
+        case .cone:
+            return "Cone"
+        case .lines:
+            return "Lines"
+        }
+    }
+}
+
 class GlucoseSource: Nightscout, @unchecked Sendable {
 
     @MainActor
@@ -56,8 +70,6 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
                 let result = try JSONDecoder().decode(DeviceStatusResponse.self, from: data)
 
                 if result.result.first!.device == "Trio" {
-                    self.logger.info("IT IS TRIO! WOOHOO!!!!")
-                    self.logger.info("IOB: \(result.result.first?.openaps.enacted.iob ?? 1000.0)u")
                     let enacted = result.result.first!.openaps.enacted
 
                     var gsep = GlucoseSourceExtraProperties()
@@ -83,6 +95,7 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
                         oapsf.zt = enacted.predBGs.zt
                     }
                     gsep.forecasts = oapsf
+                    gsep.glucoseTarget = enacted.currentTarget
                     
                     DispatchQueue.global().sync {
                         self.GlucoseSourceExtras = gsep
@@ -162,7 +175,7 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
                     
                     let ts = dateFormatter.date(from: enacted.deliverAt)
 
-                    return GlucoseSourceExtraProperties(iob: enacted.iob, cob: enacted.cob, eventualGlucose: enacted.eventualBG, reason: enacted.reason, enactedAt: ts, forecasts: forecasts)
+                    return GlucoseSourceExtraProperties(iob: enacted.iob, cob: enacted.cob, eventualGlucose: enacted.eventualBG, reason: enacted.reason, enactedAt: ts, forecasts: forecasts, glucoseTarget: enacted.currentTarget)
                 }
             } catch {
                 self.logger.error("Unable to decode NS response when checking for GSE: \(String(describing: error))")

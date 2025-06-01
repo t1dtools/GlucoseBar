@@ -22,8 +22,6 @@ struct GraphView: View {
     @State private var isHovering: Bool = false
     @State private var legends: [String : Color] = [:]
 
-    let colorScheme: GlucoseColorScheme = .dynamicColor // pull from s.colorScheme once settings exist
-
     var gse: GlucoseSourceExtraProperties = GlucoseSourceExtraProperties()
 
     init(glucose: Glucose) {
@@ -51,21 +49,26 @@ struct GraphView: View {
                         delta = entry.changeRate!
                     }
 
-                    let color = getDynamicGlucoseColor(glucoseValue: Decimal(entry.glucose), highGlucoseColorValue: highThresholdRuleMark, lowGlucoseColorValue: lowThresholdRuleMark, targetGlucose: 90, glucoseColorScheme: colorScheme)
+                    var glucoseTarget = s.glucoseTarget
+                    if g.provider.GlucoseSourceExtras.glucoseTarget != nil {
+                        glucoseTarget = g.provider.GlucoseSourceExtras.glucoseTarget!
+                    }
+
+                    let color = getDynamicGlucoseColor(glucoseValue: Decimal(convertGlucose(s, glucose: entry.glucose)), highGlucoseColorValue: highThresholdRuleMark, lowGlucoseColorValue: lowThresholdRuleMark, targetGlucose: Decimal(convertGlucose(s, glucose: glucoseTarget)), glucoseColorScheme: s.glucoseColorScheme)
 
                     data.append(GraphEntry(date: entry.date, value: glu, trend: entry.trend ?? .notComputable, delta: delta, color: color, forecastType: .none))
                 }
             }
         }
 
-        let latestEntryDate = data.first?.date ?? Date()
+        let forecastStartDate = gse.enactedAt ?? Date()
 
         if gse.forecasts.zt != nil {
             for i in 0..<gse.forecasts.zt!.count {
                 let entry = gse.forecasts.zt![i]
                 let glu = convertGlucose(s, glucose: Double(entry))
 
-                let date = Calendar.current.date(byAdding: .minute, value: (i + 1) * 5, to: latestEntryDate)!
+                let date = Calendar.current.date(byAdding: .minute, value: i * 5, to: forecastStartDate)!
 
                 data.append(GraphEntry(date: date, value: glu, trend: .notComputable, delta: 0.0, color: .purple, forecastType: .zb))
             }
@@ -76,7 +79,7 @@ struct GraphView: View {
                 let entry = gse.forecasts.uam![i]
                 let glu = convertGlucose(s, glucose: Double(entry))
 
-                let date = Calendar.current.date(byAdding: .minute, value: (i + 1) * 5, to: latestEntryDate)!
+                let date = Calendar.current.date(byAdding: .minute, value: i * 5, to: forecastStartDate)!
 
                 data.append(GraphEntry(date: date, value: glu, trend: .notComputable, delta: 0.0, color: .orange, forecastType: .uam))
             }
@@ -87,7 +90,7 @@ struct GraphView: View {
                 let entry = gse.forecasts.cob![i]
                 let glu = convertGlucose(s, glucose: Double(entry))
 
-                let date = Calendar.current.date(byAdding: .minute, value: (i + 1) * 5, to: latestEntryDate)!
+                let date = Calendar.current.date(byAdding: .minute, value: i * 5, to: forecastStartDate)!
 
                 data.append(GraphEntry(date: date, value: glu, trend: .notComputable, delta: 0.0, color: .yellow, forecastType: .cob))
             }
@@ -98,7 +101,7 @@ struct GraphView: View {
                 let entry = gse.forecasts.iob![i]
                 let glu = convertGlucose(s, glucose: Double(entry))
 
-                let date = Calendar.current.date(byAdding: .minute, value: (i + 1) * 5, to: latestEntryDate)!
+                let date = Calendar.current.date(byAdding: .minute, value: i * 5, to: forecastStartDate)!
 
                 data.append(GraphEntry(date: date, value: glu, trend: .notComputable, delta: 0.0, color: .blue, forecastType: .iob))
             }
@@ -113,23 +116,31 @@ struct GraphView: View {
         return getGraphData()
     }
 
-    func convertGlucose(_ settings: SettingsStore, glucose: Double) -> Double {
-        if s.glucoseUnit == .mmoll {
-            return glucose / 18
+    func getMinMaxY(data: [GraphEntry]) -> (Double, Double, Double, Double) {
+        let defaultMaxGlucose = convertGlucose(s, glucose: 216.0)
+        let defaultMinGlucose = convertGlucose(s, glucose: 36.0)
+
+        var maxY = 0.0
+        var minY = 0.0
+
+        var entries: [GraphEntry] = []
+
+        for(_, entry) in data.enumerated() {
+            if s.trioChartShowForecast || entry.forecastType == .none {
+                entries.append(entry)
+            }
         }
 
-        return glucose
+        maxY = entries.max(by: {$0.value < $1.value})?.value ?? defaultMaxGlucose
+        minY = entries.min(by: {$0.value > $1.value})?.value ?? defaultMinGlucose
+        return (minY, maxY, defaultMinGlucose, defaultMaxGlucose)
     }
 
     @FocusState var buttonFocusState
 
     var body: some View {
-        let defaultMaxGlucose = convertGlucose(s, glucose: 216.0)
-        let defaultMinGlucose = convertGlucose(s, glucose: 36.0)
-
         var data = getGraphData()
-        let maxY = data.max(by: {$0.value < $1.value})?.value ?? defaultMaxGlucose
-        let minY = data.min(by: {$0.value > $1.value})?.value ?? defaultMinGlucose
+        let (minY, maxY, defaultMinGlucose, defaultMaxGlucose) = getMinMaxY(data: data)
 
         let maxYMargin = convertGlucose(s, glucose: 36.0)
 
@@ -148,11 +159,13 @@ struct GraphView: View {
                     VStack {
                         Text("\(Text(headlineTime, format: .dateTime.hour().minute()))").font(.subheadline)
                         Text("\(printFormattedGlucose(settings: s, glucose: headlineGlucose)) \(headlineTrend.arrows != "↔" ? headlineTrend.arrows : "")").font(.largeTitle)
-                    }.padding(.leading, 25)
+                    }.padding(.leading, 25).padding(.top, 10)
 
                     if s.cgmProvider == .nightscout && g.provider.RemoteGlucoseSource == .trio {
-                        Spacer()
-                        TrioGridView(g: g).environmentObject(s)
+                        if s.trioChartShowCOB || s.trioChartShowIOB || s.trioChartShowLoopStatus || s.trioChartShowEventualGlucose {
+                            Spacer()
+                            TrioGridView(g: g).environmentObject(s)
+                        }
                     }
                 }.padding()
             }
@@ -186,17 +199,20 @@ struct GraphView: View {
 
             Chart {
                 if true {
-                    if colorScheme == .staticColor {
+                    if s.glucoseColorScheme == .staticColor {
                         RuleMark(y: .value("High", highThresholdRuleMark)).foregroundStyle(.orange).lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
                         RuleMark(y: .value("Low", lowThresholdRuleMark)).foregroundStyle(.red).lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
-                    } else if colorScheme == .dynamicColor {
+                    } else if s.glucoseColorScheme == .dynamicColor {
                         RuleMark(y: .value("High", highThresholdRuleMark)).foregroundStyle(dynamicPurple).lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
                         RuleMark(y: .value("Low", lowThresholdRuleMark)).foregroundStyle(dynamicRed).lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
                     }
                 }
 
+                if s.trioChartShowForecast {
+                    DrawForecast(data: data)
+                }
                 DrawGlucose(data: data)
-                DrawForecast(data: data)
+
                 if s.hoverableGraph {
                     if let hoveredTime, let hoveredValue {
                         PointMark(

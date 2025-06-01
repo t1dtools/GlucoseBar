@@ -51,6 +51,7 @@ struct GeneralSettings: View {
                         }
                     }.pickerStyle(SegmentedPickerStyle())
                 }
+
                 HStack {
                     Text("High Threshold").frame(width: 130, alignment: .leading)
                     Spacer()
@@ -74,6 +75,7 @@ struct GeneralSettings: View {
                     Spacer()
                     Text(formatGlucoseForDisplay(settings: s, glucose: s.highThreshold)).frame(width:50, alignment: .trailing)
                 }
+
                 HStack {
                     Text("Low Threshold").frame(width: 130, alignment: .leading)
                     Spacer()
@@ -99,6 +101,24 @@ struct GeneralSettings: View {
                 }
 
                 HStack {
+                    Text("Target").frame(width: 130, alignment: .leading)
+                    Spacer()
+                    VStack {
+                        Slider(value: Binding(
+                            get: { s.glucoseTarget },
+                            set: { s.glucoseTarget = $0 }
+                            ), in: 40...400) {
+                        } minimumValueLabel: {
+                            Text("\(formatGlucoseForDisplay(settings: s, glucose: 40))")
+                        } maximumValueLabel: {
+                            Text("\(formatGlucoseForDisplay(settings: s, glucose: 400))")
+                        }
+                    }.frame(width:270, alignment: .leading)
+                    Spacer()
+                    Text(formatGlucoseForDisplay(settings: s, glucose: s.glucoseTarget)).frame(width:50, alignment: .trailing)
+                }
+
+                HStack {
                     Text("Show Delta").frame(width: 260, alignment: .leading)
                     Spacer()
                     Toggle(isOn: $s.showDelta, label: {}).toggleStyle(.switch).tint(.blue)
@@ -115,7 +135,7 @@ struct GeneralSettings: View {
                 }
 
                 HStack {
-                    Text("Enable Colored Icon When Out of Range").frame(width: 260, alignment: .leading)
+                    Text("Enable Icon When Out of Range").frame(width: 260, alignment: .leading)
                     Spacer()
                     Toggle(isOn: $s.showMenuBarIcon, label: {}).toggleStyle(.switch).tint(.blue)
                 }
@@ -143,6 +163,17 @@ struct GeneralSettings: View {
                     Spacer()
                 }
 
+                HStack {
+                    Text("Glucose Chart Color Scheme")
+                    Spacer()
+                    Picker("", selection: $s.glucoseColorScheme) {
+                        Text("\(GlucoseColorScheme.dynamicColor.displayName)").tag(GlucoseColorScheme.dynamicColor)
+                        Text("\(GlucoseColorScheme.staticColor.displayName)").tag(GlucoseColorScheme.staticColor)
+                    }.frame(width: 100).onChange(of: s.glucoseColorScheme) {
+                        s.save()
+                    }.pickerStyle(SegmentedPickerStyle()).padding(.trailing, 17)
+                }
+
                 Text("Launch Behavior").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 10)
                 HStack {
                     Text("Launch at Login").frame(width: 260, alignment: .leading)
@@ -162,7 +193,7 @@ struct GeneralSettings: View {
                 Spacer()
                 Text("\(Bundle.main.appName) Version: \(Bundle.main.appVersionLong) (\(Bundle.main.appBuild)) ").font(.footnote).padding(2)
             }
-        }.frame(minWidth: 475, maxWidth: 475, minHeight: 395, maxHeight: 395)
+        }.frame(minWidth: 475, maxWidth: 475, minHeight: 450, maxHeight: 450)
     }
 }
 
@@ -189,6 +220,7 @@ struct CGMSettings: View {
 
     struct NightscoutView: View {
         @EnvironmentObject var s: SettingsStore
+        @EnvironmentObject var g: Glucose
 
         @FocusState var nsSecretFailedValidationFocus: Bool
         @State var nsSecretFailedValidation: Bool = false
@@ -215,6 +247,95 @@ struct CGMSettings: View {
                 HStack {
                     Text("This token needs to have the permission \"readable\" in Nightscout.").font(.footnote)
                     Spacer()
+                }
+
+                if g.provider.RemoteGlucoseSource == .trio {
+                    VStack {
+
+                        Text("Trio Settings").font(.headline).frame(maxWidth: .infinity, alignment: .leading)
+                        Text("We noticed you use Trio, so here's a few extra goodies!").font(.footnote).frame(maxWidth: .infinity, alignment: .leading)
+
+                        Text("Menu Bar Data").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 10)
+                        Text("This is the data you see in the macOS menu bar").font(.footnote).frame(maxWidth: .infinity, alignment: .leading)
+                        HStack {
+                            Text("Show Insulin On Board")
+                            Spacer()
+                            Toggle(isOn: $s.trioBarShowIOB, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.trioBarShowIOB, initial: false) {
+                                s.save()
+                            }
+                        }
+
+                        HStack {
+                            Text("Show Carbs On Board when > 0g")
+                            Spacer()
+                            Toggle(isOn: $s.trioBarShowCOB, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.trioBarShowCOB, initial: false) {
+                                s.save()
+                            }
+                        }
+
+                        HStack {
+                            Text("Show Eventual Glucose")
+                            Spacer()
+                            Toggle(isOn: $s.trioBarShowEventualGlucose, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.trioBarShowEventualGlucose, initial: false) {
+                                s.save()
+                            }
+                        }
+
+                        Text("Chart Data").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 10)
+                        Text("This is the data you in and around the chart when you open GlucoseBar").font(.footnote).frame(maxWidth: .infinity, alignment: .leading)
+                        HStack {
+                            Text("Show Forecast")
+                            Spacer()
+                            Toggle(isOn: $s.trioChartShowForecast, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.trioChartShowForecast, initial: false) {
+                                s.save()
+                            }
+                        }
+
+                        if s.trioChartShowForecast {
+                            HStack {
+                                Text("Forecast Kind")
+                                Spacer()
+                                Picker("", selection: $s.trioChartForecastDisplay) {
+                                    Text("\(ForecastDisplay.lines.presentable)").tag(ForecastDisplay.lines)
+                                    Text("\(ForecastDisplay.cone.presentable)").tag(ForecastDisplay.cone)
+                                }.frame(width: 100).onChange(of: s.trioChartForecastDisplay) {
+                                    s.save()
+                                }.pickerStyle(SegmentedPickerStyle())
+                            }
+                        }
+
+                        HStack {
+                            Text("Show Insulin On Board")
+                            Spacer()
+                            Toggle(isOn: $s.trioChartShowIOB, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.trioChartShowIOB, initial: false) {
+                                s.save()
+                            }
+                        }
+
+                        HStack {
+                            Text("Show Carbs On Board")
+                            Spacer()
+                            Toggle(isOn: $s.trioChartShowCOB, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.trioChartShowCOB, initial: false) {
+                                s.save()
+                            }
+                        }
+
+                        HStack {
+                            Text("Show Loop Status")
+                            Spacer()
+                            Toggle(isOn: $s.trioChartShowLoopStatus, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.trioChartShowLoopStatus, initial: false) {
+                                s.save()
+                            }
+                        }
+
+                        HStack {
+                            Text("Show Eventual Glucose")
+                            Spacer()
+                            Toggle(isOn: $s.trioChartShowEventualGlucose, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.trioChartShowEventualGlucose, initial: false) {
+                                s.save()
+                            }
+                        }
+                    }.padding(.top, 10)
                 }
             }
         }
@@ -396,7 +517,7 @@ struct CGMSettings: View {
                     Validation()
                 }
             }
-        }.frame(minWidth: 475, maxWidth: 475, minHeight: 200, maxHeight: 200, alignment: .topLeading)
+        }.frame(minWidth: 475, maxWidth: 475, minHeight: s.cgmProvider == .nightscout && g.provider.RemoteGlucoseSource == .trio ? 555 : 200, maxHeight: s.cgmProvider == .nightscout && g.provider.RemoteGlucoseSource == .trio ? 555 : 200, alignment: .topLeading)
     }
 }
 

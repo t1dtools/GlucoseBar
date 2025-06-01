@@ -27,15 +27,15 @@ struct TrioGridView: View {
     }
 
     var body: some View {
-        Grid(alignment: .leading, horizontalSpacing: 15, verticalSpacing: 15) {
+        Grid(alignment: .leading, horizontalSpacing: 10, verticalSpacing: 10) {
             GridRow {
-                if g.provider.GlucoseSourceExtras.iob != nil {
+                if s.trioChartShowIOB && g.provider.GlucoseSourceExtras.iob != nil {
                     HStack {
                         Image(systemName: "syringe.fill").foregroundColor(.blue)
                         Text(formatIOBForDisplay(iob: g.provider.GlucoseSourceExtras.iob!) + " U")
                     }
                 }
-                if g.provider.GlucoseSourceExtras.cob != nil {
+                if s.trioChartShowCOB && g.provider.GlucoseSourceExtras.cob != nil {
                     HStack {
                         Image(systemName: "fork.knife").foregroundColor(.orange)
                         Text(formatCOBForDisplay(cob: g.provider.GlucoseSourceExtras.cob!) + " g")
@@ -43,19 +43,19 @@ struct TrioGridView: View {
                 }
             }
             GridRow {
-                if g.provider.GlucoseSourceExtras.enactedAt != nil {
+                if s.trioChartShowLoopStatus && g.provider.GlucoseSourceExtras.enactedAt != nil {
                     HStack {
                         Image(systemName: "circle").foregroundColor(loopColor)
                         Text("\(relativeTime(time: g.provider.GlucoseSourceExtras.enactedAt!))")
                     }.frame(alignment: .leading).padding(.bottom, 5).padding(.top, 3)
                 }
-                if g.provider.GlucoseSourceExtras.eventualGlucose != nil {
+                if s.trioChartShowEventualGlucose && g.provider.GlucoseSourceExtras.eventualGlucose != nil {
                     HStack {
                         Image(systemName: "arrow.right.circle")
-                        Text(formatGlucoseForDisplay(settings: s, glucose: g.provider.GlucoseSourceExtras.eventualGlucose!))
+                        Text(formatGlucoseForDisplay(settings: s, glucose: convertGlucose(s, glucose: g.provider.GlucoseSourceExtras.eventualGlucose!)))
                     }
                 }
             }
-        }.padding(.trailing, 25).padding(.top, 15).multilineTextAlignment(.leading)
+        }.padding(.trailing, 25).padding(.top, 10).multilineTextAlignment(.leading)
     }
 }

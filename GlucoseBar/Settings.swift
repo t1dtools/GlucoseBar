@@ -13,6 +13,8 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     @Published var glucoseUnit: GlucoseUnit = .mgdl
     @Published var highThreshold: Double = 180
     @Published var lowThreshold: Double = 70
+    @Published var glucoseTarget: Double = 100
+    @Published var glucoseColorScheme: GlucoseColorScheme = .dynamicColor
 
     @Published var cgmProvider: CGMProvider = .null
     @Published var graphMinutes: Int = 180
@@ -37,6 +39,18 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     
     @Published var hoverableGraph: Bool = true
     @Published var showMenuBarIcon: Bool = false
+
+    // Trio Specifics
+    @Published var trioBarShowIOB: Bool = false
+    @Published var trioBarShowCOB: Bool = false
+    @Published var trioBarShowEventualGlucose: Bool = false
+
+    @Published var trioChartShowForecast: Bool = true
+    @Published var trioChartForecastDisplay: ForecastDisplay = .lines
+    @Published var trioChartShowIOB: Bool = true
+    @Published var trioChartShowCOB: Bool = true
+    @Published var trioChartShowEventualGlucose: Bool = true
+    @Published var trioChartShowLoopStatus: Bool = true
 
     @Published var validSettings: Bool = false
 
@@ -128,8 +142,54 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
                 self.glucoseUnit = .mgdl
             }
         }
+        
+        self.glucoseTarget = defaults.double(forKey: "glucoseTarget")
+        if self.glucoseTarget == 0 {
+            self.glucoseTarget = 100.0
+        }
+        let colorScheme = defaults.string(forKey: "glucoseColorScheme") ?? GlucoseColorScheme.staticColor.displayName
+        switch colorScheme {
+        case GlucoseColorScheme.staticColor.displayName:
+            DispatchQueue.main.async {
+                self.glucoseColorScheme = .staticColor
+            }
+        case GlucoseColorScheme.dynamicColor.displayName:
+            DispatchQueue.main.async {
+                self.glucoseColorScheme = .dynamicColor
+            }
+        default:
+            DispatchQueue.main.async {
+                self.glucoseColorScheme = .dynamicColor
+            }
+        }
+
+        self.trioBarShowIOB = defaults.bool(forKey: "trioBarShowIOB")
+        self.trioBarShowCOB = defaults.bool(forKey: "trioBarShowCOB")
+        self.trioBarShowEventualGlucose = defaults.bool(forKey: "trioBarShowEventualGlucose")
+
+        self.trioChartShowForecast = defaults.bool(forKey: "trioChartShowForecast")
+        let forecastDisplay = defaults.string(forKey: "trioChartForecastDisplay") ?? ForecastDisplay.lines.presentable
+        switch forecastDisplay {
+        case ForecastDisplay.lines.presentable:
+            DispatchQueue.main.async {
+                self.trioChartForecastDisplay = .lines
+            }
+        case ForecastDisplay.cone.presentable:
+            DispatchQueue.main.async {
+                self.trioChartForecastDisplay = .cone
+            }
+        default:
+            DispatchQueue.main.async {
+                self.trioChartForecastDisplay = .lines
+            }
+        }
+
+        self.trioChartShowIOB = defaults.bool(forKey: "trioChartShowIOB")
+        self.trioChartShowCOB = defaults.bool(forKey: "trioChartShowCOB")
+        self.trioChartShowEventualGlucose = defaults.bool(forKey: "trioChartShowEventualGlucose")
+        self.trioChartShowLoopStatus = defaults.bool(forKey: "trioChartShowLoopStatus")
     }
-    
+
     func save() {
         let defaults = UserDefaults.standard
         defaults.set(true, forKey: "validSettings")
@@ -160,6 +220,19 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         defaults.set(self.libreConnectionID, forKey: "libreConnectionID")
 
         defaults.set(self.hoverableGraph, forKey: "hoverableGraph")
+
+        defaults.set(self.glucoseTarget, forKey: "glucoseTarget")
+        defaults.set(self.glucoseColorScheme.displayName, forKey: "glucoseColorScheme")
+
+        defaults.set(self.trioBarShowIOB, forKey: "trioBarShowIOB")
+        defaults.set(self.trioBarShowCOB, forKey: "trioBarShowCOB")
+        defaults.set(self.trioBarShowEventualGlucose, forKey: "trioBarShowEventualGlucose")
+        defaults.set(self.trioChartShowForecast, forKey: "trioChartShowForecast")
+        defaults.set(self.trioChartForecastDisplay.presentable, forKey: "trioChartForecastDisplay")
+        defaults.set(self.trioChartShowIOB, forKey: "trioChartShowIOB")
+        defaults.set(self.trioChartShowCOB, forKey: "trioChartShowCOB")
+        defaults.set(self.trioChartShowEventualGlucose, forKey: "trioChartShowEventualGlucose")
+        defaults.set(self.trioChartShowLoopStatus, forKey: "trioChartShowLoopStatus")
     }
 
     func deleteCGMProvider() {
