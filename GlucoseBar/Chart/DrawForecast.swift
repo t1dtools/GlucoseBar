@@ -13,15 +13,54 @@ let forecastDuration = 2.5 * 60 * 60
 
 struct DrawForecast: ChartContent {
     let data: [GraphEntry]
+    let yMin: Double
+    let yMax: Double
+
+    func getLatestGlucoseDate(_ data: [GraphEntry], includeForecasts: Bool) -> Date {
+        var latestDate: Date? = nil
+        data.forEach { entry in
+            if latestDate == nil || (latestDate ?? Date()) < entry.date {
+                if !includeForecasts && entry.forecastType == .none {
+                    latestDate = entry.date
+                }
+
+                if includeForecasts && entry.forecastType != .none {
+                    latestDate = entry.date
+                }
+            }
+        }
+
+        if latestDate == nil {
+            return Date()
+        }
+
+        if latestDate! > Date().addingTimeInterval(forecastDuration) {
+            latestDate = Date().addingTimeInterval(forecastDuration)
+        }
+
+        return latestDate!
+    }
 
     var body: some ChartContent {
         if true {
             DrawLineForecast(data: data)
         }
-        
+
 //        if true {
 //            DrawConeForecast(data: data)
 //        }
+
+        AreaMark(
+            x: .value("Time", getLatestGlucoseDate(data, includeForecasts: false)),
+            yStart: .value("Glucose", yMin),
+            yEnd: .value("Glucose", yMax)
+        ).foregroundStyle(.gray).opacity(0.1)
+
+        AreaMark(
+            x: .value("Time", getLatestGlucoseDate(data, includeForecasts: true)),
+            yStart: .value("Glucose", yMin),
+            yEnd: .value("Glucose", yMax)
+        ).foregroundStyle(.gray).opacity(0.1)
     }
 }
 

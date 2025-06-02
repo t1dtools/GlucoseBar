@@ -209,7 +209,11 @@ struct GraphView: View {
                 }
 
                 if s.trioChartShowForecast {
-                    DrawForecast(data: data)
+                    DrawForecast(
+                        data: data,
+                        yMin: minY <= defaultMinGlucose ? minY : defaultMinGlucose,
+                        yMax: maxY >= defaultMaxGlucose ? (maxY + maxYMargin) : defaultMaxGlucose
+                    )
                 }
                 DrawGlucose(data: data)
 
@@ -273,10 +277,7 @@ struct GraphView: View {
                             isHovering = false
                         }
                     }
-            }.chartForegroundStyleScale(["UAM": .orange,
-                                         "ZT": .purple,
-                                         "IOB": .blue,
-                                         "COB": .yellow]
+            }.chartForegroundStyleScale(["UAM": .orange, "ZT": .purple, "IOB": .blue, "COB": .yellow]
             ).chartLegend(data.last?.forecastType != .none ?? nil ? .visible : .hidden)
             .padding()
         }
