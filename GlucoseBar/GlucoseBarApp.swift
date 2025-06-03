@@ -206,10 +206,12 @@ struct GlucoseBarApp: App {
                 NSApp.setActivationPolicy(.regular)
                 NSApp.activate(ignoringOtherApps: true)
                 NSApp.windows.first?.orderFrontRegardless()
-            }.onReceive(NotificationCenter.default.publisher(for: NSWindow.willCloseNotification)) { newValue in
+            }
+            .onDisappear {
+                NSApp.setActivationPolicy(.accessory)
                 NSApp.deactivate()
-                NSApp.setActivationPolicy(.prohibited)
-            }.environmentObject(s).environmentObject(g)
+              }.environmentObject(s).environmentObject(g)
+
         }.handlesExternalEvents(matching: Set(arrayLiteral: "SettingsView"))
     }
 }
