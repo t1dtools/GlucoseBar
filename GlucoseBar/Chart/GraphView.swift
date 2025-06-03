@@ -154,21 +154,19 @@ struct GraphView: View {
         let graphDataDuration = (-1 * (g.entries?.last?.date.timeIntervalSinceNow ?? 1) / 60 / 60).rounded()
 
         VStack {
-            if s.hoverableGraph {
-                HStack {
-                    VStack {
-                        Text("\(Text(headlineTime, format: .dateTime.hour().minute()))").font(.subheadline)
-                        Text("\(printFormattedGlucose(settings: s, glucose: headlineGlucose)) \(headlineTrend.arrows != "↔" ? headlineTrend.arrows : "")").font(.largeTitle)
-                    }.padding(.leading, 25).padding(.top, 10)
+            HStack {
+                VStack {
+                    Text("\(Text(headlineTime, format: .dateTime.hour().minute()))").font(.subheadline)
+                    Text("\(printFormattedGlucose(settings: s, glucose: headlineGlucose)) \(headlineTrend.arrows != "↔" ? headlineTrend.arrows : "")").font(.largeTitle)
+                }.padding(.leading, 25).padding(.top, 10)
 
-                    if s.cgmProvider == .nightscout && g.provider.RemoteGlucoseSource == .trio {
-                        if s.trioChartShowCOB || s.trioChartShowIOB || s.trioChartShowLoopStatus || s.trioChartShowEventualGlucose {
-                            Spacer()
-                            TrioGridView(g: g).environmentObject(s)
-                        }
+                if s.cgmProvider == .nightscout && g.provider.RemoteGlucoseSource == .trio {
+                    if s.trioChartShowCOB || s.trioChartShowIOB || s.trioChartShowLoopStatus || s.trioChartShowEventualGlucose {
+                        Spacer()
+                        TrioGridView(g: g).environmentObject(s)
                     }
-                }.padding()
-            }
+                }
+            }.padding()
 
             HStack {
                 if graphDataDuration >= 3 {
@@ -217,13 +215,11 @@ struct GraphView: View {
                 }
                 DrawGlucose(data: data)
 
-                if s.hoverableGraph {
-                    if let hoveredTime, let hoveredValue {
-                        PointMark(
-                            x: .value("Time", hoveredTime),
-                            y: .value("Glucose", hoveredValue)
-                        )
-                    }
+                if let hoveredTime, let hoveredValue {
+                    PointMark(
+                        x: .value("Time", hoveredTime),
+                        y: .value("Glucose", hoveredValue)
+                    )
                 }
             }
             .chartYScale(domain: [minY <= defaultMinGlucose ? minY : defaultMinGlucose, maxY >= defaultMaxGlucose ? (maxY + maxYMargin) : defaultMaxGlucose])

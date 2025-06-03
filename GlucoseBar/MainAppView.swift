@@ -114,7 +114,7 @@ struct MainAppView: View {
                     }
                 }
             }
-            .frame(width: 500, height: s.hoverableGraph ? 500 : 400, alignment: .leading)
+            .frame(width: 500, height: 500, alignment: .leading)
             .focusable()
             .focusEffectDisabled()
 //            .onKeyPress(keys: [.escape]) { press in
