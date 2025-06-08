@@ -19,7 +19,7 @@ struct GraphEntry {
 
 public enum ForecastType: String, CaseIterable, Identifiable {
     case none
-    case zb
+    case zt
     case uam
     case iob
     case cob
@@ -28,8 +28,8 @@ public enum ForecastType: String, CaseIterable, Identifiable {
         switch self {
         case .none:
             return ""
-        case .zb:
-            return "Zero Basal"
+        case .zt:
+            return "Zero Temp"
         case .uam:
             return "Unannounced Meal"
         case .iob:
@@ -42,7 +42,7 @@ public enum ForecastType: String, CaseIterable, Identifiable {
         switch self {
         case .none:
             return 0
-        case .zb:
+        case .zt:
             return 1
         case .uam:
             return 2
