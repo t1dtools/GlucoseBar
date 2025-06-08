@@ -26,6 +26,19 @@ struct TrioGridView: View {
         return formatter.localizedString(for: time, relativeTo: Date())
     }
 
+    func getLoopColor(_ time: Date) -> Color {
+        let timeSinceNow = time.timeIntervalSinceNow
+        if timeSinceNow > -60 * 6 {
+            return .green
+        }
+
+        if timeSinceNow > -60 * 10 {
+            return .yellow
+        }
+
+        return .red
+    }
+
     var body: some View {
         Grid(alignment: .leading, horizontalSpacing: 10, verticalSpacing: 10) {
             GridRow {
@@ -45,7 +58,7 @@ struct TrioGridView: View {
             GridRow {
                 if s.trioChartShowLoopStatus && g.provider.GlucoseSourceExtras.enactedAt != nil {
                     HStack {
-                        Image(systemName: "circle").foregroundColor(loopColor)
+                        Image(systemName: "circle").foregroundColor(getLoopColor(g.provider.GlucoseSourceExtras.enactedAt!))
                         Text("\(relativeTime(time: g.provider.GlucoseSourceExtras.enactedAt!))")
                     }.frame(alignment: .leading).padding(.bottom, 5).padding(.top, 3)
                 }
