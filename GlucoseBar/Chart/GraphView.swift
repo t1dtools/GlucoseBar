@@ -275,7 +275,7 @@ struct GraphView: View {
                         }
                     }
             }.chartForegroundStyleScale(["UAM": .orange, "ZT": .purple, "IOB": .blue, "COB": .yellow]
-            ).chartLegend(data.last?.forecastType != .none ?? nil ? .visible : .hidden)
+            ).chartLegend(s.trioChartShowForecast && s.trioChartForecastDisplay == .lines ? .visible : .hidden)
             .padding()
         }
     }
