@@ -31,6 +31,11 @@
 		83E198062DEB59DA00B0F995 /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E198052DEB59D800B0F995 /* Data.swift */; };
 		83E198082DEB926600B0F995 /* DynamicGlucoseColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E198072DEB926200B0F995 /* DynamicGlucoseColor.swift */; };
 		83E1980A2DEB92C000B0F995 /* GlucoseColorScheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E198092DEB92B900B0F995 /* GlucoseColorScheme.swift */; };
+		83E1980F2DEE5E6800B0F995 /* CGMSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E1980E2DEE5E6400B0F995 /* CGMSettingsView.swift */; };
+		83E198112DEE5ECA00B0F995 /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E198102DEE5ECA00B0F995 /* GeneralSettingsView.swift */; };
+		83E198132DEEE23F00B0F995 /* MenuBarSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E198122DEEE23F00B0F995 /* MenuBarSettingsView.swift */; };
+		83E198152DEEE2A900B0F995 /* ChartSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E198142DEEE2A900B0F995 /* ChartSettingsView.swift */; };
+		83E198172DEF269F00B0F995 /* TrioSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E198162DEF269F00B0F995 /* TrioSettingsView.swift */; };
 		83E323812AC21DDD00CB5206 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E323802AC21DDD00CB5206 /* Settings.swift */; };
 		83EC4AC62BE972D9007285C7 /* NightscoutKit in Frameworks */ = {isa = PBXBuildFile; productRef = 83EC4AC52BE972D9007285C7 /* NightscoutKit */; };
 		83F888412B1A888000A50E74 /* LibreLinkUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F888402B1A888000A50E74 /* LibreLinkUp.swift */; };
@@ -62,6 +67,11 @@
 		83E198052DEB59D800B0F995 /* Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Data.swift; sourceTree = "<group>"; };
 		83E198072DEB926200B0F995 /* DynamicGlucoseColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicGlucoseColor.swift; sourceTree = "<group>"; };
 		83E198092DEB92B900B0F995 /* GlucoseColorScheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseColorScheme.swift; sourceTree = "<group>"; };
+		83E1980E2DEE5E6400B0F995 /* CGMSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGMSettingsView.swift; sourceTree = "<group>"; };
+		83E198102DEE5ECA00B0F995 /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
+		83E198122DEEE23F00B0F995 /* MenuBarSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarSettingsView.swift; sourceTree = "<group>"; };
+		83E198142DEEE2A900B0F995 /* ChartSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartSettingsView.swift; sourceTree = "<group>"; };
+		83E198162DEF269F00B0F995 /* TrioSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrioSettingsView.swift; sourceTree = "<group>"; };
 		83E323802AC21DDD00CB5206 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		83F888402B1A888000A50E74 /* LibreLinkUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibreLinkUp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -128,6 +138,7 @@
 		836351822ABF6A9000BDAA96 /* GlucoseBar */ = {
 			isa = PBXGroup;
 			children = (
+				83E1980D2DEE5B9500B0F995 /* Settings */,
 				83E197FD2DEB575B00B0F995 /* Chart */,
 				83D76EC62C4DB616006639EF /* Info.plist */,
 				834621252ADDAC930024048E /* Providers */,
@@ -138,8 +149,6 @@
 				8363136D2ABF8CAA0047C99D /* GlucoseEntry.swift */,
 				836313732ABF99210047C99D /* DispatchTimer.swift */,
 				836313752AC0808E0047C99D /* Glucose.swift */,
-				83E323802AC21DDD00CB5206 /* Settings.swift */,
-				83A3301B2AC9F70100222445 /* SettingsView.swift */,
 				8381599C2BE4257F00A228F3 /* MainAppView.swift */,
 				838B25DE2BF0146F00D10DDA /* WelcomeView.swift */,
 			);
@@ -183,6 +192,20 @@
 				83A330192AC9F69B00222445 /* GraphView.swift */,
 			);
 			path = Chart;
+			sourceTree = "<group>";
+		};
+		83E1980D2DEE5B9500B0F995 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				83E198162DEF269F00B0F995 /* TrioSettingsView.swift */,
+				83E1980E2DEE5E6400B0F995 /* CGMSettingsView.swift */,
+				83A3301B2AC9F70100222445 /* SettingsView.swift */,
+				83E198142DEEE2A900B0F995 /* ChartSettingsView.swift */,
+				83E198122DEEE23F00B0F995 /* MenuBarSettingsView.swift */,
+				83E198102DEE5ECA00B0F995 /* GeneralSettingsView.swift */,
+				83E323802AC21DDD00CB5206 /* Settings.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 		83F8883F2B1A86BA00A50E74 /* LibreLinkUp */ = {
@@ -274,6 +297,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				831CC8332DE269C800E04180 /* GlucoseSource.swift in Sources */,
+				83E198152DEEE2A900B0F995 /* ChartSettingsView.swift in Sources */,
 				836313742ABF99210047C99D /* DispatchTimer.swift in Sources */,
 				83E1980A2DEB92C000B0F995 /* GlucoseColorScheme.swift in Sources */,
 				83E197FF2DEB579200B0F995 /* TrioGridView.swift in Sources */,
@@ -287,12 +311,16 @@
 				83F888412B1A888000A50E74 /* LibreLinkUp.swift in Sources */,
 				836313762AC0808E0047C99D /* Glucose.swift in Sources */,
 				834621282ADDACB20024048E /* Simulator.swift in Sources */,
+				83E198112DEE5ECA00B0F995 /* GeneralSettingsView.swift in Sources */,
+				83E198172DEF269F00B0F995 /* TrioSettingsView.swift in Sources */,
+				83E198132DEEE23F00B0F995 /* MenuBarSettingsView.swift in Sources */,
 				8381599D2BE4257F00A228F3 /* MainAppView.swift in Sources */,
 				838B25DF2BF0146F00D10DDA /* WelcomeView.swift in Sources */,
 				8346212A2ADDACC20024048E /* Provider.swift in Sources */,
 				836351842ABF6A9000BDAA96 /* GlucoseBarApp.swift in Sources */,
 				83A3301A2AC9F69B00222445 /* GraphView.swift in Sources */,
 				83E198012DEB58F200B0F995 /* DrawForecast.swift in Sources */,
+				83E1980F2DEE5E6800B0F995 /* CGMSettingsView.swift in Sources */,
 				83E198032DEB595700B0F995 /* DrawGlucose.swift in Sources */,
 				83DF71B22AEDA9EB00FC0566 /* Nightscout.swift in Sources */,
 			);
@@ -337,6 +365,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = HAR373MZHM;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -402,6 +431,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = HAR373MZHM;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;

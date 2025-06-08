@@ -36,8 +36,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 
     @Published var showTimeSince: Bool = false
     @Published var showDelta: Bool = true
-    
-    @Published var hoverableGraph: Bool = true
+
     @Published var showMenuBarIcon: Bool = false
 
     // Trio Specifics
@@ -61,7 +60,6 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         let defaults = UserDefaults.standard
 
         self.validSettings = defaults.bool(forKey: "validSettings")
-        self.hoverableGraph = defaults.bool(forKey: "hoverableGraph")
 
         // Nightscout
         self.nsURL = defaults.string(forKey: "nsURL") ?? "https://my.nightscout.site"
@@ -218,8 +216,6 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         defaults.set(self.libreUsername, forKey: "libreUsername")
         defaults.set(self.librePassword, forKey: "librePassword")
         defaults.set(self.libreConnectionID, forKey: "libreConnectionID")
-
-        defaults.set(self.hoverableGraph, forKey: "hoverableGraph")
 
         defaults.set(self.glucoseTarget, forKey: "glucoseTarget")
         defaults.set(self.glucoseColorScheme.displayName, forKey: "glucoseColorScheme")
