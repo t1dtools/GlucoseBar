@@ -60,7 +60,6 @@ struct SettingsView: View {
                     Button("Quit GlucoseBar") {
                         NSApplication.shared.terminate(nil)
                     }
-                    //                    Spacer()
                     Text("\(Bundle.main.appName) Version: \(Bundle.main.appVersionLong) (\(Bundle.main.appBuild)) ").font(.footnote).padding(2)
                 }.frame(alignment: .bottomTrailing).padding(.bottom, 5)
             }

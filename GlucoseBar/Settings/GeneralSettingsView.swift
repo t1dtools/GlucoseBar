@@ -209,7 +209,7 @@ struct GeneralSettingsView: View {
 //                        s.save()
 //                    }
 //                }.padding(.top, 10)
-            }//.formStyle(.grouped)
-        }.padding()
+            }.padding()
+        }
     }
 }
