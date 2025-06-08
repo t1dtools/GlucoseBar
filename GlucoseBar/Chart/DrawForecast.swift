@@ -15,6 +15,7 @@ struct DrawForecast: ChartContent {
     let data: [GraphEntry]
     let yMin: Double
     let yMax: Double
+    let forecastType: ForecastDisplay
 
     func getLatestGlucoseDate(_ data: [GraphEntry], includeForecasts: Bool) -> Date {
         var latestDate: Date? = nil
@@ -42,25 +43,18 @@ struct DrawForecast: ChartContent {
     }
 
     var body: some ChartContent {
-        if true {
+        if forecastType == .lines {
             DrawLineForecast(data: data)
         }
 
-//        if true {
-//            DrawConeForecast(data: data)
-//        }
+        if forecastType == .cone {
+            DrawConeForecast(data: data)
+        }
 
-        AreaMark(
-            x: .value("Time", getLatestGlucoseDate(data, includeForecasts: false)),
-            yStart: .value("Glucose", yMin),
-            yEnd: .value("Glucose", yMax)
-        ).foregroundStyle(.gray).opacity(0.1)
-
-        AreaMark(
-            x: .value("Time", getLatestGlucoseDate(data, includeForecasts: true)),
-            yStart: .value("Glucose", yMin),
-            yEnd: .value("Glucose", yMax)
-        ).foregroundStyle(.gray).opacity(0.1)
+        // Draw forecast boundry line
+        RuleMark(x: .value("Time", getLatestGlucoseDate(data, includeForecasts: false)),
+                 yStart: .value("Glucose", yMin),
+                 yEnd: .value("Glucose", yMax)).foregroundStyle(.gray.opacity(0.3)).lineStyle(StrokeStyle(lineWidth: 1.5, dash: [5]))
     }
 }
 
@@ -82,75 +76,119 @@ struct DrawLineForecast: ChartContent {
     }
 }
 
-//struct DrawConeForecast: ChartContent {
-//    let data: [GraphEntry]
-//    
-//    func calculateConeData(entries: [GraphEntry]) -> ([Date: Double], [Date: Double]) {
-////        var forecastEntries = [[GraphEntry]]()
-//        var minForTime: [Date: Double] = [:]
-//        var maxForTime: [Date: Double] = [:]
-//
-//        for entry in entries {
-//            if entry.forecastType != .none {
-//                
-////                forecastEntries.insert([entry], at: entry.forecastType.int)
-//                if entry.value < minForTime[entry.date] ?? .greatestFiniteMagnitude {
-//                    minForTime[entry.date] = entry.value
-//                }
-//                
-//                if entry.value > maxForTime[entry.date] ?? -.greatestFiniteMagnitude {
-//                    maxForTime[entry.date] = entry.value
-//                }
-//            }
-//        }
-//        
-//        return (minForTime, maxForTime)
-//    }
-//    
-//    func timeForIndex(_ index: Int, latestEntryDate: Date) -> Date {
-//        return Calendar.current.date(byAdding: .minute, value: (index + 1) * 5, to: latestEntryDate)!
-//    }
-//
-//    var body: some ChartContent {
-//        let (minForecast, maxForecast) = calculateConeData(entries: data)
-//        let maxValue = 200
-//
-//        let latestEntryDate = data.first?.date ?? Date()
-//        ForEach(0 ..< max(minForecast.count, maxForecast.count), id: \.self) { index in
-//            if index < minForecast.count, index < maxForecast.count {
-//                let xValue = timeForIndex(index, latestEntryDate: latestEntryDate)
-//                let yMinMaxDelta = Decimal((minForecast[xValue] ?? 0) - (maxForecast[xValue] ?? 0))
-//
-//                // if distance between respective min and max is 0, provide a default range
-//                if yMinMaxDelta == 0 {
-//                    let yMinValue = Decimal(minForecast[index] - 1)
-//                    let yMaxValue = Decimal(minForecast[index] + 1)
-//
-//                    if xValue <= Date(timeIntervalSinceNow: TimeInterval(hours: 2.5)) {
-//                        AreaMark(
-//                            x: .value("Time", xValue),
-//                            yStart: .value("Min Value", yMinValue <= maxValue ? yMinValue : maxValue),
-//                            yEnd: .value("Max Value", yMaxValue <= maxValue ? yMaxValue : maxValue)
-//                        )
-//                        .foregroundStyle(Color.blue.opacity(0.5))
-//                        .interpolationMethod(.catmullRom)
-//                    }
-//                } else {
-//                    let yMinValue = minForecast[xValue]
-//                    let yMaxValue = maxForecast[xValue]
-//
-//                    if xValue <= Date(timeIntervalSinceNow: TimeInterval(forecastDuration)) {
-//                        AreaMark(
-//                            x: .value("Time", xValue),
-//                            // maxValue is already parsed to user units, no need to parse
-//                            yStart: .value("Min Value", yMinValue <= maxValue ? yMinValue : maxValue),
-//                            yEnd: .value("Max Value", yMaxValue <= maxValue ? yMaxValue : maxValue)
-//                        )
-//                        .foregroundStyle(Color.blue.opacity(0.5))
-//                        .interpolationMethod(.catmullRom)
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}
+struct DrawConeForecast: ChartContent {
+    let data: [GraphEntry]
+
+    struct ConeData: Identifiable {
+        var id = UUID()
+        var d: Date
+        var v: Double
+    }
+
+    func calculateConeData(entries: [GraphEntry]) -> ([ConeData], [ConeData]) {
+        var minForTime: [Date: Double] = [:]
+        var maxForTime: [Date: Double] = [:]
+
+        // TODO: Figure out how to avoid weird fingers when one line is shorter than others https://discord.com/channels/@me/1052707464916766860/1381054035980714014
+        var counters: [ForecastType: Int] = [:]
+        for entry in entries {
+            if entry.forecastType != .none {
+                if counters.contains(where: {$0.key == entry.forecastType}) {
+                    counters[entry.forecastType]! += 1
+                } else {
+                    counters[entry.forecastType] = 1
+                }
+            }
+        }
+
+        // Shortest type
+        let shortestType = (counters.min(by: {$0.value < $1.value})?.key) ?? .none
+        let localForecastDuration = Double(counters[shortestType] ?? 0) * 5 * 60
+
+        for entry in entries {
+            if entry.forecastType != .none && entry.date <= Date(timeIntervalSinceNow: TimeInterval(localForecastDuration)) {
+                if entry.value < minForTime[entry.date] ?? .greatestFiniteMagnitude {
+                    minForTime[entry.date] = entry.value
+                }
+                if entry.value > maxForTime[entry.date] ?? -.greatestFiniteMagnitude {
+                    maxForTime[entry.date] = entry.value
+                }
+            }
+        }
+
+        var minEntries = [ConeData]()
+        for entry in minForTime {
+            minEntries.append(.init(d: entry.key, v: entry.value))
+        }
+
+        var maxEntries = [ConeData]()
+        for entry in maxForTime {
+            maxEntries.append(.init(d: entry.key, v: entry.value))
+        }
+
+        // Sort both arrays by date ascending
+        minEntries.sort { $0.d < $1.d }
+        maxEntries.sort { $0.d < $1.d }
+
+        // Ensure both arrays are the same length
+        if minEntries.count > maxEntries.count {
+            maxEntries.removeLast(minEntries.count - maxEntries.count)
+        } else if maxEntries.count > minEntries.count {
+            minEntries.removeLast(maxEntries.count - minEntries.count)
+        }
+
+        if minEntries.count > 1 {
+            minEntries.removeLast(1)
+        }
+        if maxEntries.count > 1 {
+            maxEntries.removeLast(1)
+        }
+
+        return (minEntries, maxEntries)
+    }
+
+    func timeForIndex(_ index: Int, latestEntryDate: Date) -> Date {
+        return Calendar.current.date(byAdding: .minute, value: (index + 1) * 5, to: latestEntryDate)!
+    }
+
+    func getByDate(_ date: Date, from list: [ConeData]) -> ConeData? {
+        return list.first { $0.d == date }
+    }
+
+    var body: some ChartContent {
+        let (minForecast, maxForecast) = calculateConeData(entries: data)
+        let maxValue: Double = 200
+
+        ForEach(minForecast) { minEntry in
+            ForEach(maxForecast) { maxEntry in
+                if minEntry.d == maxEntry.d {
+                    let delta = maxEntry.v - minEntry.v
+                    if delta == 0 {
+                        let minVal = minEntry.v - 1
+                        let maxVal = maxEntry.v + 1
+                        AreaMark(
+                            x: .value("Time", minEntry.d),
+                            yStart: .value("Min Value", minVal <= maxValue ? minVal : maxValue),
+                            yEnd: .value("Max Value", maxVal <= maxValue ? maxVal : maxValue),
+                            series: .value("ForecastSeries", 1)
+                        )
+                        .foregroundStyle(Color.blue.opacity(0.3))
+                        .interpolationMethod(.catmullRom)
+                    } else {
+                        let minVal = minEntry.v
+                        let maxVal = maxEntry.v
+                        AreaMark(
+                            x: .value("Time", minEntry.d),
+                            yStart: .value("Min Value", minVal <= maxValue ? minVal : maxValue),
+                            yEnd: .value("Max Value", maxVal <= maxValue ? maxVal : maxValue),
+                            series: .value("ForecastSeries", 1)
+                        )
+                        .foregroundStyle(Color.blue.opacity(0.3))
+                        .interpolationMethod(.catmullRom)
+                    }
+                }
+            }
+
+        }
+    }
+}

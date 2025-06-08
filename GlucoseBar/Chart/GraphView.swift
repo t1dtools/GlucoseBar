@@ -70,7 +70,7 @@ struct GraphView: View {
 
                 let date = Calendar.current.date(byAdding: .minute, value: i * 5, to: forecastStartDate)!
 
-                data.append(GraphEntry(date: date, value: glu, trend: .notComputable, delta: 0.0, color: .purple, forecastType: .zb))
+                data.append(GraphEntry(date: date, value: glu, trend: .notComputable, delta: 0.0, color: .purple, forecastType: .zt))
             }
         }
 
@@ -210,7 +210,8 @@ struct GraphView: View {
                     DrawForecast(
                         data: data,
                         yMin: minY <= defaultMinGlucose ? minY : defaultMinGlucose,
-                        yMax: maxY >= defaultMaxGlucose ? (maxY + maxYMargin) : defaultMaxGlucose
+                        yMax: maxY >= defaultMaxGlucose ? (maxY + maxYMargin) : defaultMaxGlucose,
+                        forecastType: s.trioChartForecastDisplay
                     )
                 }
                 DrawGlucose(data: data)
