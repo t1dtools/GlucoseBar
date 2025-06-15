@@ -1,5 +1,5 @@
 //
-//  Glucose.swift
+//  DrawGlucose.swift
 //  GlucoseBar
 //
 //  Created by Andreas Stokholm on 2025-05-31.
