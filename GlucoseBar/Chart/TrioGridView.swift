@@ -12,33 +12,6 @@ struct TrioGridView: View {
     @ObservedObject var g: Glucose
     @EnvironmentObject var s: SettingsStore
 
-    let loopColor: Color = .green
-
-    func relativeTime(time: Date) -> String {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .short
-        formatter.formattingContext = .middleOfSentence
-
-        if time.timeIntervalSinceNow > -60 {
-            return "< 1 min. ago"
-        }
-
-        return formatter.localizedString(for: time, relativeTo: Date())
-    }
-
-    func getLoopColor(_ time: Date) -> Color {
-        let timeSinceNow = time.timeIntervalSinceNow
-        if timeSinceNow > -60 * 6 {
-            return .green
-        }
-
-        if timeSinceNow > -60 * 10 {
-            return .yellow
-        }
-
-        return .red
-    }
-
     var body: some View {
         Grid(alignment: .leading, horizontalSpacing: 10, verticalSpacing: 10) {
             GridRow {
