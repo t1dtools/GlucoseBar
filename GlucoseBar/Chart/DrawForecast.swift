@@ -157,7 +157,6 @@ struct DrawConeForecast: ChartContent {
 
     var body: some ChartContent {
         let (minForecast, maxForecast) = calculateConeData(entries: data)
-        let maxValue: Double = 200
 
         ForEach(minForecast) { minEntry in
             ForEach(maxForecast) { maxEntry in
@@ -168,8 +167,8 @@ struct DrawConeForecast: ChartContent {
                         let maxVal = maxEntry.v + 1
                         AreaMark(
                             x: .value("Time", minEntry.d),
-                            yStart: .value("Min Value", minVal <= maxValue ? minVal : maxValue),
-                            yEnd: .value("Max Value", maxVal <= maxValue ? maxVal : maxValue),
+                            yStart: .value("Min Value", minVal),
+                            yEnd: .value("Max Value", maxVal),
                             series: .value("ForecastSeries", 1)
                         )
                         .foregroundStyle(Color.blue.opacity(0.3))
@@ -179,8 +178,8 @@ struct DrawConeForecast: ChartContent {
                         let maxVal = maxEntry.v
                         AreaMark(
                             x: .value("Time", minEntry.d),
-                            yStart: .value("Min Value", minVal <= maxValue ? minVal : maxValue),
-                            yEnd: .value("Max Value", maxVal <= maxValue ? maxVal : maxValue),
+                            yStart: .value("Min Value", minVal),
+                            yEnd: .value("Max Value", maxVal),
                             series: .value("ForecastSeries", 1)
                         )
                         .foregroundStyle(Color.blue.opacity(0.3))
