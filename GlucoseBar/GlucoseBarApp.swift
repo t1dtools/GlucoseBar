@@ -134,14 +134,7 @@ struct GlucoseBarApp: App {
                     icon: { Image(systemName: "exclamationmark.octagon.fill") }
                 ).labelStyle(.titleAndIcon)
             } else if g.fetchedGlucose {
-                if s.showMenuBarIcon {
-                    Label(
-                        title: { Text(" \(CreateTitleText())") },
-                        icon: { Image(nsImage: CreateTitleImage()) }
-                    ).labelStyle(.titleAndIcon)
-                } else {
-                    Text(CreateTitleText())
-                }
+                MenuBarView().environmentObject(s).environmentObject(g)
             } else {
                 if !vs.isOnline {
                     Image(

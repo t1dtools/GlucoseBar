@@ -37,7 +37,9 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     @Published var showTimeSince: Bool = false
     @Published var showDelta: Bool = true
 
+    // MenuBar layout options
     @Published var showMenuBarIcon: Bool = false
+    @Published var menuBarItems: [MenuBarItemContainer] = []
 
     // Trio Specifics
     @Published var trioBarShowIOB: Bool = false
@@ -102,6 +104,13 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         self.showTimeSince = defaults.bool(forKey: "showTimeSince")
         self.showDelta = defaults.bool(forKey: "showDelta")
         self.showMenuBarIcon = defaults.bool(forKey: "showMenuBarIcon")
+
+        let jsonMenuBarItems = defaults.string(forKey: "menuBarItems")
+        if jsonMenuBarItems != nil {
+            let decoder = JSONDecoder()
+            let decoded = try! decoder.decode([MenuBarItemContainer].self, from: jsonMenuBarItems!.data(using: .utf8)!)
+            self.menuBarItems = decoded
+        }
 
         let cgmProv = defaults.string(forKey: "cgmProvider") ?? ""
         switch cgmProv {
@@ -197,6 +206,11 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         defaults.set(self.showTimeSince, forKey: "showTimeSince")
         defaults.set(self.showDelta, forKey: "showDelta")
         defaults.set(self.showMenuBarIcon, forKey: "showMenuBarIcon")
+
+        let jsonMenuBarItems = try! JSONEncoder().encode(self.menuBarItems)
+        logger.info("Saving json! \(String(data: jsonMenuBarItems, encoding: String.Encoding.utf8)!)")
+
+        defaults.set(String(data: jsonMenuBarItems, encoding: String.Encoding.utf8)!, forKey: "menuBarItems")
         defaults.set(self.graphMinutes, forKey: "graphMinutes")
 
         defaults.set(self.highThreshold, forKey: "highThreshold")
@@ -247,15 +261,6 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
             defaults.removeObject(forKey: "dxServer")
             defaults.removeObject(forKey: "dxEmail")
             defaults.removeObject(forKey: "dxPassword")
-        case .librelinkup:
-            self.libreServer = ""
-            self.libreUsername = ""
-            self.librePassword = ""
-            self.libreConnectionID = ""
-            defaults.removeObject(forKey: "libreServer")
-            defaults.removeObject(forKey: "libreUsername")
-            defaults.removeObject(forKey: "librePassword")
-            defaults.removeObject(forKey: "libreConnectionID")
         default:
             // noop
             return

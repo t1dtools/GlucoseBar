@@ -8,7 +8,6 @@
 import Foundation
 import SwiftUI
 import LaunchAtLogin
-import Combine
 import OSLog
 
 struct SettingsView: View {
@@ -56,15 +55,19 @@ struct SettingsView: View {
                 .padding(.top, 10)
 
                 Group {
-//                    ShareLink(item: URL(string: "https://apps.apple.com/app/glucosebar/id6468110131")!, subject: Text("Share GlucoseBar"), message: Text("Share GlucoseBar with a friend or a loved one!"))
-                    Button("Quit GlucoseBar") {
-                        NSApplication.shared.terminate(nil)
-                    }
+//                    HStack {
+//                        ShareLink(item: URL(string: "https://apps.apple.com/app/glucosebar/id6468110131")!, subject: Text(""), message: Text(""))
+//                        Spacer()
+                        Button("Quit") {
+                            NSApplication.shared.terminate(nil)
+                        }
+//                    }.padding(.horizontal)
                     Text("\(Bundle.main.appName) Version: \(Bundle.main.appVersionLong) (\(Bundle.main.appBuild)) ").font(.footnote).padding(2)
                 }.frame(alignment: .bottomTrailing).padding(.bottom, 5)
             }
         } detail: {
             ScrollView {
+//                MenuBarSettingsView().environmentObject(s)
                 GeneralSettingsView().environmentObject(s)
             }
         }.frame(maxHeight: .infinity, alignment: .top)
