@@ -82,6 +82,8 @@ struct MenuBarView: View {
             }
         }.onAppear {
             loadMenuBarItems()
+        }.onReceive(s.$menuBarItems) {_ in
+            loadMenuBarItems()
         }
     }
 }
