@@ -58,6 +58,10 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "settingsstore")
 
     public init() {
+        load()
+    }
+
+    func load() {
 
         let defaults = UserDefaults.standard
 
