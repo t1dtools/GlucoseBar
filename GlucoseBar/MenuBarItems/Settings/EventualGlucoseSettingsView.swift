@@ -1,13 +1,13 @@
 //
-//  GlucoseValueSettingsView.swift
+//  EventualGlucoseSettingsView.swift
 //  GlucoseBar
 //
-//  Created by Andreas Stokholm on 2025-06-26.
+//  Created by Andreas Stokholm on 2025-08-05.
 //
 
 import SwiftUI
 
-struct GlucoseValueSettingsView: View {
+struct EventualGlucoseSettingsView: View {
     @EnvironmentObject var s: SettingsStore
     @EnvironmentObject var g: Glucose
 
@@ -20,10 +20,10 @@ struct GlucoseValueSettingsView: View {
 
     init(viewSettings: MenuBarItemContainer?) {
 
-        if let viewSettings = viewSettings {
-            _itemSettings = ObservedObject(initialValue: viewSettings)
+        if viewSettings != nil {
+            _itemSettings = ObservedObject(initialValue: viewSettings!)
         } else {
-            let container = MenuBarItemContainer(type: .glucosevalue)
+            let container = MenuBarItemContainer(type: .eventualglucose)
             _itemSettings = ObservedObject(initialValue: container)
         }
 
@@ -75,8 +75,8 @@ struct GlucoseValueSettingsView: View {
                     Text("Icon Location").frame(width: 150, alignment: .leading)
                     Spacer()
                     Picker("", selection: $iconPlacement) {
-                        Text("Before Glucose Value").tag(settingValue.iconPlacementLeading)
-                        Text("After Glucose Value").tag(settingValue.iconPlacementTrailing)
+                        Text("Before Eventual Glucose Value").tag(settingValue.iconPlacementLeading)
+                        Text("After Eventual Glucose Value").tag(settingValue.iconPlacementTrailing)
                     }.onChange(of: iconPlacement ?? .iconPlacementLeading) { _, newVal in
                         itemSettings.set(.iconPlacement, newVal)
                     }.frame(width: 200)

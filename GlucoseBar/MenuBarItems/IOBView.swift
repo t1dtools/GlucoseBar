@@ -23,9 +23,15 @@ struct IOBView: View {
                 drawIcon()
             }
 
-            Text(formatIOBForDisplay(iob: g.provider.GlucoseSourceExtras.iob!) + " U")
-                .foregroundStyle(getForegroundStyle())
-                .fontWeight(getFontWeight())
+            if let iob = g.provider.GlucoseSourceExtras.iob {
+                Text(formatIOBForDisplay(iob: iob) + " U")
+                    .foregroundStyle(getForegroundStyle())
+                    .fontWeight(getFontWeight())
+            } else {
+                Text("-")
+                    .foregroundStyle(getForegroundStyle())
+                    .fontWeight(getFontWeight())
+            }
 
             if viewSettings.get(.icon) != .iconColorHidden && viewSettings.get(.iconPlacement) == .iconPlacementTrailing {
                 drawIcon()

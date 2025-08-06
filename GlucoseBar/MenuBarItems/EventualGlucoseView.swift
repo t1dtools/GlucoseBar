@@ -23,9 +23,15 @@ struct EventualGlucoseView: View {
                 drawIcon()
             }
 
-            Text(formatGlucoseForDisplay(settings: s, glucose: convertGlucose(s, glucose: g.provider.GlucoseSourceExtras.eventualGlucose!)))
-                .foregroundStyle(getForegroundStyle())
-                .fontWeight(getFontWeight())
+            if let eventualGlucose = g.provider.GlucoseSourceExtras.eventualGlucose {
+                Text(formatGlucoseForDisplay(settings: s, glucose: convertGlucose(s, glucose: eventualGlucose)))
+                    .foregroundStyle(getForegroundStyle())
+                    .fontWeight(getFontWeight())
+            } else {
+                Text("-")
+                    .foregroundStyle(getForegroundStyle())
+                    .fontWeight(getFontWeight())
+            }
 
             if viewSettings.get(.icon) != .iconColorHidden && viewSettings.get(.iconPlacement) == .iconPlacementTrailing {
                 drawIcon()

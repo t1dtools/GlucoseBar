@@ -112,10 +112,17 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 //        defaults.removeObject(forKey: "menuBarItems")
 
         let jsonMenuBarItems = defaults.string(forKey: "menuBarItems")
-        if jsonMenuBarItems != nil {
+        if let jsonMenuBarItems = jsonMenuBarItems {
             let decoder = JSONDecoder()
-            let decoded = try! decoder.decode([MenuBarItemContainer].self, from: jsonMenuBarItems!.data(using: .utf8)!)
-            self.menuBarItems = decoded
+            if let data = jsonMenuBarItems.data(using: .utf8) {
+                do {
+                    let decoded = try decoder.decode([MenuBarItemContainer].self, from: data)
+                    self.menuBarItems = decoded
+                } catch {
+                    logger.error("Unable to decode menuBarItems object from json saved in UserDefaults: \(String(describing: error))")
+                    self.menuBarItems = []
+                }
+            }
         }
 
         let cgmProv = defaults.string(forKey: "cgmProvider") ?? ""
@@ -213,10 +220,17 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         defaults.set(self.showDelta, forKey: "showDelta")
         defaults.set(self.showMenuBarIcon, forKey: "showMenuBarIcon")
 
-        let jsonMenuBarItems = try! JSONEncoder().encode(self.menuBarItems)
-        logger.info("Saving json! \(String(data: jsonMenuBarItems, encoding: String.Encoding.utf8)!)")
+        do {
+            let jsonMenuBarItems = try JSONEncoder().encode(self.menuBarItems)
+            if let jsonString = String(data: jsonMenuBarItems, encoding: String.Encoding.utf8) {
+                defaults.set(jsonString, forKey: "menuBarItems")
+            } else {
+                logger.error("Unable to convert encoded menuBarItems object to string")
+            }
+        } catch {
+            logger.error("failed to encode menuBarItems object: \(error.localizedDescription)")
+        }
 
-        defaults.set(String(data: jsonMenuBarItems, encoding: String.Encoding.utf8)!, forKey: "menuBarItems")
         defaults.set(self.graphMinutes, forKey: "graphMinutes")
 
         defaults.set(self.highThreshold, forKey: "highThreshold")

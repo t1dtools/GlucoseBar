@@ -1,13 +1,13 @@
 //
-//  GlucoseValueSettingsView.swift
+//  COBSettingsView.swift
 //  GlucoseBar
 //
-//  Created by Andreas Stokholm on 2025-06-26.
+//  Created by Andreas Stokholm on 2025-08-05.
 //
 
 import SwiftUI
 
-struct GlucoseValueSettingsView: View {
+struct COBSettingsView: View {
     @EnvironmentObject var s: SettingsStore
     @EnvironmentObject var g: Glucose
 
@@ -20,10 +20,10 @@ struct GlucoseValueSettingsView: View {
 
     init(viewSettings: MenuBarItemContainer?) {
 
-        if let viewSettings = viewSettings {
-            _itemSettings = ObservedObject(initialValue: viewSettings)
+        if viewSettings != nil {
+            _itemSettings = ObservedObject(initialValue: viewSettings!)
         } else {
-            let container = MenuBarItemContainer(type: .glucosevalue)
+            let container = MenuBarItemContainer(type: .cob)
             _itemSettings = ObservedObject(initialValue: container)
         }
 
@@ -63,7 +63,8 @@ struct GlucoseValueSettingsView: View {
                 Spacer()
                 Picker("", selection: $showIcon) {
                     Text("Hidden").tag(settingValue.iconColorHidden)
-                    Text("Single Color").tag(settingValue.iconColorSingle)
+                    Text("Default Color").tag(settingValue.iconColorSingle)
+                    Text("Carb Orange Color").tag(settingValue.iconColorOrange)
                     Text("Static Glucose Color").tag(settingValue.iconColorStaticGlucose)
                     Text("Dynamic Glucose Color").tag(settingValue.iconColorDynamicGlucose)
                 }.onChange(of: showIcon ?? .iconColorHidden) { _, newVal in
@@ -75,8 +76,8 @@ struct GlucoseValueSettingsView: View {
                     Text("Icon Location").frame(width: 150, alignment: .leading)
                     Spacer()
                     Picker("", selection: $iconPlacement) {
-                        Text("Before Glucose Value").tag(settingValue.iconPlacementLeading)
-                        Text("After Glucose Value").tag(settingValue.iconPlacementTrailing)
+                        Text("Before COB Value").tag(settingValue.iconPlacementLeading)
+                        Text("After COB Value").tag(settingValue.iconPlacementTrailing)
                     }.onChange(of: iconPlacement ?? .iconPlacementLeading) { _, newVal in
                         itemSettings.set(.iconPlacement, newVal)
                     }.frame(width: 200)
