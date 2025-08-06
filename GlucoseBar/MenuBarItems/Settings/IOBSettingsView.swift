@@ -64,7 +64,7 @@ struct IOBSettingsView: View {
                 Picker("", selection: $showIcon) {
                     Text("Hidden").tag(settingValue.iconColorHidden)
                     Text("Default Color").tag(settingValue.iconColorSingle)
-                    Text("Insulin Blue Color").tag(settingValue.iconColorSingle)
+                    Text("Insulin Blue Color").tag(settingValue.iconColorBlue)
                     Text("Static Glucose Color").tag(settingValue.iconColorStaticGlucose)
                     Text("Dynamic Glucose Color").tag(settingValue.iconColorDynamicGlucose)
                 }.onChange(of: showIcon ?? .iconColorHidden) { _, newVal in
