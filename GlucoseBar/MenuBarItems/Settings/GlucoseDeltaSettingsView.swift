@@ -5,13 +5,6 @@
 //  Created by Andreas Stokholm on 2025-08-05.
 //
 
-//
-//  LoopStatusSettingsView.swift
-//  GlucoseBar
-//
-//  Created by Andreas Stokholm on 2025-06-26.
-//
-
 import SwiftUI
 
 struct GlucoseDeltaSettingsView: View {
