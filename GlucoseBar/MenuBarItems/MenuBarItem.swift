@@ -5,6 +5,7 @@
 //  Created by Andreas Stokholm on 2025-06-16.
 //
 
+import Combine
 import SwiftUI
 
 public enum MenuBarItem: String, CaseIterable, Identifiable, Sendable, Codable {
@@ -41,18 +42,64 @@ public enum MenuBarItem: String, CaseIterable, Identifiable, Sendable, Codable {
             return "Separator"
 
         }
-
     }
 }
 
-public struct MenuBarItemSetting: Codable {
-    var key: String
-    var value: String
+public enum settingKey: String, CaseIterable, Codable, Sendable {
+    case textColor
+    case fontWeight
+    case icon
+    case iconPlacement
+    case displayTextAndIcon
+    case character
 }
 
-public class MenuBarItemContainer: Equatable, Identifiable, Hashable, Codable {
+public enum settingValue: String, CaseIterable, Codable, Sendable {
+
+    // Display
+    case displayBoth
+    case displayText
+    case displayIcon
+
+    // Text
+    case textColorDefault
+    case textColorStaticGlucose
+    case textColorDynamicGlucose
+
+    case fontWeightRegular
+    case fontWeightLight
+    case fontWeightBold
+
+    // Icons
+    case iconColorHidden
+    case iconColorSingle
+    case iconColorStaticGlucose
+    case iconColorDynamicGlucose
+    case iconColorBlue
+    case iconColorOrange
+
+    case iconPlacementLeading
+    case iconPlacementTrailing
+
+    // Separators
+    case separatorCharPipe
+    case separatorCharDash
+    case separatorCharDot
+    case separatorCharSlash
+    case separatorCharBackslash
+
+    // None
+    case none
+}
+
+public struct MenuBarItemSetting: Codable {
+    var key: settingKey
+    var value: settingValue
+}
+
+public class MenuBarItemContainer: Equatable, Identifiable, Hashable, Codable, ObservableObject {
     public var type: MenuBarItem
-    public var settings: [MenuBarItemSetting]?
+    @Published public var settings: [MenuBarItemSetting]
 
     private enum CodingKeys : String, CodingKey {
         case type = "type"
@@ -63,14 +110,71 @@ public class MenuBarItemContainer: Equatable, Identifiable, Hashable, Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.type = try container.decode(MenuBarItem.self, forKey: .type)
         do {
-            self.settings = try container.decode([MenuBarItemSetting].self, forKey: .settings)
+            let decoded = try container.decode([MenuBarItemSetting].self, forKey: .settings)
+            self.settings = decoded
         } catch {
-            // Noop, but important for scenarios where a container carries no settings
+            self.settings = []
         }
     }
 
     init(type: MenuBarItem) {
         self.type = type
+
+        // TODO: Assign settings depending on type
+        switch type {
+        case .glucosevalue:
+            self.settings = [
+                MenuBarItemSetting(key: .textColor, value: .textColorDefault),
+                MenuBarItemSetting(key: .fontWeight, value: .fontWeightRegular),
+                MenuBarItemSetting(key: .icon, value: .iconColorHidden),
+                MenuBarItemSetting(key: .iconPlacement, value: .iconPlacementLeading),
+            ]
+        case .glucosedelta:
+            self.settings = [
+                MenuBarItemSetting(key: .textColor, value: .textColorDefault),
+                MenuBarItemSetting(key: .fontWeight, value: .fontWeightRegular),
+            ]
+        case .glucosetrend:
+            self.settings = [
+                MenuBarItemSetting(key: .textColor, value: .textColorDefault),
+                MenuBarItemSetting(key: .fontWeight, value: .fontWeightRegular),
+            ]
+        case .iob:
+            self.settings = [
+                MenuBarItemSetting(key: .textColor, value: .textColorDefault),
+                MenuBarItemSetting(key: .fontWeight, value: .fontWeightRegular),
+                MenuBarItemSetting(key: .icon, value: .iconColorHidden),
+                MenuBarItemSetting(key: .iconPlacement, value: .iconPlacementLeading),
+            ]
+        case .cob:
+            self.settings = [
+                MenuBarItemSetting(key: .textColor, value: .textColorDefault),
+                MenuBarItemSetting(key: .fontWeight, value: .fontWeightRegular),
+                MenuBarItemSetting(key: .icon, value: .iconColorHidden),
+                MenuBarItemSetting(key: .iconPlacement, value: .iconPlacementLeading),
+            ]
+        case .eventualglucose:
+            self.settings = [
+                MenuBarItemSetting(key: .textColor, value: .textColorDefault),
+                MenuBarItemSetting(key: .fontWeight, value: .fontWeightRegular),
+                MenuBarItemSetting(key: .icon, value: .iconColorHidden),
+                MenuBarItemSetting(key: .iconPlacement, value: .iconPlacementLeading),
+            ]
+        case .loopstatus:
+            self.settings = [
+                MenuBarItemSetting(key: .displayTextAndIcon, value: .displayBoth),
+                MenuBarItemSetting(key: .textColor, value: .textColorDefault),
+                MenuBarItemSetting(key: .fontWeight, value: .fontWeightRegular),
+                MenuBarItemSetting(key: .icon, value: .iconColorHidden),
+                MenuBarItemSetting(key: .iconPlacement, value: .iconPlacementLeading),
+            ]
+        case .separator:
+            self.settings = [
+                MenuBarItemSetting(key: .textColor, value: .textColorDefault),
+                MenuBarItemSetting(key: .fontWeight, value: .fontWeightRegular),
+                MenuBarItemSetting(key: .character, value: .separatorCharPipe),
+            ]
+        }
     }
 
     public static func == (lhs: MenuBarItemContainer, rhs: MenuBarItemContainer) -> Bool {
@@ -81,27 +185,63 @@ public class MenuBarItemContainer: Equatable, Identifiable, Hashable, Codable {
         hasher.combine(ObjectIdentifier(self))
     }
 
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(settings, forKey: .settings)
+        try container.encode(type, forKey: .type)
+    }
+
+    func get(_ key: settingKey) -> settingValue {
+        let setting = settings.filter { $0.key == key }.first?.value
+        if setting == nil {
+            return .none
+        }
+
+        return setting!
+    }
+
+    @MainActor
+    func set(_ key: settingKey, _ val: settingValue) {
+        self.objectWillChange.send()
+        let indices = settings.indices.filter { settings[$0].key == key }
+        if indices.count == 0 {
+            self.settings.append(MenuBarItemSetting(key: key, value: val))
+            return
+        }
+
+        let index = indices.first!
+        self.settings[index] = MenuBarItemSetting(key: key, value: val)
+
+//        self.settings.publisher.sink(receiveCompletion: {
+//            print ("completion: \($0)")
+//            print("here is when we should somehow update the view")
+//        }, receiveValue: {
+//            print ("value: \($0)")
+//            self.objectWillChange.send()
+//        })
+    }
+
     @MainActor
     func getView() -> any View {
         switch type {
         case .glucosevalue:
-            return GlucoseValueView()
+            return GlucoseValueView(viewSettings: self)
         case .glucosetrend:
-            return GlucoseTrendView()
+            return GlucoseTrendView(viewSettings: self)
         case .glucosedelta:
-            return GlucoseDeltaView()
+            return GlucoseDeltaView(viewSettings: self)
 
         case .loopstatus:
-            return LoopStatusView()
+            return LoopStatusView(viewSettings: self)
         case .eventualglucose:
-            return EventualGlucoseView()
+            return EventualGlucoseView(viewSettings: self)
         case .cob:
-            return COBView()
+            return COBView(viewSettings: self)
         case .iob:
-            return IOBView()
+            return IOBView(viewSettings: self)
 
         case MenuBarItem.separator:
-            return SeparatorView()
+            return SeparatorView(viewSettings: self)
         }
     }
 

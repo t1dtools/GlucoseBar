@@ -73,7 +73,9 @@ struct MenuBarSettingsView: View {
 
     private func removeViewFromMenuBar(_ item: MenuBarItemContainer) {
         menuBarItems.count > 0 ? menuBarItems.removeAll { $0 == item } : ()
-        menuBarItemsInverse.append(item)
+        if item.type != .separator {
+            menuBarItemsInverse.append(item)
+        }
         focusedMenuBarItem = nil
     }
 
@@ -82,23 +84,24 @@ struct MenuBarSettingsView: View {
         VStack {
             switch item.type {
             case .glucosevalue:
-                GlucoseValueView().opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                GlucoseValueView(viewSettings: item)
+                    .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
             case .glucosetrend:
-                GlucoseTrendView().opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                GlucoseTrendView(viewSettings: item).opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
             case .glucosedelta:
-                GlucoseDeltaView().opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                GlucoseDeltaView(viewSettings: item).opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
 
             case .loopstatus:
-                LoopStatusView().opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                LoopStatusView(viewSettings: item).opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
             case .eventualglucose:
-                EventualGlucoseView().opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                EventualGlucoseView(viewSettings: item).opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
             case .cob:
-                COBView().opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                COBView(viewSettings: item).opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
             case .iob:
-                IOBView().opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                IOBView(viewSettings: item).opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
 
             case MenuBarItem.separator:
-                SeparatorView().opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                SeparatorView(viewSettings: item).opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
             }
 
             if focusedMenuBarItem == item {
@@ -108,28 +111,26 @@ struct MenuBarSettingsView: View {
     }
 
     @ViewBuilder
-    func drawMenuBarItemSettings(_ item: MenuBarItem) -> some View {
-        Group {
-            switch item {
-            case .glucosevalue:
-                GlucoseValueSettingsView()
-            case .glucosetrend:
-                Text("GlucoseTrendSettingsView")
-            case .glucosedelta:
-                Text("GlucoseDeltaSettingsView")
+    func drawMenuBarItemSettings(_ item: MenuBarItemContainer) -> some View {
+        switch item.type {
+        case .glucosevalue:
+            GlucoseValueSettingsView(viewSettings: item)
+        case .glucosetrend:
+            GlucoseTrendSettingsView(viewSettings: item)
+        case .glucosedelta:
+            GlucoseDeltaSettingsView(viewSettings: item)
 
-            case .loopstatus:
-                LoopStatusSettingsView()
-            case .eventualglucose:
-                Text("EventualGlucoseSettingsView")
-            case .cob:
-                Text("COBSettingsView")
-            case .iob:
-                Text("IOSettingsView")
+        case .loopstatus:
+            LoopStatusSettingsView(viewSettings: item)
+        case .eventualglucose:
+            EventualGlucoseSettingsView(viewSettings: item)
+        case .cob:
+            COBSettingsView(viewSettings: item)
+        case .iob:
+            IOBSettingsView(viewSettings: item)
 
-            case MenuBarItem.separator:
-                Text("SeparatorSettingsView")
-            }
+        case MenuBarItem.separator:
+            SeparatorSettingsView(viewSettings: item)
         }
     }
 
@@ -210,7 +211,7 @@ struct MenuBarSettingsView: View {
                                 Image(systemName: "trash.fill")
                             }.help("Remove \(focusedMenuBarItem!.type.name)")
                         }.padding(.horizontal).padding(.top, 5)
-                        drawMenuBarItemSettings(focusedMenuBarItem!.type).padding(.horizontal).padding(.vertical, 10)
+                        drawMenuBarItemSettings(focusedMenuBarItem!).padding(.horizontal).padding(.vertical, 10)
                     }.padding(.horizontal).padding(.vertical, 10)
                 } else {
                     Text("Click to edit, or drag to reorder items.").font(.footnote).frame(alignment: .trailing)

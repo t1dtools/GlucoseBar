@@ -13,13 +13,13 @@ struct GlucoseValueView: View {
 
     @Environment(\.colorScheme) private var colorScheme
 
-    var viewSettings: [String: Any]?
+    @ObservedObject var viewSettings: MenuBarItemContainer
 
     @ViewBuilder
     var body: some View {
 
         HStack {
-            if viewSettings?["icon"] as? String != "hidden" && viewSettings?["iconLocation"] as? String == "beforeGlucoseValue" {
+            if viewSettings.get(.icon) != .iconColorHidden && viewSettings.get(.iconPlacement) == .iconPlacementLeading {
                 drawIcon()
             }
 
@@ -27,18 +27,18 @@ struct GlucoseValueView: View {
                 .fontWeight(getFontWeight())
                 .foregroundStyle(getForegroundStyle())
 
-            if viewSettings?["icon"] as? String != "hidden" && viewSettings?["iconLocation"] as? String == "afterGlucoseValue" {
+            if viewSettings.get(.icon) != .iconColorHidden && viewSettings.get(.iconPlacement) == .iconPlacementTrailing {
                 drawIcon()
             }
         }
     }
 
     func getFontWeight() -> Font.Weight {
-        if viewSettings?["fontWeight"] as? String == "light" {
+        if viewSettings.get(.fontWeight) == .fontWeightLight {
             return .light
         }
 
-        if viewSettings?["fontWeight"] as? String == "bold" {
+        if viewSettings.get(.fontWeight) == .fontWeightBold {
             return .bold
         }
 
@@ -47,12 +47,12 @@ struct GlucoseValueView: View {
     }
 
     func getForegroundStyle() -> Color {
-        if viewSettings?["textColor"] as? String == "Static Glucose Color" {
-            return getDynamicGlucoseColor(glucoseValue: Decimal(g.glucose), highGlucoseColorValue: 180, lowGlucoseColorValue: 70, targetGlucose: Decimal(90), glucoseColorScheme: .dynamicColor)
+        if viewSettings.get(.textColor) == .textColorStaticGlucose {
+            return getDynamicGlucoseColor(glucoseValue: Decimal(g.glucose), highGlucoseColorValue: Decimal(s.highThreshold), lowGlucoseColorValue: Decimal(s.lowThreshold), targetGlucose: Decimal(s.glucoseTarget), glucoseColorScheme: .staticColor)
         }
 
-        if viewSettings?["textColor"] as? String == "Dynamic Glucose Color" {
-            return getDynamicGlucoseColor(glucoseValue: Decimal(g.glucose), highGlucoseColorValue: 180, lowGlucoseColorValue: 70, targetGlucose: Decimal(90), glucoseColorScheme: .staticColor)
+        if viewSettings.get(.textColor) == .textColorDynamicGlucose {
+            return getDynamicGlucoseColor(glucoseValue: Decimal(g.glucose), highGlucoseColorValue: Decimal(s.highThreshold), lowGlucoseColorValue: Decimal(s.lowThreshold), targetGlucose: Decimal(s.glucoseTarget), glucoseColorScheme: .dynamicColor)
         }
 
         if colorScheme == .dark {
@@ -63,23 +63,23 @@ struct GlucoseValueView: View {
     }
 
     func drawIcon() -> some View {
-        let iconColor = viewSettings?["icon"] as? String
+        let iconColor = viewSettings.get(.icon)
         var color: Color = .black
 
-        if iconColor == "singleColor" {
+        if iconColor == .iconColorSingle {
             if colorScheme == .dark {
                 color = .white
             }
-        } else if iconColor == "dynamicColor" {
-            color = getDynamicGlucoseColor(glucoseValue: Decimal(g.glucose), highGlucoseColorValue: 180, lowGlucoseColorValue: 70, targetGlucose: Decimal(90), glucoseColorScheme: .dynamicColor)
-        } else if iconColor == "staticColor" {
-            color = getDynamicGlucoseColor(glucoseValue: Decimal(g.glucose), highGlucoseColorValue: 180, lowGlucoseColorValue: 70, targetGlucose: Decimal(90), glucoseColorScheme: .staticColor)
+        } else if iconColor == .iconColorDynamicGlucose {
+            color = getDynamicGlucoseColor(glucoseValue: Decimal(g.glucose), highGlucoseColorValue: Decimal(s.highThreshold), lowGlucoseColorValue: Decimal(s.lowThreshold), targetGlucose: Decimal(s.glucoseTarget), glucoseColorScheme: .dynamicColor)
+        } else if iconColor == .iconColorStaticGlucose {
+            color = getDynamicGlucoseColor(glucoseValue: Decimal(g.glucose), highGlucoseColorValue: Decimal(s.highThreshold), lowGlucoseColorValue: Decimal(s.lowThreshold), targetGlucose: Decimal(s.glucoseTarget), glucoseColorScheme: .staticColor)
         }
 
         var image = "drop.halffull"
-        if g.glucose > 180 {
+        if g.glucose >= s.highThreshold {
             image = "drop.fill"
-        } else if g.glucose < 70 {
+        } else if g.glucose <= s.lowThreshold {
             image = "drop"
         }
 

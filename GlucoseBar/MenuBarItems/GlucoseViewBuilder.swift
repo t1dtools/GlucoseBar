@@ -42,23 +42,23 @@ struct MenuBarView: View {
         Group {
             switch item.type {
             case .glucosevalue:
-                GlucoseValueView().environmentObject(s).environmentObject(g)
+                GlucoseValueView(viewSettings: item).environmentObject(s).environmentObject(g)
             case .glucosetrend:
-                GlucoseTrendView().environmentObject(s).environmentObject(g)
+                GlucoseTrendView(viewSettings: item).environmentObject(s).environmentObject(g)
             case .glucosedelta:
-                GlucoseDeltaView().environmentObject(s).environmentObject(g)
+                GlucoseDeltaView(viewSettings: item).environmentObject(s).environmentObject(g)
 
             case .loopstatus:
-                LoopStatusView().environmentObject(s).environmentObject(g)
+                LoopStatusView(viewSettings: item).environmentObject(s).environmentObject(g)
             case .eventualglucose:
-                EventualGlucoseView().environmentObject(s).environmentObject(g)
+                EventualGlucoseView(viewSettings: item).environmentObject(s).environmentObject(g)
             case .cob:
-                COBView().environmentObject(s).environmentObject(g)
+                COBView(viewSettings: item).environmentObject(s).environmentObject(g)
             case .iob:
-                IOBView().environmentObject(s).environmentObject(g)
+                IOBView(viewSettings: item).environmentObject(s).environmentObject(g)
 
             case MenuBarItem.separator:
-                SeparatorView().environmentObject(s)
+                SeparatorView(viewSettings: item).environmentObject(s)
             }
         }.environment(\.colorScheme, colorScheme == .light ? .light : .dark)
     }
