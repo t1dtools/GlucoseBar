@@ -194,8 +194,8 @@ struct MenuBarSettingsView: View {
                     .overlay(RoundedRectangle(cornerRadius: 5)
                         .background(Color.gray).opacity(0.1)
                     ).onTapGesture {
-                        if focusedMenuBarItem != nil {
-                            focusMenuBarItem(focusedMenuBarItem!)
+                        if let item = focusedMenuBarItem {
+                            focusMenuBarItem(item)
                         }
                     }.padding(5)
 

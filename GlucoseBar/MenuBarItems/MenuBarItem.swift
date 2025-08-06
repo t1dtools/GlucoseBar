@@ -197,7 +197,7 @@ public class MenuBarItemContainer: Equatable, Identifiable, Hashable, Codable, O
             return .none
         }
 
-        return setting!
+        return setting ?? .none
     }
 
     @MainActor
