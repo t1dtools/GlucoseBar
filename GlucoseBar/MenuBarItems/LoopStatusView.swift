@@ -68,9 +68,14 @@ struct LoopStatusView: View {
     }
 
     func drawIcon() -> some View {
-        var icon = "circle"
-        var color = getLoopColor(g.provider.GlucoseSourceExtras.enactedAt!)
-        if g.provider.GlucoseSourceExtras.enactedAt == nil {
+        var icon: String
+        var color: Color
+        let enactedAt = g.provider.GlucoseSourceExtras.enactedAt
+
+        if let enactedAt = enactedAt {
+            icon = "circle"
+            color = getLoopColor(enactedAt)
+        } else {
             icon = "questionmark.circle"
             color = .gray
         }

@@ -23,9 +23,15 @@ struct COBView: View {
                 drawIcon()
             }
 
-            Text(formatCOBForDisplay(cob: g.provider.GlucoseSourceExtras.cob!) + " g")
-                .foregroundStyle(getForegroundStyle())
-                .fontWeight(getFontWeight())
+            if let cob = g.provider.GlucoseSourceExtras.cob {
+                Text(formatCOBForDisplay(cob: cob) + " g")
+                    .foregroundStyle(getForegroundStyle())
+                    .fontWeight(getFontWeight())
+            } else {
+                Text("-")
+                    .foregroundStyle(getForegroundStyle())
+                    .fontWeight(getFontWeight())
+            }
 
             if viewSettings.get(.icon) != .iconColorHidden && viewSettings.get(.iconPlacement) == .iconPlacementTrailing {
                 drawIcon()
