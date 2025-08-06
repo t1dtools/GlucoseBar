@@ -109,6 +109,8 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         self.showDelta = defaults.bool(forKey: "showDelta")
         self.showMenuBarIcon = defaults.bool(forKey: "showMenuBarIcon")
 
+//        defaults.removeObject(forKey: "menuBarItems")
+
         let jsonMenuBarItems = defaults.string(forKey: "menuBarItems")
         if jsonMenuBarItems != nil {
             let decoder = JSONDecoder()

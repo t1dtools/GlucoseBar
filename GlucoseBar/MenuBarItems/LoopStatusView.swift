@@ -8,21 +8,76 @@
 import SwiftUI
 
 struct LoopStatusView: View {
-    @EnvironmentObject var s: SettingsStore
     @EnvironmentObject var g: Glucose
+    @EnvironmentObject var s: SettingsStore
 
-    @ViewBuilder
+    @Environment(\.colorScheme) private var colorScheme
+
+    @ObservedObject var viewSettings: MenuBarItemContainer
+
+    @MainActor @ViewBuilder
     var body: some View {
-        if g.provider.GlucoseSourceExtras.enactedAt != nil {
-            HStack {
-                Image(systemName: "circle").foregroundColor(getLoopColor(g.provider.GlucoseSourceExtras.enactedAt!)).fontWeight(.heavy)
+        HStack {
+
+            if viewSettings.get(.icon) != .iconColorHidden && viewSettings.get(.iconPlacement) == .iconPlacementLeading {
+                drawIcon()
+            }
+
+            if g.provider.GlucoseSourceExtras.enactedAt != nil {
                 Text("\(relativeTime(time: g.provider.GlucoseSourceExtras.enactedAt!))")
-            }.frame(alignment: .leading)//.padding(.bottom, 5).padding(.top, 3)
-        } else {
-            HStack {
-                Image(systemName: "questionmark.circle").foregroundColor(.gray).fontWeight(.heavy)
+                    .foregroundStyle(getForegroundStyle())
+                    .fontWeight(getFontWeight())
+            } else {
                 Text("Unknown")
-            }.frame(alignment: .leading)
+                    .foregroundStyle(getForegroundStyle())
+                    .fontWeight(getFontWeight())
+            }
+
+            if viewSettings.get(.icon) != .iconColorHidden && viewSettings.get(.iconPlacement) == .iconPlacementTrailing {
+                drawIcon()
+            }
+        }.frame(alignment: .leading)
+    }
+
+    func getFontWeight() -> Font.Weight {
+        if viewSettings.get(.fontWeight) == .fontWeightLight {
+            return .light
         }
+
+        if viewSettings.get(.fontWeight) == .fontWeightBold {
+            return .bold
+        }
+
+        return .regular
+    }
+
+    func getForegroundStyle() -> Color {
+        if viewSettings.get(.textColor) == .textColorStaticGlucose {
+            return getDynamicGlucoseColor(glucoseValue: Decimal(g.glucose), highGlucoseColorValue: Decimal(s.highThreshold), lowGlucoseColorValue: Decimal(s.lowThreshold), targetGlucose: Decimal(s.glucoseTarget), glucoseColorScheme: .staticColor)
+        }
+
+        if viewSettings.get(.textColor) == .textColorDynamicGlucose {
+            return getDynamicGlucoseColor(glucoseValue: Decimal(g.glucose), highGlucoseColorValue: Decimal(s.highThreshold), lowGlucoseColorValue: Decimal(s.lowThreshold), targetGlucose: Decimal(s.glucoseTarget), glucoseColorScheme: .dynamicColor)
+        }
+
+        if colorScheme == .dark {
+            return .white
+        }
+
+        return .black
+    }
+
+    func drawIcon() -> some View {
+        var icon = "circle"
+        var color = getLoopColor(g.provider.GlucoseSourceExtras.enactedAt!)
+        if g.provider.GlucoseSourceExtras.enactedAt == nil {
+            icon = "questionmark.circle"
+            color = .gray
+        }
+
+        return Image(systemName: icon)
+            .foregroundColor(color)
+            .fontWeight(.heavy)
     }
 }
+
