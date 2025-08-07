@@ -13,8 +13,6 @@ struct MenuBarSettingsView: View {
 
     @EnvironmentObject var s: SettingsStore
     @EnvironmentObject var g: Glucose
-
-    let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "menubarsettingsview")
     @Environment(\.colorScheme) private var colorScheme
 
     @State private var focusedMenuBarItem: MenuBarItemContainer? = nil
@@ -33,7 +31,7 @@ struct MenuBarSettingsView: View {
             }
 
             for p in MenuBarItem.allCases {
-                if !seenItems.contains(where: { $0 == p }) {
+                if !seenItems.contains(where: { $0 == p }) && p != .separator {
                     self.menuBarItemsInverse.append(MenuBarItemContainer.init(type: p))
                 }
             }
@@ -45,12 +43,14 @@ struct MenuBarSettingsView: View {
             MenuBarItemContainer.init(type: .glucosetrend),
             MenuBarItemContainer.init(type: .glucosedelta)
         ]
-        let defaultItemsInverse = [
-            MenuBarItemContainer.init(type: .loopstatus),
-            MenuBarItemContainer.init(type: .eventualglucose),
-            MenuBarItemContainer.init(type: .cob),
-            MenuBarItemContainer.init(type: .iob),
-        ]
+        var defaultItemsInverse: [MenuBarItemContainer] = []
+
+        if s.trioEnableIntegration && s.cgmProvider == .nightscout {
+            defaultItemsInverse.append(MenuBarItemContainer.init(type: .loopstatus))
+            defaultItemsInverse.append(MenuBarItemContainer.init(type: .eventualglucose))
+            defaultItemsInverse.append(MenuBarItemContainer.init(type: .cob))
+            defaultItemsInverse.append(MenuBarItemContainer.init(type: .iob))
+        }
 
         self.menuBarItems = defaultItems
         self.menuBarItemsInverse = defaultItemsInverse
@@ -87,21 +87,28 @@ struct MenuBarSettingsView: View {
                 GlucoseValueView(viewSettings: item)
                     .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
             case .glucosetrend:
-                GlucoseTrendView(viewSettings: item).opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                GlucoseTrendView(viewSettings: item)
+                    .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
             case .glucosedelta:
-                GlucoseDeltaView(viewSettings: item).opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                GlucoseDeltaView(viewSettings: item)
+                    .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
 
             case .loopstatus:
-                LoopStatusView(viewSettings: item).opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                LoopStatusView(viewSettings: item)
+                    .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
             case .eventualglucose:
-                EventualGlucoseView(viewSettings: item).opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                EventualGlucoseView(viewSettings: item)
+                    .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
             case .cob:
-                COBView(viewSettings: item).opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                COBView(viewSettings: item)
+                    .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
             case .iob:
-                IOBView(viewSettings: item).opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                IOBView(viewSettings: item)
+                    .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
 
             case MenuBarItem.separator:
-                SeparatorView(viewSettings: item).opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                SeparatorView(viewSettings: item)
+                    .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
             }
 
             if focusedMenuBarItem == item {
@@ -175,9 +182,9 @@ struct MenuBarSettingsView: View {
 
             GroupBox {
                 HStack {
-                    Text("Live Preview").font(.headline).padding(.leading)//.frame(maxWidth: .infinity, alignment: .leading)
+                    Text("Live Preview").font(.headline).padding(.leading)
                     Spacer()
-                    menu.frame(width: 100)//.disabled(menuBarItemsInverse.count == 0)
+                    menu.frame(width: 100)
 
                     // TODO: Find better placement for this button
 //                    Button("Reset") {
@@ -189,7 +196,7 @@ struct MenuBarSettingsView: View {
                     }
                 }.padding(.top, 5).padding(.trailing)
 
-                menubarPreview.frame(height: 24) // 42?
+                menubarPreview.frame(height: 24)
                     .padding(.horizontal, 10)
                     .overlay(RoundedRectangle(cornerRadius: 5)
                         .background(Color.gray).opacity(0.1)

@@ -42,6 +42,8 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     @Published var menuBarItems: [MenuBarItemContainer] = []
 
     // Trio Specifics
+    @Published var trioEnableIntegration: Bool = false
+
     @Published var trioBarShowIOB: Bool = false
     @Published var trioBarShowCOB: Bool = false
     @Published var trioBarShowEventualGlucose: Bool = false
@@ -183,6 +185,8 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
             }
         }
 
+        self.trioEnableIntegration = defaults.bool(forKey: "trioEnableIntegration")
+
         self.trioBarShowIOB = defaults.bool(forKey: "trioBarShowIOB")
         self.trioBarShowCOB = defaults.bool(forKey: "trioBarShowCOB")
         self.trioBarShowEventualGlucose = defaults.bool(forKey: "trioBarShowEventualGlucose")
@@ -254,6 +258,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         defaults.set(self.glucoseTarget, forKey: "glucoseTarget")
         defaults.set(self.glucoseColorScheme.displayName, forKey: "glucoseColorScheme")
 
+        defaults.set(self.trioEnableIntegration, forKey: "trioEnableIntegration")
         defaults.set(self.trioBarShowIOB, forKey: "trioBarShowIOB")
         defaults.set(self.trioBarShowCOB, forKey: "trioBarShowCOB")
         defaults.set(self.trioBarShowEventualGlucose, forKey: "trioBarShowEventualGlucose")
@@ -288,8 +293,6 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     }
 
     func testCGMProvider() async -> Bool {
-        self.logger.debug("testCGMProvider")
-
         var provider: Provider
         switch self.cgmProvider {
         case .simulator:

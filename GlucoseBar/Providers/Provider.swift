@@ -102,17 +102,6 @@ class Provider: ObservableObject, @unchecked Sendable {
     func isAuthValid() -> Bool {
         return false
     }
-
-//    @MainActor @ViewBuilder
-//    func getConnectionView(s: SettingsStore) -> some View {
-//        @ObservedObject var settings: SettingsStore = s
-//
-//        Picker("", selection: $settings.libreConnectionID) {
-//            ForEach(self.connections, id: \.patientID) {
-//                Text("\($0.firstName) \($0.lastName)").tag($0.patientID)
-//            }
-//        }
-//    }
     
     internal func fetch() async {
         self.logger.error("Base fetch function called. This should only happen once. Multiple occurrences of this message means that your CGM provider implementation does not have it's own `fetch` implementation.")

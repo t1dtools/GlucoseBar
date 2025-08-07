@@ -24,7 +24,7 @@ struct CGMSettingsView: View {
     struct SimulatorView: View {
         var body: some View {
             HStack {
-                Text("The simulator has no settings and is a CGM provider implemented to enable you to test the application without connecting a real CGM provider such as Dexcom or Nightscout.")//.padding(.horizontal)
+                Text("The simulator has no settings and is a CGM provider implemented to enable you to test the application without connecting a real CGM provider such as Dexcom or Nightscout.")
                 Spacer()
             }
         }
@@ -60,6 +60,21 @@ struct CGMSettingsView: View {
                     Text("This token needs to have the permission \"readable\" in Nightscout.").font(.footnote)
                     Spacer()
                 }
+
+                VStack {
+                    HStack {
+                        Text("Enable Trio Integration")
+                        Spacer()
+                        Picker("", selection: $s.trioEnableIntegration) {
+                            Text("Yes").tag(true)
+                            Text("No").tag(false)
+                        }.pickerStyle(SegmentedPickerStyle()).frame(width: 200)
+                    }
+                    HStack {
+                        Text("Pull extra information from Nightscout to show Loop Status, IOB, COB, Eventual Glucose, prediction lines and more").font(.footnote)
+                        Spacer()
+                    }
+                }.padding(.top, 10)
             }
         }
     }

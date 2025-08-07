@@ -154,7 +154,7 @@ struct GeneralSettingsView: View {
                             Text(formatGlucoseForDisplay(settings: s, glucose: s.glucoseTarget)).frame(width:50, alignment: .trailing)
                         }
                         HStack {
-                            Text("The target is used to correctly color the glucose values in the chart when you have it set to dynamic colors.").font(.footnote).foregroundStyle(.gray)
+                            Text("The target is used to correctly color the glucose values in the chart when you have it set to use dynamic colors.").font(.footnote).foregroundStyle(.gray)
                             Spacer()
                         }
                     }.padding()
@@ -202,13 +202,6 @@ struct GeneralSettingsView: View {
                             .scaleEffect(0.7, anchor: .trailing)
                     }.padding()
                 }
-//                Spacer()
-//                HStack {
-//                    Spacer()
-//                    Button("Save") {
-//                        s.save()
-//                    }
-//                }.padding(.top, 10)
             }.padding()
         }
     }

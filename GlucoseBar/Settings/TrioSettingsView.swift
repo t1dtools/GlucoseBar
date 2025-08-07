@@ -19,45 +19,6 @@ struct TrioSettingsView: View {
             }.padding(.horizontal).padding(.top)
 
             VStack {
-                Text("Menu Bar Data").font(.headline).frame(maxWidth: .infinity, alignment: .leading)
-                Text("This is the data you see in the macOS menu bar").font(.footnote).frame(maxWidth: .infinity, alignment: .leading)
-            }.padding()
-
-            GroupBox {
-                VStack {
-
-                    HStack {
-                        Text("Show Insulin On Board")
-                        Spacer()
-                        Toggle(isOn: $s.trioBarShowIOB, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.trioBarShowIOB, initial: false) {
-                            s.save()
-                        }.fixedSize()
-                            .scaleEffect(0.7, anchor: .trailing)
-                    }
-                    Divider()
-
-                    HStack {
-                        Text("Show Carbs On Board when > 0g")
-                        Spacer()
-                        Toggle(isOn: $s.trioBarShowCOB, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.trioBarShowCOB, initial: false) {
-                            s.save()
-                        }.fixedSize()
-                            .scaleEffect(0.7, anchor: .trailing)
-                    }
-                    Divider()
-
-                    HStack {
-                        Text("Show Eventual Glucose")
-                        Spacer()
-                        Toggle(isOn: $s.trioBarShowEventualGlucose, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.trioBarShowEventualGlucose, initial: false) {
-                            s.save()
-                        }.fixedSize()
-                            .scaleEffect(0.7, anchor: .trailing)
-                    }
-                }.padding()
-            }.padding(.bottom).padding(.horizontal)
-
-            VStack {
                 Text("Chart Data").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 10)
                 Text("This is the data you in and around the chart when you open GlucoseBar").font(.footnote).frame(maxWidth: .infinity, alignment: .leading)
             }.padding(.bottom).padding(.horizontal)

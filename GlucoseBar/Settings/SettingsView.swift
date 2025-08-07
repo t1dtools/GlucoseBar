@@ -41,7 +41,7 @@ struct SettingsView: View {
                         selectedItem = "MenuBar"
                     }
 
-                    if g.provider.RemoteGlucoseSource == .trio {
+                    if s.trioEnableIntegration && s.cgmProvider == .nightscout {
                         NavigationLink(destination: TrioSettingsView().environmentObject(s)) {
                             Label("Trio Integration", systemImage: "apps.iphone")
                         }.tag("Trio").onTapGesture {
@@ -67,7 +67,6 @@ struct SettingsView: View {
             }
         } detail: {
             ScrollView {
-//                MenuBarSettingsView().environmentObject(s)
                 GeneralSettingsView().environmentObject(s)
             }
         }.frame(maxHeight: .infinity, alignment: .top)
