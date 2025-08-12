@@ -20,8 +20,8 @@ struct EventualGlucoseSettingsView: View {
 
     init(viewSettings: MenuBarItemContainer?) {
 
-        if viewSettings != nil {
-            _itemSettings = ObservedObject(initialValue: viewSettings!)
+        if let viewSettings = viewSettings {
+            _itemSettings = ObservedObject(initialValue: viewSettings)
         } else {
             let container = MenuBarItemContainer(type: .eventualglucose)
             _itemSettings = ObservedObject(initialValue: container)

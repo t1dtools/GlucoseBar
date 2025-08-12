@@ -58,7 +58,7 @@ struct MenuBarView: View {
                 IOBView(viewSettings: item).environmentObject(s).environmentObject(g)
 
             case MenuBarItem.separator:
-                SeparatorView(viewSettings: item).environmentObject(s)
+                SeparatorView(viewSettings: item).environmentObject(s).environmentObject(g)
             }
         }.environment(\.colorScheme, colorScheme == .light ? .light : .dark)
     }
