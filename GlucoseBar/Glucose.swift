@@ -54,8 +54,8 @@ class Glucose: ObservableObject, Sendable {
                 self.logger.info("Glucose.timer initiating fetch because last fetch was over 1 minute ago")
             }
 
-            if self.entries != nil && self.entries!.first != nil {
-                if self.entries!.first!.date.timeIntervalSinceNow <= -300 && self.provider.lastFetch.timeIntervalSinceNow <= -10 {
+            if let entries = self.entries, let firstEntry = entries.first {
+                if firstEntry.date.timeIntervalSinceNow <= -300 && self.provider.lastFetch.timeIntervalSinceNow <= -10 {
                     shouldFetch = true
                     self.logger.info("Glucose.timer initiating fetch because latest reading is over 5 minutes old and last fetch was over 10 seconds ago")
                 }
@@ -122,10 +122,10 @@ class Glucose: ObservableObject, Sendable {
 
     func getGlucose() {
         self.error = ""
-        if self.provider.providerIssue != nil {
+        if let providerIssue = self.provider.providerIssue {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
-                self.error = self.provider.providerIssue ?? "Unknown provider issue"
+                self.error = providerIssue
                 return
             }
         }

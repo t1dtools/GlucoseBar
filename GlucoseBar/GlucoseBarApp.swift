@@ -66,16 +66,16 @@ struct GlucoseBarApp: App {
         }
 
         if g.provider.RemoteGlucoseSource == .trio {
-            if s.trioBarShowIOB && g.provider.GlucoseSourceExtras.iob != nil {
-                t += " " + formatIOBForDisplay(iob: g.provider.GlucoseSourceExtras.iob!) + "u"
+            if s.trioBarShowIOB, let iob = g.provider.GlucoseSourceExtras.iob {
+                t += " " + formatIOBForDisplay(iob: iob) + "u"
             }
 
-            if s.trioBarShowCOB && g.provider.GlucoseSourceExtras.cob != nil && g.provider.GlucoseSourceExtras.cob! > 0 {
-                t += " " + formatCOBForDisplay(cob: g.provider.GlucoseSourceExtras.cob!) + "g"
+            if s.trioBarShowCOB, let cob = g.provider.GlucoseSourceExtras.cob, cob > 0 {
+                t += " " + formatCOBForDisplay(cob: cob) + "g"
             }
 
-            if s.trioBarShowEventualGlucose && g.provider.GlucoseSourceExtras.eventualGlucose != nil {
-                t += " (" + formatGlucoseForDisplay(settings: s, glucose: g.provider.GlucoseSourceExtras.eventualGlucose!) + ")"
+            if s.trioBarShowEventualGlucose, let eventualGlucose = g.provider.GlucoseSourceExtras.eventualGlucose {
+                t += " (" + formatGlucoseForDisplay(settings: s, glucose: eventualGlucose) + ")"
             }
         }
 

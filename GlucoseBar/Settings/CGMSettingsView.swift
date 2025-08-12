@@ -169,8 +169,8 @@ struct CGMSettingsView: View {
                         Text("Test Connection")
                     }.disabled(isValidating) // TODO: State var for if it's currently testing
                 }
-                if g.provider.providerIssue != nil {
-                    Text("Provider issue: \(g.provider.providerIssue ?? "Unknown")")
+                if let providerIssue = g.provider.providerIssue {
+                    Text("Provider issue: \(providerIssue)")
                 }
                 if !isValidating && cgmCredentialsError && s.cgmProvider == validatedProvider {
                     Text("Invalid credentials or service unreachable").foregroundColor(.orange)

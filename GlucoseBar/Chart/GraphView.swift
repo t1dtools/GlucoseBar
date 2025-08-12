@@ -35,23 +35,23 @@ struct GraphView: View {
         let lowThresholdRuleMark = Decimal(convertGlucose(s, glucose: s.lowThreshold))
 
         var data: [GraphEntry] = [];
-        if (g.entries != nil) {
+        if let entries = g.entries {
 
             let entryCount = s.graphMinutes/5-1
 
             for i in 0..<entryCount {
-                if (g.entries!.count > i) {
-                    let entry = g.entries![i]
+                if (entries.count > i) {
+                    let entry = entries[i]
                     let glu = convertGlucose(s, glucose: entry.glucose)
 
                     var delta = 0.0
-                    if entry.changeRate != nil {
-                        delta = entry.changeRate!
+                    if let changeRate = entry.changeRate {
+                        delta = changeRate
                     }
 
                     var glucoseTarget = s.glucoseTarget
-                    if g.provider.GlucoseSourceExtras.glucoseTarget != nil {
-                        glucoseTarget = g.provider.GlucoseSourceExtras.glucoseTarget!
+                    if let fetchedGlucoseTarget = g.provider.GlucoseSourceExtras.glucoseTarget {
+                        glucoseTarget = fetchedGlucoseTarget
                     }
 
                     let color = getDynamicGlucoseColor(glucoseValue: Decimal(convertGlucose(s, glucose: entry.glucose)), highGlucoseColorValue: highThresholdRuleMark, lowGlucoseColorValue: lowThresholdRuleMark, targetGlucose: Decimal(convertGlucose(s, glucose: glucoseTarget)), glucoseColorScheme: s.glucoseColorScheme)
@@ -63,9 +63,9 @@ struct GraphView: View {
 
         let forecastStartDate = gse.enactedAt ?? Date()
 
-        if gse.forecasts.zt != nil {
-            for i in 0..<gse.forecasts.zt!.count {
-                let entry = gse.forecasts.zt![i]
+        if let zt = gse.forecasts.zt {
+            for i in 0..<zt.count {
+                let entry = zt[i]
                 let glu = convertGlucose(s, glucose: Double(entry))
 
                 let date = Calendar.current.date(byAdding: .minute, value: i * 5, to: forecastStartDate)!
@@ -74,9 +74,9 @@ struct GraphView: View {
             }
         }
 
-        if gse.forecasts.uam != nil {
-            for i in 0..<gse.forecasts.uam!.count {
-                let entry = gse.forecasts.uam![i]
+        if let uam = gse.forecasts.uam {
+            for i in 0..<uam.count {
+                let entry = uam[i]
                 let glu = convertGlucose(s, glucose: Double(entry))
 
                 let date = Calendar.current.date(byAdding: .minute, value: i * 5, to: forecastStartDate)!
@@ -85,9 +85,9 @@ struct GraphView: View {
             }
         }
 
-        if gse.forecasts.cob != nil {
-            for i in 0..<gse.forecasts.cob!.count {
-                let entry = gse.forecasts.cob![i]
+        if let cob = gse.forecasts.cob {
+            for i in 0..<cob.count {
+                let entry = cob[i]
                 let glu = convertGlucose(s, glucose: Double(entry))
 
                 let date = Calendar.current.date(byAdding: .minute, value: i * 5, to: forecastStartDate)!
@@ -96,9 +96,9 @@ struct GraphView: View {
             }
         }
 
-        if gse.forecasts.iob != nil {
-            for i in 0..<gse.forecasts.iob!.count {
-                let entry = gse.forecasts.iob![i]
+        if let iob = gse.forecasts.iob {
+            for i in 0..<iob.count {
+                let entry = iob[i]
                 let glu = convertGlucose(s, glucose: Double(entry))
 
                 let date = Calendar.current.date(byAdding: .minute, value: i * 5, to: forecastStartDate)!
@@ -147,9 +147,13 @@ struct GraphView: View {
         let highThresholdRuleMark = convertGlucose(s, glucose: s.highThreshold)
         let lowThresholdRuleMark = convertGlucose(s, glucose: s.lowThreshold)
 
-        let headlineTime = isHovering ? hoveredTime! : g.glucoseTime
-        let headlineGlucose = isHovering ? hoveredValue! : convertGlucose(s, glucose: g.glucose)
-        let headlineTrend = isHovering ? hoveredTrend! : GlucoseEntry.GlucoseTrend(direction: g.trend) ?? .notComputable
+        let latestGlucoseTime = g.glucoseTime
+        let latestGlucose = convertGlucose(s, glucose: g.glucose)
+        let latestTrend = GlucoseEntry.GlucoseTrend(direction: g.trend) ?? .notComputable
+
+        let headlineTime = isHovering ? hoveredTime ?? latestGlucoseTime : latestGlucoseTime
+        let headlineGlucose = isHovering ? hoveredValue ?? latestGlucose : latestGlucose
+        let headlineTrend = isHovering ? hoveredTrend ?? latestTrend : latestTrend
 
         let graphDataDuration = (-1 * (g.entries?.last?.date.timeIntervalSinceNow ?? 1) / 60 / 60).rounded()
 

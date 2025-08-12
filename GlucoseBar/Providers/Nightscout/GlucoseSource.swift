@@ -79,20 +79,20 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
                     gsep.reason = enacted.reason
                     
                     var oapsf = OpenAPSForecasts()
-                    if enacted.predBGs.iob != nil {
-                        oapsf.iob = enacted.predBGs.iob
+                    if let iob = enacted.predBGs.iob {
+                        oapsf.iob = iob
                     }
                     
-                    if enacted.predBGs.cob != nil {
-                        oapsf.cob = enacted.predBGs.cob
+                    if let cob = enacted.predBGs.cob {
+                        oapsf.cob = cob
                     }
                     
-                    if enacted.predBGs.uam != nil {
-                        oapsf.uam = enacted.predBGs.uam
+                    if let uam = enacted.predBGs.uam {
+                        oapsf.uam = uam
                     }
                     
-                    if enacted.predBGs.zt != nil {
-                        oapsf.zt = enacted.predBGs.zt
+                    if let zt = enacted.predBGs.zt {
+                        oapsf.zt = zt
                     }
                     gsep.forecasts = oapsf
                     gsep.glucoseTarget = enacted.currentTarget
@@ -152,20 +152,20 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
                 if result.result.first!.device == "Trio" {
                     let enacted = result.result.first!.openaps.enacted
                     var forecasts = OpenAPSForecasts()
-                    if enacted.predBGs.iob != nil {
-                        forecasts.iob = enacted.predBGs.iob
+                    if let iob = enacted.predBGs.iob {
+                        forecasts.iob = iob
                     }
 
-                    if enacted.predBGs.cob != nil {
-                        forecasts.cob = enacted.predBGs.cob
+                    if let cob = enacted.predBGs.cob {
+                        forecasts.cob = cob
                     }
 
-                    if enacted.predBGs.zt != nil {
-                        forecasts.zt = enacted.predBGs.zt
+                    if let zt = enacted.predBGs.zt {
+                        forecasts.zt = zt
                     }
 
-                    if enacted.predBGs.uam != nil {
-                        forecasts.uam = enacted.predBGs.uam
+                    if let uam = enacted.predBGs.uam {
+                        forecasts.uam = uam
                     }
 
                     let dateFormatter = DateFormatter()

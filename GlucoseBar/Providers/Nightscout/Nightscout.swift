@@ -193,24 +193,24 @@ class Nightscout: Provider, @unchecked Sendable {
         input.forEach { nsEntry in
             let date = Date(timeIntervalSince1970: nsEntry.date / 1000)
 
-            if nsEntry.sgv != nil {
+            if let sgv = nsEntry.sgv {
                 var trend = GlucoseEntry.GlucoseTrend(direction: "invalid")
-                if nsEntry.direction != nil {
-                    trend = GlucoseEntry.GlucoseTrend(direction: nsEntry.direction!)
+                if let direction = nsEntry.direction {
+                    trend = GlucoseEntry.GlucoseTrend(direction: direction)
                 }
 
                 var changeRate = 0.0
                 // Externally provided previous entry (for cases where we only fetch one new entry)
-                if previous != nil {
-                    changeRate = previous!.glucose - nsEntry.sgv!
+                if let prev = previous {
+                    changeRate = prev.glucose - sgv
                 }
 
                 // Internally tracked previous entry (for cases where we have more than one new entry fetched)
-                if previousGe != nil {
-                    changeRate = previousGe!.glucose - nsEntry.sgv!
+                if let prevGe = previousGe {
+                    changeRate = prevGe.glucose - sgv
                 }
 
-                let entry = GlucoseEntry(glucose: nsEntry.sgv!, date: date, trend: trend, changeRate: changeRate, id: nsEntry.identifier)
+                let entry = GlucoseEntry(glucose: sgv, date: date, trend: trend, changeRate: changeRate, id: nsEntry.identifier)
                 previousGe = entry
                 ge.append(entry)
             }

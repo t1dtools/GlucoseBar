@@ -15,30 +15,30 @@ struct TrioGridView: View {
     var body: some View {
         Grid(alignment: .leading, horizontalSpacing: 10, verticalSpacing: 10) {
             GridRow {
-                if s.trioChartShowIOB && g.provider.GlucoseSourceExtras.iob != nil {
+                if s.trioChartShowIOB, let iob = g.provider.GlucoseSourceExtras.iob {
                     HStack {
                         Image(systemName: "syringe.fill").foregroundColor(.blue)
-                        Text(formatIOBForDisplay(iob: g.provider.GlucoseSourceExtras.iob!) + " U")
+                        Text(formatIOBForDisplay(iob: iob) + " U")
                     }
                 }
-                if s.trioChartShowCOB && g.provider.GlucoseSourceExtras.cob != nil {
+                if s.trioChartShowCOB, let cob = g.provider.GlucoseSourceExtras.cob {
                     HStack {
                         Image(systemName: "fork.knife").foregroundColor(.orange)
-                        Text(formatCOBForDisplay(cob: g.provider.GlucoseSourceExtras.cob!) + " g")
+                        Text(formatCOBForDisplay(cob: cob) + " g")
                     }
                 }
             }
             GridRow {
-                if s.trioChartShowLoopStatus && g.provider.GlucoseSourceExtras.enactedAt != nil {
+                if s.trioChartShowLoopStatus, let enactedAt = g.provider.GlucoseSourceExtras.enactedAt {
                     HStack {
-                        Image(systemName: "circle").foregroundColor(getLoopColor(g.provider.GlucoseSourceExtras.enactedAt!))
-                        Text("\(relativeTime(time: g.provider.GlucoseSourceExtras.enactedAt!))")
+                        Image(systemName: "circle").foregroundColor(getLoopColor(enactedAt))
+                        Text("\(relativeTime(time: enactedAt))")
                     }.frame(alignment: .leading).padding(.bottom, 5).padding(.top, 3)
                 }
-                if s.trioChartShowEventualGlucose && g.provider.GlucoseSourceExtras.eventualGlucose != nil {
+                if s.trioChartShowEventualGlucose, let eventualGlucose = g.provider.GlucoseSourceExtras.eventualGlucose {
                     HStack {
                         Image(systemName: "arrow.right.circle")
-                        Text(formatGlucoseForDisplay(settings: s, glucose: convertGlucose(s, glucose: g.provider.GlucoseSourceExtras.eventualGlucose!)))
+                        Text(formatGlucoseForDisplay(settings: s, glucose: convertGlucose(s, glucose: eventualGlucose)))
                     }
                 }
             }

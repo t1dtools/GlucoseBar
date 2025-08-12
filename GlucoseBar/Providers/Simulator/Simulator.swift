@@ -56,10 +56,10 @@ class Simulator: Provider, @unchecked Sendable {
         var date = Date()
         var delta = 0.0
         var range = -20...20
-        if previousEntry != nil {
-            trend = previousEntry!.trend!
-            base = previousEntry!.glucose
-            date = previousEntry!.date.addingTimeInterval(300)
+        if let prevE = previousEntry {
+            trend = prevE.trend ?? .notComputable
+            base = prevE.glucose
+            date = prevE.date.addingTimeInterval(300)
 
             switch trend {
             case GlucoseEntry.GlucoseTrend.downDownDown:
@@ -98,8 +98,8 @@ class Simulator: Provider, @unchecked Sendable {
             trend = .downDownDown
         }
         
-        if previousEntry != nil {
-            delta = glucose - previousEntry!.glucose
+        if let prevE = previousEntry {
+            delta = glucose - prevE.glucose
         }
 
         return GlucoseEntry(glucose: glucose, date: date, trend: trend, changeRate: delta)

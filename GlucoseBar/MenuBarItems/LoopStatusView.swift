@@ -23,8 +23,8 @@ struct LoopStatusView: View {
                 drawIcon()
             }
 
-            if g.provider.GlucoseSourceExtras.enactedAt != nil {
-                Text("\(relativeTime(time: g.provider.GlucoseSourceExtras.enactedAt!))")
+            if let enactedAt = g.provider.GlucoseSourceExtras.enactedAt {
+                Text("\(relativeTime(time: enactedAt))")
                     .foregroundStyle(getForegroundStyle())
                     .fontWeight(getFontWeight())
             } else {
