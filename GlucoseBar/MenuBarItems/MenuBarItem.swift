@@ -52,6 +52,7 @@ public enum settingKey: String, CaseIterable, Codable, Sendable {
     case iconPlacement
     case displayTextAndIcon
     case character
+    case hideZero
 }
 
 public enum settingValue: String, CaseIterable, Codable, Sendable {
@@ -60,6 +61,9 @@ public enum settingValue: String, CaseIterable, Codable, Sendable {
     case displayBoth
     case displayText
     case displayIcon
+
+    case hideZeroTrue
+    case hideZeroFalse
 
     // Text
     case textColorDefault

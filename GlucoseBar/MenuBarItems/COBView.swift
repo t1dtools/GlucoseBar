@@ -17,24 +17,26 @@ struct COBView: View {
 
     @MainActor @ViewBuilder
     var body: some View {
-        HStack {
+        if viewSettings.get(.hideZero) == .hideZeroFalse || (viewSettings.get(.hideZero) == .hideZeroTrue && g.provider.GlucoseSourceExtras.cob ?? 0 > 0) {
+            HStack {
 
-            if viewSettings.get(.icon) != .iconColorHidden && viewSettings.get(.iconPlacement) == .iconPlacementLeading {
-                drawIcon()
-            }
+                if viewSettings.get(.icon) != .iconColorHidden && viewSettings.get(.iconPlacement) == .iconPlacementLeading {
+                    drawIcon()
+                }
 
-            if let cob = g.provider.GlucoseSourceExtras.cob {
-                Text(formatCOBForDisplay(cob: cob) + " g")
-                    .foregroundStyle(getForegroundStyle())
-                    .fontWeight(getFontWeight())
-            } else {
-                Text("-")
-                    .foregroundStyle(getForegroundStyle())
-                    .fontWeight(getFontWeight())
-            }
+                if let cob = g.provider.GlucoseSourceExtras.cob {
+                    Text(formatCOBForDisplay(cob: cob) + " g")
+                        .foregroundStyle(getForegroundStyle())
+                        .fontWeight(getFontWeight())
+                } else {
+                    Text("-")
+                        .foregroundStyle(getForegroundStyle())
+                        .fontWeight(getFontWeight())
+                }
 
-            if viewSettings.get(.icon) != .iconColorHidden && viewSettings.get(.iconPlacement) == .iconPlacementTrailing {
-                drawIcon()
+                if viewSettings.get(.icon) != .iconColorHidden && viewSettings.get(.iconPlacement) == .iconPlacementTrailing {
+                    drawIcon()
+                }
             }
         }
     }

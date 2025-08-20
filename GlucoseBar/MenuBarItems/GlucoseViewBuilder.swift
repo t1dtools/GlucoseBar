@@ -66,7 +66,13 @@ struct MenuBarView: View {
     var menuStack: any View {
         HStack {
             ForEach(menuBarItems, id: \.id) { item in
-                drawMenuBarItem(item)
+
+                // trio integration only works with nightscout, so don't draw it's views for other providers
+                if s.cgmProvider != .nightscout && [.loopstatus, .eventualglucose, .cob, .iob].contains(item.type) {
+                    EmptyView()
+                } else {
+                    drawMenuBarItem(item)
+                }
             }
         }
     }

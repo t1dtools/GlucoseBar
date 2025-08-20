@@ -45,6 +45,7 @@ struct GlucoseSourceExtraProperties {
     var enactedAt: Date? = nil
     var forecasts: OpenAPSForecasts = OpenAPSForecasts(iob: nil, cob: nil, zt: nil, uam: nil)
     var glucoseTarget: Double? = nil
+    var error: String? = nil
 }
 
 struct OpenAPSForecasts: Decodable {

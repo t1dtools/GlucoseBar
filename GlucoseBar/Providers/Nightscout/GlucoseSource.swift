@@ -37,6 +37,8 @@ public enum ForecastDisplay: String, CaseIterable, Identifiable {
 
 class GlucoseSource: Nightscout, @unchecked Sendable {
 
+    private let httpTimeout = 120.0
+
     @MainActor
     public func checkDeviceStatusForGSE() async -> GlucoseSourceDevice {
         logger.debug("Nightscout.GlucoseSource.checkDeviceStatusForGSE")
@@ -47,7 +49,7 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
         let url = "\(baseURL)/api/v3/devicestatus?sort%24desc=created_at&limit=1&skip=0&fields=_all"
 
         do {
-            var request = URLRequest(url: URL(string: url)!, timeoutInterval: 60)
+            var request = URLRequest(url: URL(string: url)!, timeoutInterval: httpTimeout)
             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
             request.addValue("application/json", forHTTPHeaderField: "Accept")
             request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -110,7 +112,19 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
             }
 
         } catch {
-            self.logger.error("Error parsing NS response: \(String(describing: error))")
+
+            var err = String(describing: error)
+            if (error as? URLError)?.code == .timedOut {
+                err = "Unable to get Trio data: Request timed out"
+            }
+
+            DispatchQueue.global().sync {
+                var gsep = GlucoseSourceExtraProperties()
+                gsep.error = err
+                self.GlucoseSourceExtras = gsep
+            }
+
+            self.logger.error("Error parsing NS response: \(err)")
             return .null
         }
     }
@@ -127,7 +141,7 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
         let url = "\(baseURL)/api/v3/devicestatus?sort%24desc=created_at&limit=1&skip=0&fields=_all"
 
         do {
-            var request = URLRequest(url: URL(string: url)!, timeoutInterval: 60)
+            var request = URLRequest(url: URL(string: url)!, timeoutInterval: httpTimeout)
             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
             request.addValue("application/json", forHTTPHeaderField: "Accept")
             request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -181,7 +195,12 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
                 self.logger.error("Unable to decode NS response when checking for GSE: \(String(describing: error))")
             }
         } catch {
-            self.logger.error("Error parsing NS response: \(String(describing: error))")
+            var err = String(describing: error)
+            if (error as? URLError)?.code == .timedOut {
+                err = "Unable to get Trio data: Request timed out"
+            }
+
+            self.logger.error("Error fetching GlucoseSourceExtra: \(err)")
         }
 
         return empty

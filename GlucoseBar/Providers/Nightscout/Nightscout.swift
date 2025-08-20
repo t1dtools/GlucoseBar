@@ -13,11 +13,12 @@ class Nightscout: Provider, @unchecked Sendable {
     public var validSettings: Bool = true
     public var settingsError: String = ""
 
+    private let httpTimeout = 120.0
+
     private var lastFullFetch: Date = Date()
 
     var baseURL: String
     var token: String
-    var isTrio: Bool = false
     
     init(baseURL: String, token: String) {
         
@@ -66,8 +67,6 @@ class Nightscout: Provider, @unchecked Sendable {
         logger.debug("Nightscout.fetch")
         if token.count > 0 && !isAuthValid() {
             await authenticate()
-            await self.fetch()
-            return
         }
 
         self.providerIssue = nil
@@ -98,7 +97,7 @@ class Nightscout: Provider, @unchecked Sendable {
 
         let lim = limit // Needs to be a constant to not be "Reference to captured var 'limit' in concurrently-executing code"
         do {
-            var request = URLRequest(url: URL(string: url)!, timeoutInterval: 30)
+            var request = URLRequest(url: URL(string: url)!, timeoutInterval: httpTimeout)
             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
             request.addValue("application/json", forHTTPHeaderField: "Accept")
 
@@ -182,7 +181,13 @@ class Nightscout: Provider, @unchecked Sendable {
             }
         } catch {
             DispatchQueue.main.async {
-                self.providerIssue = "Nightscout Error: \(String(describing: error))"
+                var err = String(describing: error)
+
+                if (error as? URLError)?.code == .timedOut {
+                    err = "Request timed out"
+                }
+
+                self.providerIssue = err
             }
         }
     }
@@ -251,9 +256,7 @@ class Nightscout: Provider, @unchecked Sendable {
     private func authenticate() async {
 
         if !baseURL.hasPrefix("https://") && !baseURL.hasPrefix("http://") {
-            DispatchQueue.main.async {
-                self.providerIssue = "Invalid Nightscout URL. Must start with either http:// or https://"
-            }
+            self.providerIssue = "Invalid Nightscout URL. Must start with either http:// or https://"
             return
         }
 
@@ -263,7 +266,7 @@ class Nightscout: Provider, @unchecked Sendable {
         }
 
         self.logger.debug("Nightscout.authenticate")
-        var request = URLRequest(url: URL(string: "\(baseURL)/api/v2/authorization/request/\(token)")!,timeoutInterval: Double.infinity)
+        var request = URLRequest(url: URL(string: "\(baseURL)/api/v2/authorization/request/\(token)")!, timeoutInterval: httpTimeout)
         request.httpMethod = "GET"
 
         self.logger.info("Token URL: \(self.baseURL)/api/v2/authorization/request/\(self.token)")
@@ -310,7 +313,11 @@ class Nightscout: Provider, @unchecked Sendable {
                 }
             }
         } catch {
-            self.providerIssue = "Nightscout Error: \(String(describing: error))"
+            var err = "Nightscout Error: \(String(describing: error))"
+            if (error as? URLError)?.code == .timedOut {
+                err = "Request timed out"
+            }
+            self.providerIssue = err
         }
     }
 

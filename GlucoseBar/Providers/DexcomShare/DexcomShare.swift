@@ -169,7 +169,11 @@ class DexcomShare: Provider, @unchecked Sendable {
                 } catch { self.logger.error("\(String(describing: error))") }
             }
         } catch {
-            self.providerIssue = "Dexcom Share Error: \(String(describing: error))"
+            var err = "Dexcom Share Error: \(String(describing: error))"
+            if (error as? URLError)?.code == .timedOut {
+                err = "Request timed out"
+            }
+            self.providerIssue = err
         }
     }
 
@@ -218,10 +222,7 @@ class DexcomShare: Provider, @unchecked Sendable {
     // This function gets the accountID from the username and password (used for getting the sessionID)
     private func getAccountID() async {
         self.logger.debug("DexcomShare.getAccountID")
-
-//        DispatchQueue.main.async {
         self.providerIssue = nil
-//        }
 
         let url = "\(self.server.url)/General/AuthenticatePublisherAccount"
         let requestBody = DexcomShareAccountIDRequest(accountName: self.username, password: self.password, applicationId: self.dexcomApplicationID)
@@ -265,7 +266,11 @@ class DexcomShare: Provider, @unchecked Sendable {
                 self.accountID = String(data: data, encoding: .utf8)!.replacingOccurrences(of: "\"", with: "")
             }
         } catch {
-            self.providerIssue = "Dexcom Share Error: \(String(describing: error))"
+            var err = "Dexcom Share Error: \(String(describing: error))"
+            if (error as? URLError)?.code == .timedOut {
+                err = "Request timed out"
+            }
+            self.providerIssue = err
         }
     }
 
@@ -311,7 +316,11 @@ class DexcomShare: Provider, @unchecked Sendable {
                 self.sessionID = String(data: data, encoding: .utf8)!.replacingOccurrences(of: "\"", with: "")
             }
         } catch {
-            self.providerIssue = "Dexcom Share Error: \(String(describing: error))"
+            var err = "Dexcom Share Error: \(String(describing: error))"
+            if (error as? URLError)?.code == .timedOut {
+                err = "Request timed out"
+            }
+            self.providerIssue = err
         }
 
     }

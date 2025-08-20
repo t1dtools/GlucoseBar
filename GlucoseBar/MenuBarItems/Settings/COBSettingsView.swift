@@ -11,6 +11,7 @@ struct COBSettingsView: View {
     @EnvironmentObject var s: SettingsStore
     @EnvironmentObject var g: Glucose
 
+    @State private var hideZero: settingValue?
     @State private var color: settingValue?
     @State private var fontWeight: settingValue?
     @State private var showIcon: settingValue?
@@ -27,6 +28,7 @@ struct COBSettingsView: View {
             _itemSettings = ObservedObject(initialValue: container)
         }
 
+        _hideZero = State(initialValue: itemSettings.get(.hideZero))
         _color = State(initialValue: itemSettings.get(.textColor))
         _fontWeight = State(initialValue: itemSettings.get(.fontWeight))
         _showIcon = State(initialValue: itemSettings.get(.icon))
@@ -36,6 +38,16 @@ struct COBSettingsView: View {
     @MainActor @ViewBuilder
     var body: some View {
         Grid {
+            GridRow {
+                Text("Hide when 0").frame(width: 150, alignment: .leading)
+                Spacer()
+                Picker("", selection: $hideZero) {
+                    Text("Yes").tag(settingValue.hideZeroTrue)
+                    Text("No").tag(settingValue.hideZeroFalse)
+                }.onChange(of: hideZero ?? .hideZeroTrue) { _, newVal in
+                    itemSettings.set(.hideZero, newVal)
+                }.frame(width: 200).pickerStyle(SegmentedPickerStyle())
+            }
             GridRow {
                 Text("Text Color").frame(width: 150, alignment: .leading)
                 Spacer()
