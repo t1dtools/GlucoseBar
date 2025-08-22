@@ -10,6 +10,7 @@ import NightscoutKit
 import OSLog
 import AppKit
 import Network
+import Firebase
 
 class ViewState: ObservableObject, @unchecked Sendable {
     @Published var isPanePresented: Bool = false
@@ -174,6 +175,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(sleepListener(_:)),
                                                           name: NSWorkspace.didWakeNotification, object: nil)
+        UserDefaults.standard.register(defaults: ["NSApplicationCrashOnExceptions": true])
+        FirebaseApp.configure()
     }
 
     @objc private func sleepListener(_ aNotification: Notification) {

@@ -28,6 +28,8 @@
 		83A3301C2AC9F70100222445 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A3301B2AC9F70100222445 /* SettingsView.swift */; };
 		83B737A22BE9728F00B84A75 /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 83B737A12BE9728F00B84A75 /* LaunchAtLogin */; };
 		83CA4BBA2DE26ED3003E5A24 /* DeviceStatusResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CA4BB92DE26ECA003E5A24 /* DeviceStatusResponse.swift */; };
+		83CE1E802E57BA8800630629 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 83CE1E7F2E57BA8800630629 /* FirebaseCrashlytics */; };
+		83CE1E852E57BE8C00630629 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 83CE1E842E57BE8C00630629 /* GoogleService-Info.plist */; };
 		83DB10DE2DFF3FC0001ADCE7 /* GlucoseValueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10DD2DFF3FB2001ADCE7 /* GlucoseValueView.swift */; };
 		83DB10E02DFF3FCC001ADCE7 /* GlucoseTrendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10DF2DFF3FC4001ADCE7 /* GlucoseTrendView.swift */; };
 		83DB10E22DFF3FD4001ADCE7 /* GlucoseDeltaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10E12DFF3FD0001ADCE7 /* GlucoseDeltaView.swift */; };
@@ -85,6 +87,7 @@
 		83A330192AC9F69B00222445 /* GraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphView.swift; sourceTree = "<group>"; };
 		83A3301B2AC9F70100222445 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		83CA4BB92DE26ECA003E5A24 /* DeviceStatusResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusResponse.swift; sourceTree = "<group>"; };
+		83CE1E842E57BE8C00630629 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		83D76EC62C4DB616006639EF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		83DB10DD2DFF3FB2001ADCE7 /* GlucoseValueView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseValueView.swift; sourceTree = "<group>"; };
 		83DB10DF2DFF3FC4001ADCE7 /* GlucoseTrendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseTrendView.swift; sourceTree = "<group>"; };
@@ -126,6 +129,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				83EC4AC62BE972D9007285C7 /* NightscoutKit in Frameworks */,
+				83CE1E802E57BA8800630629 /* FirebaseCrashlytics in Frameworks */,
 				83B737A22BE9728F00B84A75 /* LaunchAtLogin in Frameworks */,
 				83A172382BD6F905003C5C7E /* MenuBarExtraAccess in Frameworks */,
 			);
@@ -197,6 +201,7 @@
 				836313752AC0808E0047C99D /* Glucose.swift */,
 				8381599C2BE4257F00A228F3 /* MainAppView.swift */,
 				838B25DE2BF0146F00D10DDA /* WelcomeView.swift */,
+				83CE1E842E57BE8C00630629 /* GoogleService-Info.plist */,
 			);
 			path = GlucoseBar;
 			sourceTree = "<group>";
@@ -316,6 +321,7 @@
 				8363517C2ABF6A9000BDAA96 /* Sources */,
 				8363517D2ABF6A9000BDAA96 /* Frameworks */,
 				8363517E2ABF6A9000BDAA96 /* Resources */,
+				83CE1E812E57BB9300630629 /* Crashlytics Upload */,
 			);
 			buildRules = (
 			);
@@ -326,6 +332,7 @@
 				83A172372BD6F905003C5C7E /* MenuBarExtraAccess */,
 				83B737A12BE9728F00B84A75 /* LaunchAtLogin */,
 				83EC4AC52BE972D9007285C7 /* NightscoutKit */,
+				83CE1E7F2E57BA8800630629 /* FirebaseCrashlytics */,
 			);
 			productName = GlucoseBar;
 			productReference = 836351802ABF6A9000BDAA96 /* GlucoseBar.app */;
@@ -359,6 +366,7 @@
 				836313682ABF824C0047C99D /* XCLocalSwiftPackageReference "../swift-deps/NightscoutKit" */,
 				8312CEA72AC78C7900CD4FC9 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
 				83A172362BD6F905003C5C7E /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */,
+				83CE1E7E2E57BA8800630629 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			productRefGroup = 836351812ABF6A9000BDAA96 /* Products */;
 			projectDirPath = "";
@@ -376,10 +384,38 @@
 			files = (
 				8363518B2ABF6A9000BDAA96 /* Preview Assets.xcassets in Resources */,
 				836351882ABF6A9000BDAA96 /* Assets.xcassets in Resources */,
+				83CE1E852E57BE8C00630629 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		83CE1E812E57BB9300630629 /* Crashlytics Upload */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
+				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}.debug.dylib",
+			);
+			name = "Crashlytics Upload";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		8363517C2ABF6A9000BDAA96 /* Sources */ = {
@@ -575,8 +611,9 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 64;
+				CURRENT_PROJECT_VERSION = 65;
 				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"GlucoseBar/Preview Content\"";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -592,6 +629,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.3.0;
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = t1d.tools.GlucoseBar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -610,7 +648,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 64;
+				CURRENT_PROJECT_VERSION = 65;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"GlucoseBar/Preview Content\"";
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -627,6 +665,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.3.0;
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = t1d.tools.GlucoseBar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -682,6 +721,14 @@
 				minimumVersion = 1.0.5;
 			};
 		};
+		83CE1E7E2E57BA8800630629 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.1.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -694,6 +741,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8312CEA72AC78C7900CD4FC9 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */;
 			productName = LaunchAtLogin;
+		};
+		83CE1E7F2E57BA8800630629 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 83CE1E7E2E57BA8800630629 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
 		};
 		83EC4AC52BE972D9007285C7 /* NightscoutKit */ = {
 			isa = XCSwiftPackageProductDependency;
