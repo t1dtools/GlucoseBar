@@ -89,7 +89,6 @@ struct DrawConeForecast: ChartContent {
         var minForTime: [Date: Double] = [:]
         var maxForTime: [Date: Double] = [:]
 
-        // TODO: Figure out how to avoid weird fingers when one line is shorter than others https://discord.com/channels/@me/1052707464916766860/1381054035980714014
         var counters: [ForecastType: Int] = [:]
         for entry in entries {
             if entry.forecastType != .none {

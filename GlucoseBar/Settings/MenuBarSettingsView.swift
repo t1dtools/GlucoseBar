@@ -92,6 +92,9 @@ struct MenuBarSettingsView: View {
             case .glucosedelta:
                 GlucoseDeltaView(viewSettings: item)
                     .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+            case .glucosedot:
+                ZenModeView()
+                    .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
 
             case .loopstatus:
                 LoopStatusView(viewSettings: item)
@@ -126,6 +129,8 @@ struct MenuBarSettingsView: View {
             GlucoseTrendSettingsView(viewSettings: item)
         case .glucosedelta:
             GlucoseDeltaSettingsView(viewSettings: item)
+        case .glucosedot:
+            ZenModeSettingsView()
 
         case .loopstatus:
             LoopStatusSettingsView(viewSettings: item)

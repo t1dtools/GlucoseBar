@@ -48,7 +48,9 @@ struct CGMSettingsView: View {
                     Text("Token").frame(width: 130, alignment: .leading)
                     Spacer()
                     TextField("", text: $s.nsSecret).textFieldStyle(RoundedBorderTextFieldStyle())
-                        .focused($nsSecretFailedValidationFocus)
+                        .focused($nsSecretFailedValidationFocus).onChange(of: s.nsSecret) { _, newVal in
+                            s.nsSecret = newVal.trimmingCharacters(in: .whitespacesAndNewlines)
+                        }
                 }
                 if nsSecretFailedValidation {
                     HStack {
@@ -71,9 +73,22 @@ struct CGMSettingsView: View {
                         }.pickerStyle(SegmentedPickerStyle()).frame(width: 200)
                     }
                     HStack {
-                        Text("Pull extra information from Nightscout to show Loop Status, IOB, COB, Eventual Glucose, prediction lines and more").font(.footnote)
+                        Text("Trio is an Open Source Automated Insulin Delivery system, that can upload it's algorithm output to Nightscout with every successful Loop.").font(.footnote)
                         Spacer()
                     }
+                    HStack {
+                        Text("Enabling this integration will pull extra information from Nightscout to show Loop Status, IOB, COB, Eventual Glucose, prediction lines and more.").font(.footnote)
+                        Spacer()
+                    }
+                    HStack {
+                        Text("Not seeing your AID of choice here? Open an issue on GitHub and lets see if we get it implemented.").font(.footnote)
+                        Spacer()
+                        Button(action: {
+                            NSWorkspace.shared.open(URL(string: "https://github.com/t1dtools/GlucoseBar/issues?q=sort%3Aupdated-desc%20state%3Aopen%20label%3Aaid-integration")!)
+                        }) {
+                            Text("Open GitHub Issues")
+                        }
+                    }.padding(.top, 20)
                 }.padding(.top, 10)
             }
         }
@@ -158,6 +173,7 @@ struct CGMSettingsView: View {
                         isValidating = true
                         Task {
                             validatedProvider = s.cgmProvider
+                            g.reset(s)
                             let providerTest = await s.testCGMProvider()
 
                             cgmCredentialsError = !providerTest
@@ -196,8 +212,33 @@ struct CGMSettingsView: View {
                         return
                     }
                     s.save()
+                    g.reset(s)
                 }.disabled(isValidating)
             }
+        }
+    }
+
+    struct ProviderSelection: View {
+
+        @EnvironmentObject var s: SettingsStore
+
+        var body: some View {
+            HStack {
+                Text("Provider")
+                Spacer()
+                Picker("", selection: $s.cgmProvider) {
+                    if s.cgmProvider == .null {
+                        Text("Select a provider").tag(CGMProvider.null).selectionDisabled()
+                    }
+                    ForEach(CGMProvider.allCases) { provider in
+                        if provider != .null && provider != .librelinkup {
+                            Text(provider.presentable).tag(provider)
+                        }
+                    }
+                }.frame(width: 200).onChange(of: s.trioChartForecastDisplay) {
+                    s.save()
+                }
+            }.padding()
         }
     }
 
@@ -207,61 +248,28 @@ struct CGMSettingsView: View {
                 Text("Select CGM").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal).padding(.top)
 
                 GroupBox {
-                    HStack {
-                        Text("Provider")
-                        Spacer()
-                        Picker("", selection: $s.cgmProvider) {
-                            ForEach(CGMProvider.allCases) { provider in
-                                if provider != .null && provider != .librelinkup {
-                                    Text(provider.presentable).tag(provider)
-                                }
-                            }
-                        }.frame(width: 200).onChange(of: s.trioChartForecastDisplay) {
-                            s.save()
-                        }
-                    }.padding()
+                    ProviderSelection()
                 }.padding(.horizontal).padding(.bottom)
 
-                VStack {
-                    Text("\(s.cgmProvider.presentable) Settings").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.leading)
-                    GroupBox {
-                        if s.cgmProvider == .simulator {
-                            SimulatorView().padding()
-                        }
+                if s.cgmProvider != .null {
+                    VStack {
+                        Text("\(s.cgmProvider.presentable) Settings").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.leading)
+                        GroupBox {
+                            if s.cgmProvider == .simulator {
+                                SimulatorView().padding()
+                            }
 
-                        if s.cgmProvider == .nightscout {
-                            NightscoutView().padding()
-                        }
+                            if s.cgmProvider == .nightscout {
+                                NightscoutView().padding()
+                            }
 
-                        if s.cgmProvider == .dexcomshare {
-                            DexcomShareView(s: _s).padding()
-                        }
+                            if s.cgmProvider == .dexcomshare {
+                                DexcomShareView(s: _s).padding()
+                            }
+                        }.padding(.horizontal).padding(.bottom)
 
-                        //                    if s.cgmProvider == .librelinkup {
-                        //                        HStack {
-                        //                            Text("Email").frame(width: 130, alignment: .leading)
-                        //                            Spacer()
-                        //                            TextField("", text: $s.libreUsername).autocorrectionDisabled(true)
-                        //                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                        //                        }
-                        //                        HStack {
-                        //                            Text("Password").frame(width: 130, alignment: .leading)
-                        //                            Spacer()
-                        //                            SecureField("", text: $s.librePassword).textFieldStyle(RoundedBorderTextFieldStyle())
-                        //                        }
-                        //                        HStack {
-                        //                            Text("Following").frame(width: 130, alignment: .leading)
-                        //                            Spacer()
-                        //                            if cgmCredentialsSuccess {
-                        //                                g.provider.getConnectionView(s: s)
-                        //                            } else {
-                        //                                Text("Please click \"Test Connection\" to display following options.").font(.footnote)
-                        //                            }
-                        //                        }
-                        //                    }
-                    }.padding(.horizontal).padding(.bottom)
-
-                    Validation().padding(.horizontal).padding(.bottom)
+                        Validation().padding(.horizontal).padding(.bottom)
+                    }
                 }
             }
         }

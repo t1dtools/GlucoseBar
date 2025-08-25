@@ -76,5 +76,5 @@ struct SettingsView: View {
 }
 
 #Preview {
-    SettingsView().environmentObject(SettingsStore()).environmentObject(Glucose())
+    SettingsView().environmentObject(SettingsStore()).environmentObject(Glucose(SettingsStore()))
 }

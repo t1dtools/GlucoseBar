@@ -82,7 +82,7 @@ class Simulator: Provider, @unchecked Sendable {
 
             trend = getValidTrend(trend)
 
-            self.logger.info("Range based on previousEntry: \(range) - \(trend.arrows)")
+//            self.logger.info("Range based on previousEntry: \(range) - \(trend.arrows)")
         }
 
 

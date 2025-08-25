@@ -31,49 +31,79 @@ class Glucose: ObservableObject, Sendable {
     let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "glucose")
     let notificationCenter = NotificationCenter.default
 
-    public init() {
+    public init(_ settingsStore: SettingsStore) {
         provider = Provider()
         settings = SettingsStore()
 
         timer = DispatchTimer(timeInterval: 5, queue: DispatchQueue(label: "tools.t1d.GlucoseBar.CGMQueue"))
         timer.suspend()
-        timer.eventHandler = { [self] in
-
-            if self.settings.cgmProvider != self.provider.type {
-                self.setSettings(settings)
-            }
-            var shouldFetch: Bool = false
-            if !vs.isOnline {
-                shouldFetch = false
-                self.logger.info("Aborting fetch because network is offline")
-                return
-            }
-
-            if self.provider.lastFetch.timeIntervalSinceNow <= -60 {
-                shouldFetch = true
-                self.logger.info("Glucose.timer initiating fetch because last fetch was over 1 minute ago")
-            }
-
-            if let entries = self.entries, let firstEntry = entries.first {
-                if firstEntry.date.timeIntervalSinceNow <= -300 && self.provider.lastFetch.timeIntervalSinceNow <= -10 {
-                    shouldFetch = true
-                    self.logger.info("Glucose.timer initiating fetch because latest reading is over 5 minutes old and last fetch was over 10 seconds ago")
-                }
-            }
-
-            if shouldFetch {
-                Task {
-                    await self.provider.fetch()
-                }
-            }
-
-            DispatchQueue.main.async {
-                self.getGlucose()
-            }
-        }
+        timer.eventHandler = timerEventHandler
         timer.resume()
 
         registerForNotifications()
+    }
+
+    func timerEventHandler() {
+        if self.settings.cgmProvider != self.provider.type {
+            self.setSettings(settings)
+        }
+        var shouldFetch: Bool = false
+        if !vs.isOnline {
+            shouldFetch = false
+            self.logger.info("Aborting fetch because network is offline")
+            return
+        }
+
+        if self.provider.lastFetch.timeIntervalSinceNow <= -60 {
+            shouldFetch = true
+            self.logger.info("Glucose.timer initiating fetch because last fetch was over 1 minute ago")
+        }
+
+        if let entries = self.entries, let firstEntry = entries.first {
+            if firstEntry.date.timeIntervalSinceNow <= -300 && self.provider.lastFetch.timeIntervalSinceNow <= -10 {
+                shouldFetch = true
+                self.logger.info("Glucose.timer initiating fetch because latest reading is over 5 minutes old and last fetch was over 10 seconds ago")
+            }
+        }
+
+        if shouldFetch {
+            Task {
+                await self.provider.fetch()
+            }
+        }
+
+        DispatchQueue.main.async {
+            self.getGlucose()
+        }
+    }
+
+    func reset(_ settings: SettingsStore) {
+
+        self.setSettings(settings)
+        self.entries = nil
+        self.fetchedGlucose = false
+        self.glucose = 0.0
+        self.delta = 0.0
+        self.glucoseTime = Date()
+        self.glucoseAge = ""
+        self.trend = ""
+
+        // Load provider
+        switch settings.cgmProvider {
+            case .dexcomshare:
+            provider = DexcomShare(username: settings.dxEmail, password: settings.dxPassword, server: settings.dxServer)
+        case .nightscout:
+            provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret)
+        default:
+            provider = Simulator("defaulted")
+        }
+
+        timer = DispatchTimer(timeInterval: 5, queue: DispatchQueue(label: "tools.t1d.GlucoseBar.CGMQueue"))
+        timer.suspend()
+        timer.eventHandler = timerEventHandler
+        timer.resume()
+
+        self.logger.info("Reset glucose object")
     }
 
     func registerForNotifications() {
@@ -100,8 +130,6 @@ class Glucose: ObservableObject, Sendable {
                     self.provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret)
                 case .dexcomshare:
                     self.provider = DexcomShare(username: settings.dxEmail, password: settings.dxPassword, server: settings.dxServer)
-//                case .librelinkup:
-//                    self.provider = LibreLinkUp(username: settings.libreUsername, password: settings.librePassword)
                 case .simulator:
                     self.provider = Simulator("simulate")
                 default:

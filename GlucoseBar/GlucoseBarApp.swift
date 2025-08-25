@@ -52,12 +52,17 @@ struct GlucoseBarApp: App {
 
     @State private var title: Text = Text("GlucoseBar")
     @State private var hasSettings: Bool = true
+    @State private var mainViewPresented: Bool = false
 
     let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "main")
 
     @StateObject var s: SettingsStore = SettingsStore()
-    @StateObject var g: Glucose = Glucose()
+    @StateObject var g: Glucose = Glucose(SettingsStore())
     @StateObject var vs: ViewState = ViewState()
+
+//    init() {
+//        _s = StateObject(wrappedValue: SettingsStore(g.settings))
+//    }
 
     func CreateTitleText() -> String {
         var t = formatGlucoseForDisplay(settings: s, glucose: g.glucose) + " " + g.trend
@@ -123,12 +128,24 @@ struct GlucoseBarApp: App {
                 .environmentObject(g)
                 .environmentObject(s)
                 .environmentObject(vs)
+                .onAppear {
+                    mainViewPresented = true
+                }.onDisappear {
+                    mainViewPresented = false
+                }
         } label: {
             if !s.validSettings {
                 Label(
                     title: { Text("Configure") },
                     icon: { Image(systemName: "book.and.wrench.fill") }
-                ).labelStyle(.titleAndIcon)
+                ).labelStyle(.titleAndIcon).onAppear {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        if !mainViewPresented {
+                            let statusItem = NSApp.windows.first?.value(forKey: "statusItem") as? NSStatusItem
+                            statusItem?.button?.performClick(nil)
+                        }
+                    }
+                }
             } else if g.error != "" && s.validSettings && vs.isOnline {
                 Label(
                     title: { Text("Error") },
@@ -146,6 +163,7 @@ struct GlucoseBarApp: App {
             }
         }
         .menuBarExtraStyle(.window)
+
 //        .menuBarExtraAccess(isPresented: $vs.isPanePresented) { _ in
 //        }
 

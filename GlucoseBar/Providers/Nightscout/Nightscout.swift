@@ -101,7 +101,7 @@ class Nightscout: Provider, @unchecked Sendable {
             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
             request.addValue("application/json", forHTTPHeaderField: "Accept")
 
-            if self.token.count > 0 {
+            if self.auth?.token.count ?? 0 > 0 {
                 request.addValue("Bearer \(auth!.token)", forHTTPHeaderField: "Authorization")
             }
 
@@ -290,14 +290,14 @@ class Nightscout: Provider, @unchecked Sendable {
             } else {
                 do {
                     let result = try JSONDecoder().decode(NightscoutAuthResponse.self, from: data)
-                    self.auth = ProviderAuth(token: result.token, expiry: result.exp)
+//                    self.auth = ProviderAuth(token: result.token, expiry: result.exp)
 
                     DispatchQueue.main.async {
                         self.auth = ProviderAuth(token: result.token, expiry: result.exp)
                     }
 
                     isAuthenticating = false
-                    self.logger.debug("Authentication is now successful. No more now please!")
+                    self.logger.debug("Authentication is successful.")
                     
                     // Check glucose source device to see if we support extra features
                     let gs = GlucoseSource(baseURL: self.baseURL, token: result.token)

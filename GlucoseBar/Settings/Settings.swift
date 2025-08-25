@@ -40,6 +40,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     // MenuBar layout options
     @Published var showMenuBarIcon: Bool = false
     @Published var menuBarItems: [MenuBarItemContainer] = []
+    @Published var zenMode: Bool = false
 
     // Trio Specifics
     @Published var trioEnableIntegration: Bool = false
@@ -66,6 +67,11 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     func load() {
 
         let defaults = UserDefaults.standard
+
+        // Clear everything for testing purposes
+//        let domain = Bundle.main.bundleIdentifier!
+//        defaults.removePersistentDomain(forName: domain)
+//        UserDefaults.standard.synchronize()
 
         self.validSettings = defaults.bool(forKey: "validSettings")
 
@@ -127,11 +133,10 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
             }
         }
 
+        self.zenMode = defaults.bool(forKey: "zenMode")
+
         let cgmProv = defaults.string(forKey: "cgmProvider") ?? ""
         switch cgmProv {
-        case "":
-            self.cgmProvider = .simulator
-            self.logger.debug("cgmProvider was '' (empty)")
         case CGMProvider.simulator.presentable:
             self.cgmProvider = .simulator
             self.logger.debug("cgmProvider was simulator")
@@ -169,18 +174,15 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         if self.glucoseTarget == 0 {
             self.glucoseTarget = 100.0
         }
-        let colorScheme = defaults.string(forKey: "glucoseColorScheme") ?? GlucoseColorScheme.staticColor.displayName
-        switch colorScheme {
-        case GlucoseColorScheme.staticColor.displayName:
-            DispatchQueue.main.async {
+
+        let colorScheme = defaults.string(forKey: "glucoseColorScheme") ?? GlucoseColorScheme.dynamicColor.displayName
+        DispatchQueue.main.async {
+            switch colorScheme {
+            case GlucoseColorScheme.staticColor.displayName:
                 self.glucoseColorScheme = .staticColor
-            }
-        case GlucoseColorScheme.dynamicColor.displayName:
-            DispatchQueue.main.async {
+            case GlucoseColorScheme.dynamicColor.displayName:
                 self.glucoseColorScheme = .dynamicColor
-            }
-        default:
-            DispatchQueue.main.async {
+            default:
                 self.glucoseColorScheme = .dynamicColor
             }
         }
@@ -235,6 +237,8 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
             logger.error("failed to encode menuBarItems object: \(error.localizedDescription)")
         }
 
+        defaults.set(self.zenMode, forKey: "zenMode")
+
         defaults.set(self.graphMinutes, forKey: "graphMinutes")
 
         defaults.set(self.highThreshold, forKey: "highThreshold")
@@ -268,6 +272,9 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         defaults.set(self.trioChartShowCOB, forKey: "trioChartShowCOB")
         defaults.set(self.trioChartShowEventualGlucose, forKey: "trioChartShowEventualGlucose")
         defaults.set(self.trioChartShowLoopStatus, forKey: "trioChartShowLoopStatus")
+
+        defaults.synchronize()
+        self.load()
     }
 
     func deleteCGMProvider() {
@@ -304,9 +311,6 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         case .dexcomshare:
             self.logger.debug("testCGMProvider.dexcomshare")
             provider = DexcomShare(username: self.dxEmail, password: self.dxPassword, server: self.dxServer)
-//        case .librelinkup:
-//            self.logger.debug("testCGMProvider.librelinkup")
-//            provider = LibreLinkUp(username: self.libreUsername, password: self.librePassword)
         default:
             self.logger.debug("testCGMProvider.simulator")
             provider = Simulator("")

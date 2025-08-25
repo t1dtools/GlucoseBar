@@ -137,6 +137,7 @@ struct GraphView: View {
     }
 
     @FocusState var buttonFocusState
+    @FocusState var zenModeFocusState
 
     var body: some View {
         var data = getGraphData()
@@ -286,5 +287,5 @@ struct GraphView: View {
 }
 
 #Preview {
-    GraphView(glucose: Glucose()).environmentObject(SettingsStore())
+    GraphView(glucose: Glucose(SettingsStore())).environmentObject(SettingsStore())
 }

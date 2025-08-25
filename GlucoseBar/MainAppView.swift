@@ -32,6 +32,24 @@ struct MainAppView: View {
         .focusEffectDisabled()
     }
 
+    func ZenModeButton() -> some View {
+        Button(action: {
+            s.zenMode = !s.zenMode
+            s.save()
+        }) {
+            HStack {
+                Image(systemName: s.zenMode ? "circle.fill" : "circle").foregroundColor(getDynamicGlucoseColor(glucoseValue: Decimal(g.glucose), highGlucoseColorValue: Decimal(s.highThreshold), lowGlucoseColorValue: Decimal(s.lowThreshold), targetGlucose: Decimal(s.glucoseTarget), glucoseColorScheme: .dynamicColor))
+                Text("Zen Mode")
+            }
+        }
+        .keyboardShortcut("z", modifiers: .command)
+        .buttonStyle(.plain)
+        .padding(4)
+        .focusEffectDisabled()
+        .padding()
+
+    }
+
     func SettingsButton() -> some View {
         SettingsLink{
             HStack {
@@ -57,7 +75,7 @@ struct MainAppView: View {
         }) {
             HStack {
                 Image(systemName: "link")
-                Text("Visit Nightscout")
+                Text("Nightscout")
             }.contentShape(Rectangle())
         }
         .contentShape(Rectangle())
@@ -97,6 +115,8 @@ struct MainAppView: View {
                 VStack {
                     GraphView(glucose: g).environmentObject(s).environmentObject(vs)
                     HStack {
+                        ZenModeButton().help("Replaces your configured items in the menu bar with a circle that changes color based on glucose levels.")
+                        Spacer()
                         if s.cgmProvider == .nightscout {
                             NightscoutButton()
                         }
@@ -146,7 +166,7 @@ struct MainAppView: View {
 
 #Preview {
     MainAppView()
-        .environmentObject(Glucose())
+        .environmentObject(Glucose(SettingsStore()))
         .environmentObject(SettingsStore())
         .environmentObject(ViewState())
 }

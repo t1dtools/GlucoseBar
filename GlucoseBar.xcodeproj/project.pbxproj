@@ -19,6 +19,8 @@
 		8363518B2ABF6A9000BDAA96 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8363518A2ABF6A9000BDAA96 /* Preview Assets.xcassets */; };
 		836D26592DFF3D7C007A5D01 /* GlucoseViewBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836D26582DFF3D74007A5D01 /* GlucoseViewBuilder.swift */; };
 		8381599D2BE4257F00A228F3 /* MainAppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8381599C2BE4257F00A228F3 /* MainAppView.swift */; };
+		83849C052E5CF18200BFD090 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 83849C042E5CF18200BFD090 /* InfoPlist.xcstrings */; };
+		83849C072E5CF18200BFD090 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 83849C062E5CF18200BFD090 /* Localizable.xcstrings */; };
 		838B25DF2BF0146F00D10DDA /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 838B25DE2BF0146F00D10DDA /* WelcomeView.swift */; };
 		83A105112E0DE77600C4B7BD /* GlucoseValueSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A105102E0DE77100C4B7BD /* GlucoseValueSettingsView.swift */; };
 		83A105132E0DF85900C4B7BD /* LoopStatusSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A105122E0DF85500C4B7BD /* LoopStatusSettingsView.swift */; };
@@ -30,6 +32,9 @@
 		83CA4BBA2DE26ED3003E5A24 /* DeviceStatusResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CA4BB92DE26ECA003E5A24 /* DeviceStatusResponse.swift */; };
 		83CE1E802E57BA8800630629 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 83CE1E7F2E57BA8800630629 /* FirebaseCrashlytics */; };
 		83CE1E852E57BE8C00630629 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 83CE1E842E57BE8C00630629 /* GoogleService-Info.plist */; };
+		83CE1E872E5906D000630629 /* ZenModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CE1E862E5906CB00630629 /* ZenModeView.swift */; };
+		83CE1E8A2E5917E300630629 /* ZenModeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CE1E892E5917DD00630629 /* ZenModeSettingsView.swift */; };
+		83CE1E8C2E59239700630629 /* GlucoseAgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CE1E8B2E59238E00630629 /* GlucoseAgeView.swift */; };
 		83DB10DE2DFF3FC0001ADCE7 /* GlucoseValueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10DD2DFF3FB2001ADCE7 /* GlucoseValueView.swift */; };
 		83DB10E02DFF3FCC001ADCE7 /* GlucoseTrendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10DF2DFF3FC4001ADCE7 /* GlucoseTrendView.swift */; };
 		83DB10E22DFF3FD4001ADCE7 /* GlucoseDeltaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10E12DFF3FD0001ADCE7 /* GlucoseDeltaView.swift */; };
@@ -80,6 +85,8 @@
 		8363518C2ABF6A9000BDAA96 /* GlucoseBar.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GlucoseBar.entitlements; sourceTree = "<group>"; };
 		836D26582DFF3D74007A5D01 /* GlucoseViewBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseViewBuilder.swift; sourceTree = "<group>"; };
 		8381599C2BE4257F00A228F3 /* MainAppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainAppView.swift; sourceTree = "<group>"; };
+		83849C042E5CF18200BFD090 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = InfoPlist.xcstrings; path = GlucoseBar/InfoPlist.xcstrings; sourceTree = SOURCE_ROOT; };
+		83849C062E5CF18200BFD090 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = Localizable.xcstrings; path = GlucoseBar/Localizable.xcstrings; sourceTree = SOURCE_ROOT; };
 		838B25DE2BF0146F00D10DDA /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		83A105102E0DE77100C4B7BD /* GlucoseValueSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseValueSettingsView.swift; sourceTree = "<group>"; };
 		83A105122E0DF85500C4B7BD /* LoopStatusSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopStatusSettingsView.swift; sourceTree = "<group>"; };
@@ -88,6 +95,9 @@
 		83A3301B2AC9F70100222445 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		83CA4BB92DE26ECA003E5A24 /* DeviceStatusResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusResponse.swift; sourceTree = "<group>"; };
 		83CE1E842E57BE8C00630629 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		83CE1E862E5906CB00630629 /* ZenModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenModeView.swift; sourceTree = "<group>"; };
+		83CE1E892E5917DD00630629 /* ZenModeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenModeSettingsView.swift; sourceTree = "<group>"; };
+		83CE1E8B2E59238E00630629 /* GlucoseAgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseAgeView.swift; sourceTree = "<group>"; };
 		83D76EC62C4DB616006639EF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		83DB10DD2DFF3FB2001ADCE7 /* GlucoseValueView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseValueView.swift; sourceTree = "<group>"; };
 		83DB10DF2DFF3FC4001ADCE7 /* GlucoseTrendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseTrendView.swift; sourceTree = "<group>"; };
@@ -186,6 +196,8 @@
 		836351822ABF6A9000BDAA96 /* GlucoseBar */ = {
 			isa = PBXGroup;
 			children = (
+				83849C042E5CF18200BFD090 /* InfoPlist.xcstrings */,
+				83849C062E5CF18200BFD090 /* Localizable.xcstrings */,
 				83DB10EB2DFF40AA001ADCE7 /* Common */,
 				836D26572DFF3C34007A5D01 /* MenuBarItems */,
 				83E1980D2DEE5B9500B0F995 /* Settings */,
@@ -217,6 +229,7 @@
 		836D26572DFF3C34007A5D01 /* MenuBarItems */ = {
 			isa = PBXGroup;
 			children = (
+				83CE1E8B2E59238E00630629 /* GlucoseAgeView.swift */,
 				83A1050F2E0DE76300C4B7BD /* Settings */,
 				83DB10F42E00B080001ADCE7 /* SeparatorView.swift */,
 				83DB10F22E009730001ADCE7 /* MenuBarItem.swift */,
@@ -228,6 +241,7 @@
 				83DB10DF2DFF3FC4001ADCE7 /* GlucoseTrendView.swift */,
 				83DB10DD2DFF3FB2001ADCE7 /* GlucoseValueView.swift */,
 				836D26582DFF3D74007A5D01 /* GlucoseViewBuilder.swift */,
+				83CE1E862E5906CB00630629 /* ZenModeView.swift */,
 			);
 			path = MenuBarItems;
 			sourceTree = "<group>";
@@ -235,6 +249,7 @@
 		83A1050F2E0DE76300C4B7BD /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				83CE1E892E5917DD00630629 /* ZenModeSettingsView.swift */,
 				83F850312E42A27C00F8699F /* SeparatorSettingsView.swift */,
 				83F8502F2E42A1C400F8699F /* IOBSettingsView.swift */,
 				83F8502D2E42A18A00F8699F /* COBSettingsView.swift */,
@@ -360,6 +375,9 @@
 			knownRegions = (
 				en,
 				Base,
+				da,
+				sv,
+				fr,
 			);
 			mainGroup = 836351772ABF6A9000BDAA96;
 			packageReferences = (
@@ -383,7 +401,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				8363518B2ABF6A9000BDAA96 /* Preview Assets.xcassets in Resources */,
+				83849C072E5CF18200BFD090 /* Localizable.xcstrings in Resources */,
 				836351882ABF6A9000BDAA96 /* Assets.xcassets in Resources */,
+				83849C052E5CF18200BFD090 /* InfoPlist.xcstrings in Resources */,
 				83CE1E852E57BE8C00630629 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -447,6 +467,8 @@
 				83CA4BBA2DE26ED3003E5A24 /* DeviceStatusResponse.swift in Sources */,
 				83A3301C2AC9F70100222445 /* SettingsView.swift in Sources */,
 				83F888412B1A888000A50E74 /* LibreLinkUp.swift in Sources */,
+				83CE1E8C2E59239700630629 /* GlucoseAgeView.swift in Sources */,
+				83CE1E872E5906D000630629 /* ZenModeView.swift in Sources */,
 				836313762AC0808E0047C99D /* Glucose.swift in Sources */,
 				834621282ADDACB20024048E /* Simulator.swift in Sources */,
 				83DB10ED2DFF40B3001ADCE7 /* RelativeTime.swift in Sources */,
@@ -468,6 +490,7 @@
 				83DB10DE2DFF3FC0001ADCE7 /* GlucoseValueView.swift in Sources */,
 				83E1980F2DEE5E6800B0F995 /* CGMSettingsView.swift in Sources */,
 				83F8502A2E42A02400F8699F /* GlucoseTrendSettingsView.swift in Sources */,
+				83CE1E8A2E5917E300630629 /* ZenModeSettingsView.swift in Sources */,
 				83E198032DEB595700B0F995 /* DrawGlucose.swift in Sources */,
 				83DB10F12DFF45B0001ADCE7 /* GlucoseOps.swift in Sources */,
 				83DF71B22AEDA9EB00FC0566 /* Nightscout.swift in Sources */,
@@ -611,7 +634,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 65;
+				CURRENT_PROJECT_VERSION = 66;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"GlucoseBar/Preview Content\"";
@@ -648,7 +671,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 65;
+				CURRENT_PROJECT_VERSION = 66;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"GlucoseBar/Preview Content\"";
 				ENABLE_HARDENED_RUNTIME = YES;

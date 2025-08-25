@@ -1,0 +1,1371 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        }
+      }
+    },
+    "-" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "-"
+          }
+        }
+      }
+    },
+    "(%@)" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(%@)"
+          }
+        }
+      }
+    },
+    "/" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/"
+          }
+        }
+      }
+    },
+    "\\" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\\"
+          }
+        }
+      }
+    },
+    "%@" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        }
+      }
+    },
+    "%@ %@" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@"
+          }
+        }
+      }
+    },
+    "%@ Settings" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Indstillinger"
+          }
+        }
+      }
+    },
+    "%@ Version: %@ (%@) " : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ Version: %2$@ (%3$@) "
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ Version: %2$@ (%3$@) "
+          }
+        }
+      }
+    },
+    "•" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "•"
+          }
+        }
+      }
+    },
+    "+ Add" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ Tilføj"
+          }
+        }
+      }
+    },
+    "|" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "|"
+          }
+        }
+      }
+    },
+    "3" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3"
+          }
+        }
+      }
+    },
+    "3 Hours" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 Timer"
+          }
+        }
+      }
+    },
+    "6" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "6"
+          }
+        }
+      }
+    },
+    "6 Hours" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "6 Timer"
+          }
+        }
+      }
+    },
+    "12" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12"
+          }
+        }
+      }
+    },
+    "12 Hours" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12 Timer"
+          }
+        }
+      }
+    },
+    "24" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24"
+          }
+        }
+      }
+    },
+    "24 Hours" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24 Timer"
+          }
+        }
+      }
+    },
+    "Additional Info: %@" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yderligere Information: %@"
+          }
+        }
+      }
+    },
+    "After COB Value" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Efter COB Værdi"
+          }
+        }
+      }
+    },
+    "After Eventual Glucose Value" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Efter Eventuel Glukoseværdi"
+          }
+        }
+      }
+    },
+    "After Glucose Value" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Efter Glukoseværdi"
+          }
+        }
+      }
+    },
+    "After IOB Value" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Efter IOB Værdi"
+          }
+        }
+      }
+    },
+    "Are you sure you want to remove data for %@?" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Er du sikker på, at du vil fjerne data for %@?"
+          }
+        }
+      }
+    },
+    "Before COB Value" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Før COB Værdi"
+          }
+        }
+      }
+    },
+    "Before Eventual Glucose Value" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Før Eventuel Glukoseværdi"
+          }
+        }
+      }
+    },
+    "Before Glucose Value" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Før Glukoseværdi"
+          }
+        }
+      }
+    },
+    "Before IOB Value" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Før IOB Værdi"
+          }
+        }
+      }
+    },
+    "Bold" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fed"
+          }
+        }
+      }
+    },
+    "Cancel" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annullér"
+          }
+        }
+      }
+    },
+    "Carb Orange Color" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kulhydrat Orange Farve"
+          }
+        }
+      }
+    },
+    "Carbs On Board" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kulhydrater Om Bord (COB)"
+          }
+        }
+      }
+    },
+    "CGM" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CGM"
+          }
+        }
+      }
+    },
+    "Chart Data" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grafdata"
+          }
+        }
+      }
+    },
+    "Chart View Options" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indstillinger for Graf"
+          }
+        }
+      }
+    },
+    "Check the settings and make sure your CGM source (%@) is responding." : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontroller indstillingerne og sørg for at din CGM-kilde (%@) fungerer korrekt."
+          }
+        }
+      }
+    },
+    "Click to edit, or drag to reorder items." : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klik for at redigere, eller træk for at omarrangere elementer."
+          }
+        }
+      }
+    },
+    "Configure" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konfigurer"
+          }
+        }
+      }
+    },
+    "Connection OK" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forbindelse OK"
+          }
+        }
+      }
+    },
+    "Default" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard"
+          }
+        }
+      }
+    },
+    "Default Color" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard Farve"
+          }
+        }
+      }
+    },
+    "Delete" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slet"
+          }
+        }
+      }
+    },
+    "Delete data for %@?" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slet data for %@?"
+          }
+        }
+      }
+    },
+    "Dexcom Region" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dexcom Region"
+          }
+        }
+      }
+    },
+    "Display" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vis"
+          }
+        }
+      }
+    },
+    "Dynamic" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dynamisk"
+          }
+        }
+      }
+    },
+    "Dynamic Glucose Color" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dynamisk Glukose Farve"
+          }
+        }
+      }
+    },
+    "Email or Username" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E-mail eller brugernavn"
+          }
+        }
+      }
+    },
+    "Enable Trio Integration" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktiver Trio Integration"
+          }
+        }
+      }
+    },
+    "Enabling this integration will pull extra information from Nightscout to show Loop Status, IOB, COB, Eventual Glucose, prediction lines and more." : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktivering af denne integration vil trække ekstra information fra Nightscout for at vise Loop Status, IOB, COB, Eventual Glucose, forudsigelse linjer og mere."
+          }
+        }
+      }
+    },
+    "Error" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fejl"
+          }
+        }
+      }
+    },
+    "Eventual Glucose" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eventuel Glukose"
+          }
+        }
+      }
+    },
+    "Font Weight" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Font Vægt"
+          }
+        }
+      }
+    },
+    "Forecast Kind" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prognose Type"
+          }
+        }
+      }
+    },
+    "ForecastSeries" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prognoseserie"
+          }
+        }
+      }
+    },
+    "General" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generel"
+          }
+        }
+      }
+    },
+    "Glucose" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glukose"
+          }
+        }
+      }
+    },
+    "Glucose Chart Color Scheme" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glukose Graf Farveskema"
+          }
+        }
+      }
+    },
+    "Glucose Options" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glukose Indstillinger"
+          }
+        }
+      }
+    },
+    "Glucose Unit" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glukose Enhed"
+          }
+        }
+      }
+    },
+    "GlucoseBar" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GlucoseBar"
+          }
+        }
+      }
+    },
+    "GlucoseBar has detected Trio data in your Nightscout instance, and is able to show you some of the data from there." : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GlucoseBar har opdaget Trio data i din Nightscout-instans, og er i stand til at vise dig nogle af de data derfra."
+          }
+        }
+      }
+    },
+    "Hi,\nI'm GlucoseBar." : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hej,\nJeg er GlucoseBar."
+          }
+        }
+      }
+    },
+    "Hidden" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skjult"
+          }
+        }
+      }
+    },
+    "Hide when 0" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skjul ved 0"
+          }
+        }
+      }
+    },
+    "High" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Høj"
+          }
+        }
+      }
+    },
+    "High Threshold" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Høj Grænseværdi"
+          }
+        }
+      }
+    },
+    "I'm a privacy first application that lives here in the menu bar on your Mac, providing you a quick way to glance at your Continous Glucose Monitor (CGM) readings, from places like Nightscout and Dexcom" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeg er en menulinie app der respekterer dine private data, og jeg bor i din menulinie. Jeg giver dig en nem måde at hurtigt få et overblik over din Continous Glucose Monitor (CGM) data, fra services som Nightscout og Dexcom"
+          }
+        }
+      }
+    },
+    "Icon" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ikon"
+          }
+        }
+      }
+    },
+    "Icon Location" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ikon Placering"
+          }
+        }
+      }
+    },
+    "Insulin Blue Color" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blå Insulin Farve"
+          }
+        }
+      }
+    },
+    "Insulin On Board" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insulin Om Bord (IOB)"
+          }
+        }
+      }
+    },
+    "Invalid credentials or service unreachable" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ugyldige legitimationsoplysninger eller tjeneste utilgængelig"
+          }
+        }
+      }
+    },
+    "Launch at Login" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start ved login"
+          }
+        }
+      }
+    },
+    "Launch Behavior" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start Adfærd"
+          }
+        }
+      }
+    },
+    "Light" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lys"
+          }
+        }
+      }
+    },
+    "Live Preview" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live Forhåndsvisning"
+          }
+        }
+      }
+    },
+    "Loop Icon and Time Since Loop" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop Ikon og tid siden Loop"
+          }
+        }
+      }
+    },
+    "Loop Icon Only" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kun Loop Ikon"
+          }
+        }
+      }
+    },
+    "Loop Status and time since last loop" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop Status og tid siden sidste loop"
+          }
+        }
+      }
+    },
+    "Low" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lav"
+          }
+        }
+      }
+    },
+    "Low Threshold" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lav Grænseværdi"
+          }
+        }
+      }
+    },
+    "Max Value" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Max Værdi"
+          }
+        }
+      }
+    },
+    "Menu Bar" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menulinje"
+          }
+        }
+      }
+    },
+    "Menu Bar Settings" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indstillinger For Menulinje"
+          }
+        }
+      }
+    },
+    "Min Value" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Min Værdi"
+          }
+        }
+      }
+    },
+    "Nightscout" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nightscout"
+          }
+        }
+      }
+    },
+    "No" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nej"
+          }
+        }
+      }
+    },
+    "Not seeing your AID of choice here? Open an issue on GitHub and lets see if we get it implemented." : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ser du ikke din AID her? Åben et issue på GitHub og lad os se om vi kan få det implementeret."
+          }
+        }
+      }
+    },
+    "Offline" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offline"
+          }
+        }
+      }
+    },
+    "Open GitHub Issues" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Åbn GitHub Issues"
+          }
+        }
+      }
+    },
+    "Password" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Password"
+          }
+        }
+      }
+    },
+    "Provider" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Udbyder"
+          }
+        }
+      }
+    },
+    "Provider issue: %@" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Udbyderproblem: %@"
+          }
+        }
+      }
+    },
+    "Quit" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afslut"
+          }
+        }
+      }
+    },
+    "Regular" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normal"
+          }
+        }
+      }
+    },
+    "Remove %@" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fjern %@"
+          }
+        }
+      }
+    },
+    "Replaces your configured items in the menu bar with a circle that changes color based on glucose levels." : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erstatter dine indstillede punkter i menulinjen med en cirkel, der ændrer farve baseret på glukoseniveauer."
+          }
+        }
+      }
+    },
+    "Save" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gem"
+          }
+        }
+      }
+    },
+    "Select a provider" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vælg en udbyder"
+          }
+        }
+      }
+    },
+    "Select CGM" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vælg CGM"
+          }
+        }
+      }
+    },
+    "Separator" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Separator"
+          }
+        }
+      }
+    },
+    "Separator Color" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Separator Farve"
+          }
+        }
+      }
+    },
+    "Server URL" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Server URL"
+          }
+        }
+      }
+    },
+    "Settings" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indstillinger"
+          }
+        }
+      }
+    },
+    "Show Carbs On Board" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vis Kulhydrater Om Bord (COB)"
+          }
+        }
+      }
+    },
+    "Show Eventual Glucose" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vis Eventuel Blodsukker"
+          }
+        }
+      }
+    },
+    "Show Forecast" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vis Prognose"
+          }
+        }
+      }
+    },
+    "Show Insulin On Board" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vis Insulin Om Bord (IOB)"
+          }
+        }
+      }
+    },
+    "Show Loop Status" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vis Loop Status"
+          }
+        }
+      }
+    },
+    "Since this is the first time we meet, you need to help me access your Glucose data. Head over to %@ Settings to get started." : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Da dette er første gang, vi mødes, har jeg brug for hjælp med at få adgang til dine glukosedata. Gå over til %@ Indstillinger for at komme i gang."
+          }
+        }
+      }
+    },
+    "Single Color" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enkel Farve"
+          }
+        }
+      }
+    },
+    "Static" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Statisk"
+          }
+        }
+      }
+    },
+    "Static Glucose Color" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Statisk Glukose Farve"
+          }
+        }
+      }
+    },
+    "Symbol" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Symbol"
+          }
+        }
+      }
+    },
+    "Target" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mål"
+          }
+        }
+      }
+    },
+    "Test Connection" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test Forbindelse"
+          }
+        }
+      }
+    },
+    "Text Color" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekst Farve"
+          }
+        }
+      }
+    },
+    "The Glucose Dot does not have any settings" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glukose Dot har ingen indstillinger"
+          }
+        }
+      }
+    },
+    "The simulator has no settings and is a CGM provider implemented to enable you to test the application without connecting a real CGM provider such as Dexcom or Nightscout." : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simulatoren har ingen indstillinger og er en CGM-udbyder, der er implementeret for at gøre det muligt for dig at teste applikationen uden at forbinde en reel CGM-udbyder, såsom Dexcom eller Nightscout."
+          }
+        }
+      }
+    },
+    "The target is used to correctly color the glucose values in the chart when you have it set to use dynamic colors." : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Målet bruges til korrekt at farve glukoseværdierne i grafen når du har den indstillet til at bruge dynamiske farver."
+          }
+        }
+      }
+    },
+    "The Token is required for GlucoseBar to function correctly. Please ensure your Nightscout instance has one set up and use it here." : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token er påkrævet for at GlucoseBar kan fungere korrekt. Sørg for at din Nightscout-instans har en opsat og brug den her."
+          }
+        }
+      }
+    },
+    "These credentials are the ones from your primary Dexcom account. You must also have at least one follower in the Dexcom app." : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disse legitimationsoplysninger er dem fra din primære Dexcom konto. Du skal også have mindst én følger i Dexcom appen."
+          }
+        }
+      }
+    },
+    "This is the data you see in and around the chart when you open GlucoseBar" : {
+
+    },
+    "This token needs to have the permission \"readable\" in Nightscout." : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Denne token skal have tilladelsen \"læsbar\" i Nightscout."
+          }
+        }
+      }
+    },
+    "Time" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tid"
+          }
+        }
+      }
+    },
+    "Time Since Loop Only" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kun Tid Siden Loop"
+          }
+        }
+      }
+    },
+    "Token" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token"
+          }
+        }
+      }
+    },
+    "Trio Integration" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trio Integration"
+          }
+        }
+      }
+    },
+    "Trio is an Open Source Automated Insulin Delivery system, that can upload it's algorithm output to Nightscout with every successful Loop." : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trio er et Open Source Automated Insulin Delivery system, der kan uploade det algoritme output til Nightscout med hver vellykket Loop."
+          }
+        }
+      }
+    },
+    "Unknown" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ukendt"
+          }
+        }
+      }
+    },
+    "Weight" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vægt"
+          }
+        }
+      }
+    },
+    "Yes" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ja"
+          }
+        }
+      }
+    },
+    "Zen Mode" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zen Mode"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

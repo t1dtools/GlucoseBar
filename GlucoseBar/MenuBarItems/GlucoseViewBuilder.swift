@@ -47,6 +47,8 @@ struct MenuBarView: View {
                 GlucoseTrendView(viewSettings: item).environmentObject(s).environmentObject(g)
             case .glucosedelta:
                 GlucoseDeltaView(viewSettings: item).environmentObject(s).environmentObject(g)
+            case .glucosedot:
+                ZenModeView().environmentObject(s).environmentObject(g)
 
             case .loopstatus:
                 LoopStatusView(viewSettings: item).environmentObject(s).environmentObject(g)
@@ -77,19 +79,35 @@ struct MenuBarView: View {
         }
     }
 
+    var zenMode: any View {
+        ZenModeView().environmentObject(s).environmentObject(g)
+    }
+
     var body: some View {
-        let r = ImageRenderer(content: AnyView(menuStack))
-        let menuBarImage = r.nsImage
-        Group {
-            if menuBarImage != nil {
-                Image(nsImage: menuBarImage!)
-            } else {
-                Image(systemName: "questionmark.circle.dashed")
+        if s.zenMode {
+            let r = ImageRenderer(content: AnyView(zenMode))
+            let menuBarImage = r.nsImage
+            Group {
+                if menuBarImage != nil {
+                    Image(nsImage: menuBarImage!)
+                } else {
+                    Image(systemName: "questionmark.circle.dashed")
+                }
             }
-        }.onAppear {
-            loadMenuBarItems()
-        }.onReceive(s.$menuBarItems) {_ in
-            loadMenuBarItems()
+        } else {
+            let r = ImageRenderer(content: AnyView(menuStack))
+            let menuBarImage = r.nsImage
+            Group {
+                if menuBarImage != nil {
+                    Image(nsImage: menuBarImage!)
+                } else {
+                    Image(systemName: "questionmark.circle.dashed")
+                }
+            }.onAppear {
+                loadMenuBarItems()
+            }.onReceive(s.$menuBarItems) {_ in
+                loadMenuBarItems()
+            }
         }
     }
 }

@@ -12,6 +12,7 @@ public enum MenuBarItem: String, CaseIterable, Identifiable, Sendable, Codable {
     case glucosevalue
     case glucosetrend
     case glucosedelta
+    case glucosedot
     case loopstatus
     case eventualglucose
     case iob
@@ -26,6 +27,8 @@ public enum MenuBarItem: String, CaseIterable, Identifiable, Sendable, Codable {
             return "Glucose Trend"
         case .glucosedelta:
             return "Glucose Delta"
+        case .glucosedot:
+            return "Glucose Dot"
 
         // Trio
         case .loopstatus:
@@ -143,6 +146,8 @@ public class MenuBarItemContainer: Equatable, Identifiable, Hashable, Codable, O
                 MenuBarItemSetting(key: .textColor, value: .textColorDefault),
                 MenuBarItemSetting(key: .fontWeight, value: .fontWeightRegular),
             ]
+        case .glucosedot:
+            self.settings = []
         case .iob:
             self.settings = [
                 MenuBarItemSetting(key: .textColor, value: .textColorDefault),
@@ -234,6 +239,8 @@ public class MenuBarItemContainer: Equatable, Identifiable, Hashable, Codable, O
             return GlucoseTrendView(viewSettings: self)
         case .glucosedelta:
             return GlucoseDeltaView(viewSettings: self)
+        case .glucosedot:
+            return ZenModeView()
 
         case .loopstatus:
             return LoopStatusView(viewSettings: self)

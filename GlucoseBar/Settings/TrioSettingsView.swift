@@ -20,7 +20,7 @@ struct TrioSettingsView: View {
 
             VStack {
                 Text("Chart Data").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 10)
-                Text("This is the data you in and around the chart when you open GlucoseBar").font(.footnote).frame(maxWidth: .infinity, alignment: .leading)
+                Text("This is the data you see in and around the chart when you open GlucoseBar").font(.footnote).frame(maxWidth: .infinity, alignment: .leading)
             }.padding(.bottom).padding(.horizontal)
 
             GroupBox {
