@@ -159,10 +159,26 @@ class Nightscout: Provider, @unchecked Sendable {
                             self.GlucoseSourceExtras = gse
                         }
                     }
+                } catch let DecodingError.dataCorrupted(context) {
+                    DispatchQueue.main.async {
+                        self.providerIssue = "Unable to read data from Nightscout: Data corrupted."
+                    }
+                } catch let DecodingError.keyNotFound(key, context) {
+                    DispatchQueue.main.async {
+                        self.providerIssue = "Unable to read data from Nightscout: Missing key \(key)"
+                    }
+                } catch let DecodingError.valueNotFound(value, context) {
+                    DispatchQueue.main.async {
+                        self.providerIssue = "Unable to read data from Nightscout: Missing required value"
+                    }
+                } catch let DecodingError.typeMismatch(t, context) {
+                    DispatchQueue.main.async {
+                        self.providerIssue = "Unable to read data from Nightscout: Value type mismatch. Is this a new version of Nightscout?"
+                    }
                 } catch {
                     self.logger.error("Error parsing NS response: \(String(describing: error))")
                     DispatchQueue.main.async {
-                        self.providerIssue = "Unable to get glucose data: \(String(describing: error))"
+                        self.providerIssue = "Unable to parse glucose data from nightscout: Error unknown."
                     }
                 }
             } else if res!.statusCode == 401 {
@@ -290,7 +306,6 @@ class Nightscout: Provider, @unchecked Sendable {
             } else {
                 do {
                     let result = try JSONDecoder().decode(NightscoutAuthResponse.self, from: data)
-//                    self.auth = ProviderAuth(token: result.token, expiry: result.exp)
 
                     DispatchQueue.main.async {
                         self.auth = ProviderAuth(token: result.token, expiry: result.exp)

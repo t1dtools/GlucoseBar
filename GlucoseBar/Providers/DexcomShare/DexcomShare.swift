@@ -165,8 +165,17 @@ class DexcomShare: Provider, @unchecked Sendable {
 
                     self.GlucoseEntries = self.dexcomEntriesToGlucoseEntries(input: result, previous: previous)
                     self.lastFetch = Date()
-
-                } catch { self.logger.error("\(String(describing: error))") }
+                } catch let DecodingError.dataCorrupted(context) {
+                    self.providerIssue = "Unable to read data from Dexcom Share: Data corrupted."
+                } catch let DecodingError.keyNotFound(key, context) {
+                    self.providerIssue = "Unable to read data from Dexcom Share: Missing key \(key)"
+                } catch let DecodingError.valueNotFound(value, context) {
+                    self.providerIssue = "Unable to read data from Dexcom Share: Missing required value"
+                } catch let DecodingError.typeMismatch(t, context) {
+                    self.providerIssue = "Unable to read data from Dexcom Share: Value type mismatch."
+                } catch {
+                    self.logger.error("\(String(describing: error))")
+                }
             }
         } catch {
             var err = "Dexcom Share Error: \(String(describing: error))"
@@ -254,6 +263,14 @@ class DexcomShare: Provider, @unchecked Sendable {
                     if result.Code == "AccountPasswordInvalid" {
                         providerError! += " (If you've gotten this error a few times in a row, this could also mean that the Dexcom servers have given you a short timeout before you can login again)"
                     }
+                } catch let DecodingError.dataCorrupted(context) {
+                    providerError = "Unable to read data from Dexcom Share: Data corrupted."
+                } catch let DecodingError.keyNotFound(key, context) {
+                    providerError = "Unable to read data from Dexcom Share: Missing key \(key)"
+                } catch let DecodingError.valueNotFound(value, context) {
+                    providerError = "Unable to read data from Dexcom Share: Missing required value"
+                } catch let DecodingError.typeMismatch(t, context) {
+                    providerError = "Unable to read data from Dexcom Share: Value type mismatch."
                 } catch {
                     providerError = "Unknown Dexcom Share Issue"
                     self.logger.error("Unknown Dexcom Share Issue: \(String(describing: error))")
@@ -305,6 +322,14 @@ class DexcomShare: Provider, @unchecked Sendable {
                 do {
                     let result = try JSONDecoder().decode(DexcomShareErrorResponse.self, from: data)
                     providerError = "\(result.Code): \(result.Message)"
+                } catch let DecodingError.dataCorrupted(context) {
+                    providerError = "Unable to read data from Dexcom: Data corrupted."
+                } catch let DecodingError.keyNotFound(key, context) {
+                    providerError = "Unable to read data from Dexcom Share: Missing key \(key)"
+                } catch let DecodingError.valueNotFound(value, context) {
+                    providerError = "Unable to read data from Nightscout: Missing required value"
+                } catch let DecodingError.typeMismatch(t, context) {
+                    providerError = "Unable to read data from Nightscout: Value type mismatch. Is this a new version of Nightscout?"
                 } catch {
                     providerError = "Unknown Dexcom Share Issue"
                     self.logger.error("Unknown Dexcom Share Issue: \(String(describing: error))")
