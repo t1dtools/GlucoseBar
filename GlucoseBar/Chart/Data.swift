@@ -15,6 +15,7 @@ struct GraphEntry {
     var delta: Double
     var color: Color
     var forecastType: ForecastType
+    var glucoseType: GlucoseEntry.GlucoseType?
 }
 
 public enum ForecastType: String, CaseIterable, Identifiable {

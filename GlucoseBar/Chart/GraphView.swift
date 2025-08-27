@@ -56,7 +56,7 @@ struct GraphView: View {
 
                     let color = getDynamicGlucoseColor(glucoseValue: Decimal(convertGlucose(s, glucose: entry.glucose)), highGlucoseColorValue: highThresholdRuleMark, lowGlucoseColorValue: lowThresholdRuleMark, targetGlucose: Decimal(convertGlucose(s, glucose: glucoseTarget)), glucoseColorScheme: s.glucoseColorScheme)
 
-                    data.append(GraphEntry(date: entry.date, value: glu, trend: entry.trend ?? .notComputable, delta: delta, color: color, forecastType: .none))
+                    data.append(GraphEntry(date: entry.date, value: glu, trend: entry.trend ?? .notComputable, delta: delta, color: color, forecastType: .none, glucoseType: entry.glucoseType))
                 }
             }
         }
