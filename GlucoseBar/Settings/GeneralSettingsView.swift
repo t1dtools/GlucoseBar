@@ -28,7 +28,7 @@ struct GeneralSettingsView: View {
             let value = midline + amplitude * sine  // Scale to desired glucose range
 
             let color = getDynamicGlucoseColor(glucoseValue: Decimal(value), highGlucoseColorValue: 180, lowGlucoseColorValue: 70, targetGlucose: Decimal(90), glucoseColorScheme: scheme)
-            entries.append(GraphEntry(date: date, value: value, trend: .notComputable, delta: 0, color: color, forecastType: .none))
+            entries.append(GraphEntry(date: date, value: value, trend: .notComputable, delta: 0, color: color, forecastType: .none, glucoseType: .sensor))
         }
 
         return entries

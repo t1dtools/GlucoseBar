@@ -204,7 +204,7 @@ class DexcomShare: Provider, @unchecked Sendable {
                 changeRate = Double(lastValue - dxEntry.Value)
             }
 
-            let entry = GlucoseEntry(glucose: Double(dxEntry.Value), date: date, trend: trend, changeRate: changeRate)
+            let entry = GlucoseEntry(glucose: Double(dxEntry.Value), date: date, glucoseType: .sensor, trend: trend, changeRate: changeRate)
             ge.append(entry)
 
             lastValue = dxEntry.Value
