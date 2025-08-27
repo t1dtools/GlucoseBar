@@ -34,8 +34,8 @@ struct DrawGlucose: ChartContent {
                         .symbolSize(30)
                         .interpolationMethod(.catmullRom)
                         .symbol {
-                            Image(systemName: "drop.fill")
-                                .foregroundColor(point.color)
+                            Image(systemName: "drop.circle")
+                                .foregroundStyle(.red, point.color)
                         }
                 }
             }
