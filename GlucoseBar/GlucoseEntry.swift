@@ -59,7 +59,8 @@ public struct GlucoseEntry: Hashable {
         case downDownDown   = 7
         case notComputable  = 8
         case rateOutOfRange = 9
-        
+        case none           = 10
+
         init?(direction: String) {
             for trend in GlucoseTrend.allCases {
                 if direction == trend.direction {
@@ -67,6 +68,8 @@ public struct GlucoseEntry: Hashable {
                     return
                 }
             }
+
+            self = .notComputable
             return nil
         }
         
@@ -90,6 +93,8 @@ public struct GlucoseEntry: Hashable {
                 return "↔"
             case .rateOutOfRange:
                 return "?"
+            case .none:
+                return "↔"
             }
         }
 
@@ -113,6 +118,9 @@ public struct GlucoseEntry: Hashable {
                 return "NotComputable"
             case .rateOutOfRange:
                 return "RateOutOfRange"
+            case .none:
+                return "NONE"
+
             }
         }
     }
