@@ -30,8 +30,6 @@
 		83A3301C2AC9F70100222445 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A3301B2AC9F70100222445 /* SettingsView.swift */; };
 		83B737A22BE9728F00B84A75 /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 83B737A12BE9728F00B84A75 /* LaunchAtLogin */; };
 		83CA4BBA2DE26ED3003E5A24 /* DeviceStatusResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CA4BB92DE26ECA003E5A24 /* DeviceStatusResponse.swift */; };
-		83CE1E802E57BA8800630629 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 83CE1E7F2E57BA8800630629 /* FirebaseCrashlytics */; };
-		83CE1E852E57BE8C00630629 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 83CE1E842E57BE8C00630629 /* GoogleService-Info.plist */; };
 		83CE1E872E5906D000630629 /* ZenModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CE1E862E5906CB00630629 /* ZenModeView.swift */; };
 		83CE1E8A2E5917E300630629 /* ZenModeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CE1E892E5917DD00630629 /* ZenModeSettingsView.swift */; };
 		83CE1E8C2E59239700630629 /* GlucoseAgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CE1E8B2E59238E00630629 /* GlucoseAgeView.swift */; };
@@ -94,7 +92,6 @@
 		83A330192AC9F69B00222445 /* GraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphView.swift; sourceTree = "<group>"; };
 		83A3301B2AC9F70100222445 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		83CA4BB92DE26ECA003E5A24 /* DeviceStatusResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusResponse.swift; sourceTree = "<group>"; };
-		83CE1E842E57BE8C00630629 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		83CE1E862E5906CB00630629 /* ZenModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenModeView.swift; sourceTree = "<group>"; };
 		83CE1E892E5917DD00630629 /* ZenModeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenModeSettingsView.swift; sourceTree = "<group>"; };
 		83CE1E8B2E59238E00630629 /* GlucoseAgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseAgeView.swift; sourceTree = "<group>"; };
@@ -139,7 +136,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				83EC4AC62BE972D9007285C7 /* NightscoutKit in Frameworks */,
-				83CE1E802E57BA8800630629 /* FirebaseCrashlytics in Frameworks */,
 				83B737A22BE9728F00B84A75 /* LaunchAtLogin in Frameworks */,
 				83A172382BD6F905003C5C7E /* MenuBarExtraAccess in Frameworks */,
 			);
@@ -213,7 +209,6 @@
 				836313752AC0808E0047C99D /* Glucose.swift */,
 				8381599C2BE4257F00A228F3 /* MainAppView.swift */,
 				838B25DE2BF0146F00D10DDA /* WelcomeView.swift */,
-				83CE1E842E57BE8C00630629 /* GoogleService-Info.plist */,
 			);
 			path = GlucoseBar;
 			sourceTree = "<group>";
@@ -347,7 +342,6 @@
 				83A172372BD6F905003C5C7E /* MenuBarExtraAccess */,
 				83B737A12BE9728F00B84A75 /* LaunchAtLogin */,
 				83EC4AC52BE972D9007285C7 /* NightscoutKit */,
-				83CE1E7F2E57BA8800630629 /* FirebaseCrashlytics */,
 			);
 			productName = GlucoseBar;
 			productReference = 836351802ABF6A9000BDAA96 /* GlucoseBar.app */;
@@ -384,7 +378,6 @@
 				836313682ABF824C0047C99D /* XCLocalSwiftPackageReference "../swift-deps/NightscoutKit" */,
 				8312CEA72AC78C7900CD4FC9 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
 				83A172362BD6F905003C5C7E /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */,
-				83CE1E7E2E57BA8800630629 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			productRefGroup = 836351812ABF6A9000BDAA96 /* Products */;
 			projectDirPath = "";
@@ -404,7 +397,6 @@
 				83849C072E5CF18200BFD090 /* Localizable.xcstrings in Resources */,
 				836351882ABF6A9000BDAA96 /* Assets.xcassets in Resources */,
 				83849C052E5CF18200BFD090 /* InfoPlist.xcstrings in Resources */,
-				83CE1E852E57BE8C00630629 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -744,14 +736,6 @@
 				minimumVersion = 1.0.5;
 			};
 		};
-		83CE1E7E2E57BA8800630629 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 12.1.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -764,11 +748,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8312CEA72AC78C7900CD4FC9 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */;
 			productName = LaunchAtLogin;
-		};
-		83CE1E7F2E57BA8800630629 /* FirebaseCrashlytics */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 83CE1E7E2E57BA8800630629 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseCrashlytics;
 		};
 		83EC4AC52BE972D9007285C7 /* NightscoutKit */ = {
 			isa = XCSwiftPackageProductDependency;
