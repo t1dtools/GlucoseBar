@@ -73,7 +73,7 @@ struct MenuBarView: View {
                 if s.cgmProvider != .nightscout && [.loopstatus, .eventualglucose, .cob, .iob].contains(item.type) {
                     EmptyView()
                 } else {
-                    drawMenuBarItem(item)
+                    drawMenuBarItem(item).fixedSize()
                 }
             }
         }
