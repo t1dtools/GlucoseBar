@@ -81,7 +81,7 @@ struct MenuBarSettingsView: View {
 
     @ViewBuilder
     func drawMenuBarItem(_ item: MenuBarItemContainer) -> some View {
-        VStack {
+        Group {
             switch item.type {
             case .glucosevalue:
                 GlucoseValueView(viewSettings: item)
@@ -113,11 +113,13 @@ struct MenuBarSettingsView: View {
                 SeparatorView(viewSettings: item)
                     .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
             }
+        }
+            .frame(height: 24)
+            .offset(y: focusedMenuBarItem == item ? 9 : 0)
 
-            if focusedMenuBarItem == item {
-                Image(systemName: "arrowtriangle.up.fill").foregroundStyle(.blue).frame(width: 10, height: 10)
-            }
-        }.padding(.top, focusedMenuBarItem == item ? 17 : 0)
+        if focusedMenuBarItem == item {
+            Image(systemName: "arrowtriangle.up.fill").foregroundStyle(.blue).frame(width: 10, height: 10).offset(y: 3)
+        }
     }
 
     @ViewBuilder
@@ -191,10 +193,6 @@ struct MenuBarSettingsView: View {
                     Spacer()
                     menu.frame(width: 100)
 
-                    // TODO: Find better placement for this button
-//                    Button("Reset") {
-//                        // TODO: Override settings with what's from storage
-//                    }
                     Button("Save") {
                         s.menuBarItems = menuBarItems
                         s.save()

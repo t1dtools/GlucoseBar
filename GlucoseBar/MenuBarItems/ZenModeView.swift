@@ -18,7 +18,7 @@ struct ZenModeView: View {
     @MainActor @ViewBuilder
     var body: some View {
         HStack {
-            drawIcon().padding(.top, 3)
+            drawIcon()
         }.frame(alignment: .leading)
     }
 
@@ -28,6 +28,7 @@ struct ZenModeView: View {
         return Image(systemName: "circle.fill")
             .foregroundColor(color)
             .fontWeight(.heavy)
+            .offset(y: 1)
     }
 }
 
