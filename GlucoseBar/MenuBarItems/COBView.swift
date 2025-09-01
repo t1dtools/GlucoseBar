@@ -14,10 +14,11 @@ struct COBView: View {
     @Environment(\.colorScheme) private var colorScheme
 
     @ObservedObject var viewSettings: MenuBarItemContainer
+    var isSettings: Bool = false
 
     @MainActor @ViewBuilder
     var body: some View {
-        if viewSettings.get(.hideZero) == .hideZeroFalse || (viewSettings.get(.hideZero) == .hideZeroTrue && g.provider.GlucoseSourceExtras.cob ?? 0 > 0) {
+        if isSettings || (viewSettings.get(.hideZero) == .hideZeroFalse || (viewSettings.get(.hideZero) == .hideZeroTrue && g.provider.GlucoseSourceExtras.cob ?? 0 > 0)) {
             HStack {
 
                 if viewSettings.get(.icon) != .iconColorHidden && viewSettings.get(.iconPlacement) == .iconPlacementLeading {

@@ -103,7 +103,7 @@ struct MenuBarSettingsView: View {
                 EventualGlucoseView(viewSettings: item)
                     .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
             case .cob:
-                COBView(viewSettings: item)
+                COBView(viewSettings: item, isSettings: true)
                     .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
             case .iob:
                 IOBView(viewSettings: item)
