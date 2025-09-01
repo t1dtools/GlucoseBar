@@ -26,6 +26,7 @@ struct GlucoseValueView: View {
             Text("\(formatGlucoseForDisplay(settings: s, glucose: g.glucose))")
                 .fontWeight(getFontWeight())
                 .foregroundStyle(getForegroundStyle())
+                .strikethrough(g.glucoseTime.timeIntervalSinceNow < -300, color: .red)
 
             if viewSettings.get(.icon) != .iconColorHidden && viewSettings.get(.iconPlacement) == .iconPlacementTrailing {
                 drawIcon()

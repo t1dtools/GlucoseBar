@@ -129,7 +129,18 @@ struct MainAppView: View {
                         HStack {
                             Spacer()
                             Label("Offline", systemImage: "bolt.horizontal").foregroundColor(.red).padding()
-                        }
+                            Spacer()
+                        }.offset(y: -10)
+                        Spacer()
+                    }
+                }
+                if g.glucoseTime.timeIntervalSinceNow < -300 {
+                    VStack {
+                        HStack {
+                            Spacer()
+                            Label("Stale Glucose: \(g.glucoseAge)", systemImage: "clock.badge.exclamationmark.fill").foregroundColor(.red).padding()
+                            Spacer()
+                        }.offset(y: -10)
                         Spacer()
                     }
                 }

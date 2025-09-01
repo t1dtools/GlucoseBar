@@ -20,6 +20,7 @@ struct GlucoseTrendView: View {
         Text("\(g.trend)")
             .fontWeight(getFontWeight())
             .foregroundStyle(getForegroundStyle())
+            .strikethrough(g.glucoseTime.timeIntervalSinceNow < -300, color: .red)
     }
 
     func getFontWeight() -> Font.Weight {

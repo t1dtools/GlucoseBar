@@ -27,10 +27,12 @@ struct IOBView: View {
                 Text(formatIOBForDisplay(iob: iob) + " U")
                     .foregroundStyle(getForegroundStyle())
                     .fontWeight(getFontWeight())
+                    .strikethrough(g.glucoseTime.timeIntervalSinceNow < -300, color: .red)
             } else {
                 Text("-")
                     .foregroundStyle(getForegroundStyle())
                     .fontWeight(getFontWeight())
+                    .strikethrough(g.glucoseTime.timeIntervalSinceNow < -300, color: .red)
             }
 
             if viewSettings.get(.icon) != .iconColorHidden && viewSettings.get(.iconPlacement) == .iconPlacementTrailing {

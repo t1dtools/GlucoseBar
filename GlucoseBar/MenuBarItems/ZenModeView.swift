@@ -14,7 +14,6 @@ struct ZenModeView: View {
 
     @Environment(\.colorScheme) private var colorScheme
 
-
     @MainActor @ViewBuilder
     var body: some View {
         HStack {
@@ -23,10 +22,16 @@ struct ZenModeView: View {
     }
 
     func drawIcon() -> some View {
-        let color = getDynamicGlucoseColor(glucoseValue: Decimal(g.glucose), highGlucoseColorValue: Decimal(s.highThreshold), lowGlucoseColorValue: Decimal(s.lowThreshold), targetGlucose: Decimal(s.glucoseTarget), glucoseColorScheme: .dynamicColor)
+        let glucoseColor = getDynamicGlucoseColor(glucoseValue: Decimal(g.glucose), highGlucoseColorValue: Decimal(s.highThreshold), lowGlucoseColorValue: Decimal(s.lowThreshold), targetGlucose: Decimal(s.glucoseTarget), glucoseColorScheme: .dynamicColor)
+        var strikeColor = glucoseColor
+        var icon = "circle.fill"
+        if g.glucoseTime.timeIntervalSinceNow < -300 {
+            icon = "circle.slash"
+            strikeColor = .red
+        }
 
-        return Image(systemName: "circle.fill")
-            .foregroundColor(color)
+        return Image(systemName: icon)
+            .foregroundStyle(strikeColor, glucoseColor)
             .fontWeight(.heavy)
             .offset(y: 1)
     }
