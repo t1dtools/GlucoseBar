@@ -159,19 +159,19 @@ class Nightscout: Provider, @unchecked Sendable {
                             self.GlucoseSourceExtras = gse
                         }
                     }
-                } catch let DecodingError.dataCorrupted(context) {
+                } catch DecodingError.dataCorrupted(_) {
                     DispatchQueue.main.async {
                         self.providerIssue = "Unable to read data from Nightscout: Data corrupted."
                     }
-                } catch let DecodingError.keyNotFound(key, context) {
+                } catch let DecodingError.keyNotFound(key, _) {
                     DispatchQueue.main.async {
                         self.providerIssue = "Unable to read data from Nightscout: Missing key \(key)"
                     }
-                } catch let DecodingError.valueNotFound(value, context) {
+                } catch DecodingError.valueNotFound(_, _) {
                     DispatchQueue.main.async {
                         self.providerIssue = "Unable to read data from Nightscout: Missing required value"
                     }
-                } catch let DecodingError.typeMismatch(t, context) {
+                } catch DecodingError.typeMismatch(_, _) {
                     DispatchQueue.main.async {
                         self.providerIssue = "Unable to read data from Nightscout: Value type mismatch. Is this a new version of Nightscout?"
                     }
