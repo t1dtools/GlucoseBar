@@ -134,7 +134,7 @@ struct MainAppView: View {
                         Spacer()
                     }
                 }
-                if g.glucoseTime.timeIntervalSinceNow < -300 {
+                if g.glucoseTime.timeIntervalSinceNow < -360 {
                     VStack {
                         HStack {
                             Spacer()
@@ -156,12 +156,6 @@ struct MainAppView: View {
 //            }
         } else {
             WelcomeView().frame(width: 400, height: 390, alignment: .leading)
-//            VStack {
-//                Text("Welcome to GlucoseBar!\n\nUse this application to keep your glucose glanceable in your menu bar at all times.\n\nGet started by configuring GlucoseBar.")
-//
-//                SettingsButton()
-//                QuitButton()
-//            }
             .padding()
             .focusable()
             .focusEffectDisabled()

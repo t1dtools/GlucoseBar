@@ -29,12 +29,12 @@ struct COBView: View {
                     Text(formatCOBForDisplay(cob: cob) + " g")
                         .foregroundStyle(getForegroundStyle())
                         .fontWeight(getFontWeight())
-                        .strikethrough(g.glucoseTime.timeIntervalSinceNow < -300, color: .red)
+                        .strikethrough(g.glucoseTime.timeIntervalSinceNow < -360, color: .red)
                 } else {
                     Text("-")
                         .foregroundStyle(getForegroundStyle())
                         .fontWeight(getFontWeight())
-                        .strikethrough(g.glucoseTime.timeIntervalSinceNow < -300, color: .red)
+                        .strikethrough(g.glucoseTime.timeIntervalSinceNow < -360, color: .red)
                 }
 
                 if viewSettings.get(.icon) != .iconColorHidden && viewSettings.get(.iconPlacement) == .iconPlacementTrailing {

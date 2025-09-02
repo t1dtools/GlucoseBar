@@ -20,7 +20,7 @@ struct GlucoseDeltaView: View {
         Text("\(formatDeltaForDisplay(settings: s, delta: g.delta))")
             .fontWeight(getFontWeight())
             .foregroundStyle(getForegroundStyle())
-            .strikethrough(g.glucoseTime.timeIntervalSinceNow < -300, color: .red)
+            .strikethrough(g.glucoseTime.timeIntervalSinceNow < -360, color: .red)
     }
 
     func getFontWeight() -> Font.Weight {

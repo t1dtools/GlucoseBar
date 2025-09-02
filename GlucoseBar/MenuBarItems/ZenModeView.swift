@@ -25,7 +25,7 @@ struct ZenModeView: View {
         let glucoseColor = getDynamicGlucoseColor(glucoseValue: Decimal(g.glucose), highGlucoseColorValue: Decimal(s.highThreshold), lowGlucoseColorValue: Decimal(s.lowThreshold), targetGlucose: Decimal(s.glucoseTarget), glucoseColorScheme: .dynamicColor)
         var strikeColor = glucoseColor
         var icon = "circle.fill"
-        if g.glucoseTime.timeIntervalSinceNow < -300 {
+        if g.glucoseTime.timeIntervalSinceNow < -360 {
             icon = "circle.slash"
             strikeColor = .red
         }
