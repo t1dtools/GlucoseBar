@@ -5,7 +5,19 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
+            "state" : "needs_review",
+            "value" : ""
+          }
+        },
+        "en" : {
+          "stringUnit" : {
             "state" : "translated",
+            "value" : ""
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
             "value" : ""
           }
         }
@@ -18,6 +30,18 @@
             "state" : "translated",
             "value" : "-"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "-"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "-"
+          }
         }
       }
     },
@@ -26,6 +50,18 @@
         "da" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "(%@)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(%@)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
             "value" : "(%@)"
           }
         }
@@ -38,6 +74,18 @@
             "state" : "translated",
             "value" : "/"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "/"
+          }
         }
       }
     },
@@ -48,6 +96,18 @@
             "state" : "translated",
             "value" : "\\"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\\"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "\\"
+          }
         }
       }
     },
@@ -56,6 +116,18 @@
         "da" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
             "value" : "%@"
           }
         }
@@ -71,7 +143,13 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
+            "value" : "%1$@ %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
             "value" : "%1$@ %2$@"
           }
         }
@@ -83,6 +161,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ Indstillinger"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Settings"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Reeglages de %@"
           }
         }
       }
@@ -97,8 +187,14 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "%1$@ Version: %2$@ (%3$@) "
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ version : %2$@ (%3$@) "
           }
         }
       }
@@ -108,6 +204,18 @@
         "da" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "•"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "•"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
             "value" : "•"
           }
         }
@@ -120,6 +228,18 @@
             "state" : "translated",
             "value" : "+ Tilføj"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ Add"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "+ ajouter"
+          }
         }
       }
     },
@@ -128,6 +248,18 @@
         "da" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "|"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "|"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
             "value" : "|"
           }
         }
@@ -140,6 +272,18 @@
             "state" : "translated",
             "value" : "3"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "3"
+          }
         }
       }
     },
@@ -148,7 +292,19 @@
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "3 Timer"
+            "value" : "3 timer"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 Hours"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "3 heures"
           }
         }
       }
@@ -160,6 +316,18 @@
             "state" : "translated",
             "value" : "6"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "6"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "6"
+          }
         }
       }
     },
@@ -167,8 +335,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "6 timer"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
             "state" : "translated",
-            "value" : "6 Timer"
+            "value" : "6 Hours"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "6 heures"
           }
         }
       }
@@ -177,7 +357,19 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "12"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
             "state" : "translated",
+            "value" : "12"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
             "value" : "12"
           }
         }
@@ -187,8 +379,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "12 timer"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
             "state" : "translated",
-            "value" : "12 Timer"
+            "value" : "12 Hours"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "12 heures"
           }
         }
       }
@@ -197,7 +401,19 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "24"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
             "state" : "translated",
+            "value" : "24"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
             "value" : "24"
           }
         }
@@ -207,8 +423,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "24 timer"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
             "state" : "translated",
-            "value" : "24 Timer"
+            "value" : "24 Hours"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "24 heures"
           }
         }
       }
@@ -217,8 +445,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Yderligere Information: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Additional Info: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Informations supplémentaires : %@"
           }
         }
       }
@@ -227,8 +467,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Efter COB Værdi"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After COB Value"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Après la valeur des glucides actifs"
           }
         }
       }
@@ -237,8 +489,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Efter Eventuel Glukoseværdi"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After Eventual Glucose Value"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Après la valeur prédite de glycémie"
           }
         }
       }
@@ -247,8 +511,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Efter Glukoseværdi"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After Glucose Value"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Après la valeur de glycémie"
           }
         }
       }
@@ -257,8 +533,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Efter IOB Værdi"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After IOB Value"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Après la valeur d’IàB"
           }
         }
       }
@@ -267,8 +555,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Er du sikker på, at du vil fjerne data for %@?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Are you sure you want to remove data for %@?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Êtes-vous sûr de vouloir supprimer les données pour %@ ?"
           }
         }
       }
@@ -277,8 +577,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Før COB Værdi"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Before COB Value"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Avant la valeur glucides actifs"
           }
         }
       }
@@ -287,8 +599,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Før Eventuel Glukoseværdi"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Before Eventual Glucose Value"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Avant la valeur prédite de glycémie"
           }
         }
       }
@@ -297,8 +621,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Før Glukoseværdi"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Before Glucose Value"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Avant la valeur de glycémie"
           }
         }
       }
@@ -307,8 +643,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Før IOB Værdi"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Before IOB Value"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Avant la valeur d'IàB"
           }
         }
       }
@@ -317,8 +665,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Fed"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bold"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Gras"
           }
         }
       }
@@ -327,8 +687,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Annuller"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
             "state" : "translated",
-            "value" : "Annullér"
+            "value" : "Cancel"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Annuler"
           }
         }
       }
@@ -337,8 +709,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Kulhydrat Orange"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
             "state" : "translated",
-            "value" : "Kulhydrat Orange Farve"
+            "value" : "Carb Orange Color"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Couleur orange pour les glucides"
           }
         }
       }
@@ -347,8 +731,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Kulhydrater Om Bord (COB)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carbs On Board"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Glucides actifs"
           }
         }
       }
@@ -357,7 +753,19 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "CGM"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
             "state" : "translated",
+            "value" : "CGM"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
             "value" : "CGM"
           }
         }
@@ -367,8 +775,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Grafdata"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chart Data"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Données du graphique"
           }
         }
       }
@@ -377,8 +797,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Indstillinger for Graf"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chart View Options"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Options d'affichage du graphique"
           }
         }
       }
@@ -387,8 +819,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Kontroller indstillingerne og sørg for at din CGM-kilde (%@) fungerer korrekt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check the settings and make sure your CGM source (%@) is responding."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Vérifiez les paramètres et assurez-vous que votre source de CGM (%@) répond."
           }
         }
       }
@@ -397,8 +841,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Klik for at redigere, eller træk for at omarrangere elementer."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click to edit, or drag to reorder items."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Cliquez pour modifier, ou faites glisser pour réorganiser les éléments."
           }
         }
       }
@@ -407,8 +863,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Konfigurer"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configure"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Configurer"
           }
         }
       }
@@ -417,8 +885,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Forbindelse OK"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connection OK"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Connexion OK"
           }
         }
       }
@@ -427,8 +907,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Standard"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Default"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Par défaut"
           }
         }
       }
@@ -437,8 +929,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Standardfarve"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
             "state" : "translated",
-            "value" : "Standard Farve"
+            "value" : "Default Color"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Couleur par défaut"
           }
         }
       }
@@ -447,8 +951,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Slet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Supprimer"
           }
         }
       }
@@ -457,8 +973,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Slet data for %@?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete data for %@?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Supprimer les données pour %@ ?"
           }
         }
       }
@@ -467,8 +995,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Dexcom Region"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
             "state" : "translated",
             "value" : "Dexcom Region"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Région de Dexcom"
           }
         }
       }
@@ -477,8 +1017,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Vis"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Display"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Affichage"
           }
         }
       }
@@ -487,8 +1039,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Dynamisk"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dynamic"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Dynamique"
           }
         }
       }
@@ -497,8 +1061,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Dynamisk Glukose Farve"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dynamic Glucose Color"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Couleur de glycémie dynamique"
           }
         }
       }
@@ -507,8 +1083,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "E-mail eller brugernavn"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Email or Username"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "E-mail ou identifiant"
           }
         }
       }
@@ -517,8 +1105,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Aktiver Trio Integration"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enable Trio Integration"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Activer l'intégration Trio"
           }
         }
       }
@@ -527,8 +1127,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Aktivering af denne integration vil trække ekstra information fra Nightscout for at vise Loop Status, IOB, COB, Eventuel Glukose, prognoselinjer og mere."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
             "state" : "translated",
-            "value" : "Aktivering af denne integration vil trække ekstra information fra Nightscout for at vise Loop Status, IOB, COB, Eventual Glucose, forudsigelse linjer og mere."
+            "value" : "Enabling this integration will pull extra information from Nightscout to show Loop Status, IOB, COB, Eventual Glucose, prediction lines and more."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Activer cette intégration permettra d'obtenir des informations supplémentaires depuis Nightscout pour afficher l'état de la boucle, l’IàB, les glucides actifs, la glycémie prédite, les lignes de prédiction, et plus encore."
           }
         }
       }
@@ -537,8 +1149,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Fejl"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Error"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Erreur"
           }
         }
       }
@@ -547,8 +1171,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Eventuel Glukose"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eventual Glucose"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Glycémie prédite"
           }
         }
       }
@@ -557,8 +1193,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Font Vægt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Font Weight"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Épaisseur de la police"
           }
         }
       }
@@ -567,8 +1215,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Prognose Type"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forecast Kind"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Type de prévision"
           }
         }
       }
@@ -577,8 +1237,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Prognoseserie"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ForecastSeries"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Séries de prévision"
           }
         }
       }
@@ -587,8 +1259,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Generel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "General"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Général"
           }
         }
       }
@@ -597,8 +1281,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Glukose"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glucose"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Glycémie"
           }
         }
       }
@@ -607,8 +1303,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Glukose Graf Farveskema"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glucose Chart Color Scheme"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Jeu de couleurs du graphique de glycémie"
           }
         }
       }
@@ -617,8 +1325,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Glukose Indstillinger"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glucose Options"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Options de glycémie"
           }
         }
       }
@@ -627,8 +1347,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Glukose Enhed"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glucose Unit"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Unité de glycémie"
           }
         }
       }
@@ -637,7 +1369,19 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "GlucoseBar"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
             "state" : "translated",
+            "value" : "GlucoseBar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
             "value" : "GlucoseBar"
           }
         }
@@ -647,8 +1391,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "GlucoseBar har opdaget Trio data i din Nightscout-instans, og er i stand til at vise dig nogle af de data derfra."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GlucoseBar has detected Trio data in your Nightscout instance, and is able to show you some of the data from there."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "GlucoseBar a détecté des données Trio dans votre instance Nightscout et est en mesure de vous montrer certaines des données à partir de là."
           }
         }
       }
@@ -657,8 +1413,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Hej,\nJeg er GlucoseBar."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hi,\nI'm GlucoseBar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Bonjour,\nJe suis GlucoseBar."
           }
         }
       }
@@ -667,8 +1435,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Skjult"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hidden"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Masqué"
           }
         }
       }
@@ -677,8 +1457,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Skjul ved 0"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hide when 0"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Masquer quand c’est à 0"
           }
         }
       }
@@ -687,8 +1479,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Høj"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "High"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Élevée"
           }
         }
       }
@@ -697,8 +1501,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Høj Grænseværdi"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "High Threshold"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Seuil Haut"
           }
         }
       }
@@ -707,8 +1523,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Jeg er en app der respekterer dine private data, og jeg bor i din menulinie. Jeg giver dig en nem måde at hurtigt få et overblik over din Continous Glucose Monitor (CGM) data, fra services som Nightscout og Dexcom"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
             "state" : "translated",
-            "value" : "Jeg er en menulinie app der respekterer dine private data, og jeg bor i din menulinie. Jeg giver dig en nem måde at hurtigt få et overblik over din Continous Glucose Monitor (CGM) data, fra services som Nightscout og Dexcom"
+            "value" : "I'm a privacy first application that lives here in the menu bar on your Mac, providing you a quick way to glance at your Continous Glucose Monitor (CGM) readings, from places like Nightscout and Dexcom"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Je suis une application axée sur la confidentialité qui vit ici dans la barre de menu de votre Mac, vous fournissant un moyen rapide de jeter un coup d'œil à vos lectures de moniteur de glyémie en continu (CGM), à partir de serveurs comme Nightscout et Dexcom"
           }
         }
       }
@@ -717,8 +1545,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Ikon"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Icon"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Icône"
           }
         }
       }
@@ -727,8 +1567,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Ikon Placering"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Icon Location"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Emplacement de l'icône"
           }
         }
       }
@@ -737,8 +1589,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Insulin Blå"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
             "state" : "translated",
-            "value" : "Blå Insulin Farve"
+            "value" : "Insulin Blue Color"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Couleur bleue de l’insuline"
           }
         }
       }
@@ -747,8 +1611,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Insulin Om Bord (IOB)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insulin On Board"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Insuline à bord (IOB)"
           }
         }
       }
@@ -757,8 +1633,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Ugyldige legitimationsoplysninger eller tjeneste utilgængelig"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invalid credentials or service unreachable"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Identifiants incorrects ou service injoignable"
           }
         }
       }
@@ -767,8 +1655,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Start ved login"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Launch at Login"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Lancer au démarrage"
           }
         }
       }
@@ -777,8 +1677,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Start Adfærd"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Launch Behavior"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Comportement de lancement"
           }
         }
       }
@@ -787,8 +1699,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Lys"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Clair"
           }
         }
       }
@@ -797,8 +1721,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Live Forhåndsvisning"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live Preview"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Prévisualisation en direct"
           }
         }
       }
@@ -807,8 +1743,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Loop ikon og tid siden Loop"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
             "state" : "translated",
-            "value" : "Loop Ikon og tid siden Loop"
+            "value" : "Loop Icon and Time Since Loop"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Icône de boucle et temps écoulé"
           }
         }
       }
@@ -817,8 +1765,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Kun Loop Ikon"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loop Icon Only"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Icône de boucle uniquement"
           }
         }
       }
@@ -827,8 +1787,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Loop status og tid siden sidste loop"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
             "state" : "translated",
-            "value" : "Loop Status og tid siden sidste loop"
+            "value" : "Loop Status and time since last loop"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Statut et temps de boucle depuis la dernière boucle"
           }
         }
       }
@@ -837,8 +1809,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Lav"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Low"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Basse"
           }
         }
       }
@@ -847,8 +1831,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Lav Grænseværdi"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Low Threshold"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Seuil Bas"
           }
         }
       }
@@ -857,8 +1853,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Max Værdi"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Max Value"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Valeur max."
           }
         }
       }
@@ -867,8 +1875,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Menulinje"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menu Bar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Barre des menus"
           }
         }
       }
@@ -877,8 +1897,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Indstillinger For Menulinje"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menu Bar Settings"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Réglages de la barre des menus"
           }
         }
       }
@@ -887,8 +1919,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Min Værdi"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Min Value"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Valeur min."
           }
         }
       }
@@ -897,7 +1941,19 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Nightscout"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
             "state" : "translated",
+            "value" : "Nightscout"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
             "value" : "Nightscout"
           }
         }
@@ -907,8 +1963,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Nej"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Non"
           }
         }
       }
@@ -917,8 +1985,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Ser du ikke din AID her? Åben et issue på GitHub og lad os se om vi kan få det implementeret."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not seeing your AID of choice here? Open an issue on GitHub and lets see if we get it implemented."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Vous ne voyez pas votre pompe préférée ici ? Créez un ticket sur GitHub et voyez si nous le faisons implémenter."
           }
         }
       }
@@ -927,8 +2007,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Offline"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
             "state" : "translated",
             "value" : "Offline"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Hors ligne"
           }
         }
       }
@@ -937,8 +2029,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Åbn GitHub Issues"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open GitHub Issues"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Ouvrir les tickets de GitHub"
           }
         }
       }
@@ -947,8 +2051,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Adgangskode"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
             "state" : "translated",
             "value" : "Password"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mot de passe"
           }
         }
       }
@@ -957,8 +2073,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Udbyder"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Provider"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Fournisseur"
           }
         }
       }
@@ -967,8 +2095,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Udbyderproblem: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Provider issue: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Problème de fournisseur : %@"
           }
         }
       }
@@ -977,8 +2117,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Afslut"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quit"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Quitter"
           }
         }
       }
@@ -987,8 +2139,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Normal"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regular"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Standard"
           }
         }
       }
@@ -997,8 +2161,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Fjern %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Supprimer %@"
           }
         }
       }
@@ -1007,8 +2183,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Erstatter dine indstillede punkter i menulinjen med en cirkel, der ændrer farve baseret på glukoseniveauer."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replaces your configured items in the menu bar with a circle that changes color based on glucose levels."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Remplace vos éléments configurés dans la barre des menus par un cercle qui change de couleur en fonction des valeurs de glycémie."
           }
         }
       }
@@ -1017,8 +2205,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Gem"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Enregistrer"
           }
         }
       }
@@ -1027,8 +2227,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Vælg en udbyder"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select a provider"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Sélectionnez un fournisseur"
           }
         }
       }
@@ -1037,8 +2249,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Vælg CGM"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select CGM"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Sélectionner le CGM"
           }
         }
       }
@@ -1047,8 +2271,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Separator"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
             "state" : "translated",
             "value" : "Separator"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Séparateur"
           }
         }
       }
@@ -1057,8 +2293,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Separator Farve"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Separator Color"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Couleur du séparateur"
           }
         }
       }
@@ -1067,8 +2315,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Server URL"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
             "state" : "translated",
             "value" : "Server URL"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "URL du serveur"
           }
         }
       }
@@ -1077,8 +2337,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Indstillinger"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Réglages"
           }
         }
       }
@@ -1087,8 +2359,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Vis Kulhydrater Om Bord (COB)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Carbs On Board"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Afficher les glucides actifs"
           }
         }
       }
@@ -1097,8 +2381,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Vis Eventuel Blodsukker"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Eventual Glucose"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Afficher la glycémie prédite"
           }
         }
       }
@@ -1107,8 +2403,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Vis Prognose"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Forecast"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Afficher les prévisions"
           }
         }
       }
@@ -1117,8 +2425,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Vis Insulin Om Bord (IOB)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Insulin On Board"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Afficher l'insuline à bord"
           }
         }
       }
@@ -1127,8 +2447,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Vis Loop Status"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Loop Status"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Afficher l'état de la boucle"
           }
         }
       }
@@ -1137,8 +2469,20 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Da dette er første gang, vi mødes, har jeg brug for hjælp med at få adgang til dine glukosedata. Gå over til %@ Indstillinger for at komme i gang."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Since this is the first time we meet, you need to help me access your Glucose data. Head over to %@ Settings to get started."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Puisque c'est la première fois que nous rencontrons, vous devez m'aider à accéder à vos données de glycémie. Rendez-vous dans les paramètres de %@ pour commencer."
           }
         }
       }
@@ -1147,8 +2491,42 @@
       "localizations" : {
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Enkel Farve"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Single Color"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Couleur unique"
+          }
+        }
+      }
+    },
+    "Stale Glucose: %@" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Gammel Glukose: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stale Glucose: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Glyceemie périmée: %@"
           }
         }
       }
@@ -1160,6 +2538,18 @@
             "state" : "translated",
             "value" : "Statisk"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Static"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Stationnaire"
+          }
         }
       }
     },
@@ -1169,6 +2559,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Statisk Glukose Farve"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Static Glucose Color"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Couleur de glycémie stationnaire"
           }
         }
       }
@@ -1180,6 +2582,18 @@
             "state" : "translated",
             "value" : "Symbol"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Symbol"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Symbole"
+          }
         }
       }
     },
@@ -1189,6 +2603,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mål"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Target"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Cible"
           }
         }
       }
@@ -1200,6 +2626,18 @@
             "state" : "translated",
             "value" : "Test Forbindelse"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test Connection"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Tester la connexion"
+          }
         }
       }
     },
@@ -1209,6 +2647,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tekst Farve"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Text Color"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Couleur du texte"
           }
         }
       }
@@ -1220,6 +2670,18 @@
             "state" : "translated",
             "value" : "Glukose Dot har ingen indstillinger"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Glucose Dot does not have any settings"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Le point de glycémie n'a aucun paramètre"
+          }
         }
       }
     },
@@ -1229,6 +2691,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Simulatoren har ingen indstillinger og er en CGM-udbyder, der er implementeret for at gøre det muligt for dig at teste applikationen uden at forbinde en reel CGM-udbyder, såsom Dexcom eller Nightscout."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The simulator has no settings and is a CGM provider implemented to enable you to test the application without connecting a real CGM provider such as Dexcom or Nightscout."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Le simulateur n'a pas de paramètres et est un fournisseur de CGM implémenté pour vous permettre de tester l'application sans vous connecter à un véritable fournisseur de CGM tel que Dexcom ou Nightscout."
           }
         }
       }
@@ -1240,6 +2714,18 @@
             "state" : "translated",
             "value" : "Målet bruges til korrekt at farve glukoseværdierne i grafen når du har den indstillet til at bruge dynamiske farver."
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The target is used to correctly color the glucose values in the chart when you have it set to use dynamic colors."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "La cible est utilisée pour colorier correctement les valeurs de glyceemie dans le graphique lorsque vous l'avez configuré pour utiliser des couleurs dynamiques."
+          }
         }
       }
     },
@@ -1249,6 +2735,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Token er påkrævet for at GlucoseBar kan fungere korrekt. Sørg for at din Nightscout-instans har en opsat og brug den her."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Token is required for GlucoseBar to function correctly. Please ensure your Nightscout instance has one set up and use it here."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Le jeton est requis pour que GlucoseBar fonctionne correctement. Veuillez vous assurer que votre instance Nightscout a une configuration et utilisez-la ici."
           }
         }
       }
@@ -1260,18 +2758,61 @@
             "state" : "translated",
             "value" : "Disse legitimationsoplysninger er dem fra din primære Dexcom konto. Du skal også have mindst én følger i Dexcom appen."
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "These credentials are the ones from your primary Dexcom account. You must also have at least one follower in the Dexcom app."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Ces identifiants sont ceux de votre compte Dexcom principal. Vous devez également avoir au moins un abonné dans l'application Dexcom."
+          }
         }
       }
     },
     "This is the data you see in and around the chart when you open GlucoseBar" : {
-
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dette er de data du ser i og omkring grafen, når du åbner GlucoseBar"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is the data you see in and around the chart when you open GlucoseBar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Voici les données que vous voyez dans et autour du graphique lorsque vous ouvrez GlucoseBar"
+          }
+        }
+      }
     },
     "This token needs to have the permission \"readable\" in Nightscout." : {
       "localizations" : {
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Denne token skal have tilladelsen \"læsbar\" i Nightscout."
+            "value" : "Denne token skal have tilladelsen \"læsbar\" (engelsk: \"readable\") i Nightscout."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This token needs to have the permission \"readable\" in Nightscout."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Ce jeton doit avoir la permission « lisible » dans Nightscout."
           }
         }
       }
@@ -1283,6 +2824,18 @@
             "state" : "translated",
             "value" : "Tid"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Heure"
+          }
         }
       }
     },
@@ -1292,6 +2845,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kun Tid Siden Loop"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time Since Loop Only"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Temps écoulé depuis la boucle uniquement"
           }
         }
       }
@@ -1303,6 +2868,18 @@
             "state" : "translated",
             "value" : "Token"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Jeton"
+          }
         }
       }
     },
@@ -1313,6 +2890,18 @@
             "state" : "translated",
             "value" : "Trio Integration"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trio Integration"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Intégration de Trio"
+          }
         }
       }
     },
@@ -1321,7 +2910,19 @@
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trio er et Open Source Automated Insulin Delivery system, der kan uploade det algoritme output til Nightscout med hver vellykket Loop."
+            "value" : "Trio er et Open Source Automated Insulin Delivery system, der kan uploade sit algoritme output til Nightscout med hver vellykket Loop."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trio is an Open Source Automated Insulin Delivery system, that can upload it's algorithm output to Nightscout with every successful Loop."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Trio est un système Open Source de système de distribution d'insuline qui peut téléverser ses valeurs d'algorithme vers Nightscout à chaque boucle réussie."
           }
         }
       }
@@ -1333,6 +2934,18 @@
             "state" : "translated",
             "value" : "Ukendt"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unknown"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Inconnu"
+          }
         }
       }
     },
@@ -1342,6 +2955,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vægt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weight"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Poids"
           }
         }
       }
@@ -1353,6 +2978,18 @@
             "state" : "translated",
             "value" : "Ja"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Oui"
+          }
         }
       }
     },
@@ -1362,6 +2999,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zen Mode"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zen Mode"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mode Zen"
           }
         }
       }
