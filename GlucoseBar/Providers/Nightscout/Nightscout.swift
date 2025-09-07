@@ -344,6 +344,7 @@ class Nightscout: Provider, @unchecked Sendable {
     override internal func verifyCredentials() async -> Bool {
         self.logger.debug("nightscout.verifyCredentials")
         await self.authenticate()
-        return true
+
+        return self.isAuthenticated
     }
 }
