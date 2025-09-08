@@ -14,9 +14,9 @@ public enum DexcomServer: String, CaseIterable, Identifiable {
     public var presentable: String {
         switch self {
         case .us:
-            return "USA"
+            return String(localized: "USA", comment: "The USA Dexcom Share region")
         case .ous:
-            return "Outside USA"
+            return String(localized: "Outside USA", comment: "The non-USA Dexcom Share region")
         }
     }
     public var url: String {
@@ -48,12 +48,12 @@ class DexcomShare: Provider, @unchecked Sendable {
     init(username: String, password: String, server: DexcomServer) {
         if username.isEmpty {
             validSettings = false
-            settingsError = "Username can not be empty"
+            settingsError = String(localized: "Username can not be empty")
         }
 
         if password.isEmpty {
             validSettings = false
-            settingsError = "Password can not be empty"
+            settingsError = String(localized: "Password can not be empty")
         }
 
         self.username = username
@@ -119,7 +119,7 @@ class DexcomShare: Provider, @unchecked Sendable {
         } catch {
             logger.info("Failed marshalling json, aborting fetch")
             DispatchQueue.main.async {
-                self.providerIssue = "Unable to create request"
+                self.providerIssue = String(localized: "Unable to create request")
             }
             return
         }
@@ -143,7 +143,7 @@ class DexcomShare: Provider, @unchecked Sendable {
 
                     providerError = "\(result.Code): \(result.Message)"
                 } catch {
-                    providerError = "Unknown Dexcom Share Issue: \(res.statusCode)"
+                    providerError = String(localized: "Unknown Dexcom Share Issue: \(res.statusCode)")
                     self.logger.error("Unknown Dexcom Share Issue: \(String(describing: error))")
 
                     self.logger.error("Request info: Status Code: \(res.statusCode)")
@@ -166,21 +166,21 @@ class DexcomShare: Provider, @unchecked Sendable {
                     self.GlucoseEntries = self.dexcomEntriesToGlucoseEntries(input: result, previous: previous)
                     self.lastFetch = Date()
                 } catch DecodingError.dataCorrupted(_) {
-                    self.providerIssue = "Unable to read data from Dexcom Share: Data corrupted."
+                    self.providerIssue = String(localized: "Unable to read data from Dexcom Share: Data corrupted.")
                 } catch let DecodingError.keyNotFound(key, _) {
-                    self.providerIssue = "Unable to read data from Dexcom Share: Missing key \(key)"
+                    self.providerIssue = String(localized: "Unable to read data from Dexcom Share: Missing key ") + "\(key)"
                 } catch DecodingError.valueNotFound(_, _) {
-                    self.providerIssue = "Unable to read data from Dexcom Share: Missing required value"
+                    self.providerIssue = String(localized: "Unable to read data from Dexcom Share: Missing required value")
                 } catch DecodingError.typeMismatch(_, _) {
-                    self.providerIssue = "Unable to read data from Dexcom Share: Value type mismatch."
+                    self.providerIssue = String(localized: "Unable to read data from Dexcom Share: Value type mismatch.")
                 } catch {
                     self.logger.error("\(String(describing: error))")
                 }
             }
         } catch {
-            var err = "Dexcom Share Error: \(String(describing: error))"
+            var err = String(localized: "Dexcom Share Error: ") + "\(String(describing: error))"
             if (error as? URLError)?.code == .timedOut {
-                err = "Request timed out"
+                err = String(localized: "Request timed out")
             }
             self.providerIssue = err
         }
@@ -261,16 +261,16 @@ class DexcomShare: Provider, @unchecked Sendable {
                     providerError = "\(result.Code): \(result.Message)"
 
                     if result.Code == "AccountPasswordInvalid" {
-                        providerError! += " (If you've gotten this error a few times in a row, this could also mean that the Dexcom servers have given you a short timeout before you can login again)"
+                        providerError! += String(localized: " (If you've gotten this error a few times in a row, this could also mean that the Dexcom servers have given you a short timeout before you can login again)")
                     }
                 } catch DecodingError.dataCorrupted(_) {
-                    providerError = "Unable to read data from Dexcom Share: Data corrupted."
+                    providerError = String(localized: "Unable to read data from Dexcom Share: Data corrupted.")
                 } catch let DecodingError.keyNotFound(key, _) {
-                    providerError = "Unable to read data from Dexcom Share: Missing key \(key)"
+                    providerError = String(localized: "Unable to read data from Dexcom Share: Missing key ") + "\(key)"
                 } catch DecodingError.valueNotFound(_, _) {
-                    providerError = "Unable to read data from Dexcom Share: Missing required value"
+                    providerError = String(localized: "Unable to read data from Dexcom Share: Missing required value")
                 } catch DecodingError.typeMismatch(_, _) {
-                    providerError = "Unable to read data from Dexcom Share: Value type mismatch."
+                    providerError = String(localized: "Unable to read data from Dexcom Share: Value type mismatch.")
                 } catch {
                     providerError = "Unknown Dexcom Share Issue"
                     self.logger.error("Unknown Dexcom Share Issue: \(String(describing: error))")
@@ -283,9 +283,9 @@ class DexcomShare: Provider, @unchecked Sendable {
                 self.accountID = String(data: data, encoding: .utf8)!.replacingOccurrences(of: "\"", with: "")
             }
         } catch {
-            var err = "Dexcom Share Error: \(String(describing: error))"
+            var err = String(localized: "Dexcom Share Error: ") + "\(String(describing: error))"
             if (error as? URLError)?.code == .timedOut {
-                err = "Request timed out"
+                err = String(localized: "Request timed out")
             }
             self.providerIssue = err
         }
@@ -323,15 +323,15 @@ class DexcomShare: Provider, @unchecked Sendable {
                     let result = try JSONDecoder().decode(DexcomShareErrorResponse.self, from: data)
                     providerError = "\(result.Code): \(result.Message)"
                 } catch DecodingError.dataCorrupted(_) {
-                    providerError = "Unable to read data from Dexcom: Data corrupted."
+                    providerError = String(localized: "Unable to read data from Dexcom: Data corrupted.")
                 } catch let DecodingError.keyNotFound(key, _) {
-                    providerError = "Unable to read data from Dexcom Share: Missing key \(key)"
+                    providerError = String(localized: "Unable to read data from Dexcom Share: Missing key ") + "\(key)"
                 } catch DecodingError.valueNotFound(_, _) {
-                    providerError = "Unable to read data from Nightscout: Missing required value"
+                    providerError = String(localized: "Unable to read data from Dexcom Share: Missing required value")
                 } catch DecodingError.typeMismatch(_, _) {
-                    providerError = "Unable to read data from Nightscout: Value type mismatch. Is this a new version of Nightscout?"
+                    providerError = String(localized: "Unable to read data from Dexcom Share: Value type mismatch.")
                 } catch {
-                    providerError = "Unknown Dexcom Share Issue"
+                    providerError = String(localized: "Unknown Dexcom Share Issue")
                     self.logger.error("Unknown Dexcom Share Issue: \(String(describing: error))")
                 }
 
@@ -341,9 +341,9 @@ class DexcomShare: Provider, @unchecked Sendable {
                 self.sessionID = String(data: data, encoding: .utf8)!.replacingOccurrences(of: "\"", with: "")
             }
         } catch {
-            var err = "Dexcom Share Error: \(String(describing: error))"
+            var err = String(localized: "Dexcom Share Error: ") + "\(String(describing: error))"
             if (error as? URLError)?.code == .timedOut {
-                err = "Request timed out"
+                err = String(localized: "Request timed out")
             }
             self.providerIssue = err
         }

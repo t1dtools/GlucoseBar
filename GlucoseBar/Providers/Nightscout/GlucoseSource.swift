@@ -14,7 +14,7 @@ public enum GlucoseSourceDevice: String, CaseIterable, Identifiable, Sendable {
     public var presentable: String {
         switch self {
         case .null:
-            return "No extras"
+            return String(localized: "No extras")
         case .trio:
             return "Trio"
         }
@@ -28,9 +28,9 @@ public enum ForecastDisplay: String, CaseIterable, Identifiable {
     public var presentable: String {
         switch self {
         case .cone:
-            return "Cone"
+            return String(localized: "Cone", comment: "Used for the forecast display selector in Trio integration to select the Cone of Uncertainty")
         case .lines:
-            return "Lines"
+            return String(localized: "Lines", comment: "Used for the forecast display selector in Trio integration to select the prediction lines")
         }
     }
 }
@@ -115,7 +115,7 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
 
             var err = String(describing: error)
             if (error as? URLError)?.code == .timedOut {
-                err = "Unable to get Trio data: Request timed out"
+                err = String(localized: "Unable to get Trio data: Request timed out")
             }
 
             DispatchQueue.global().sync {
@@ -197,7 +197,7 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
         } catch {
             var err = String(describing: error)
             if (error as? URLError)?.code == .timedOut {
-                err = "Unable to get Trio data: Request timed out"
+                err = String(localized: "Unable to get Trio data: Request timed out")
             }
 
             self.logger.error("Error fetching GlucoseSourceExtra: \(err)")

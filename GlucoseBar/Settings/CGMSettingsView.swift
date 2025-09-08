@@ -144,17 +144,13 @@ struct CGMSettingsView: View {
                         isDeletingCGMProvider = true
                     }) {
                         Image(systemName: "trash.fill").foregroundColor(.red)
-                    }.disabled(isValidating || ![.nightscout, .dexcomshare, .librelinkup].contains(s.cgmProvider)).help("Delete data for \(s.cgmProvider.presentable)?").confirmationDialog(
+                    }.disabled(isValidating || ![.nightscout, .dexcomshare].contains(s.cgmProvider)).help("Delete data for \(s.cgmProvider.presentable)?").confirmationDialog(
                         "Are you sure you want to remove data for \(s.cgmProvider.presentable)?",
                         isPresented: $isDeletingCGMProvider
                     ) {
                         Button("Delete") {
                             DispatchQueue.main.async {
                                 s.deleteCGMProvider()
-                                if g.provider.type == .librelinkup {
-                                    //                                g.provider.connections = []
-                                    g.provider.connectionID = ""
-                                }
                             }
                             isDeletingCGMProvider = false
                         }
@@ -231,7 +227,7 @@ struct CGMSettingsView: View {
                         Text("Select a provider").tag(CGMProvider.null).selectionDisabled()
                     }
                     ForEach(CGMProvider.allCases) { provider in
-                        if provider != .null && provider != .librelinkup {
+                        if provider != .null {
                             Text(provider.presentable).tag(provider)
                         }
                     }
@@ -253,7 +249,7 @@ struct CGMSettingsView: View {
 
                 if s.cgmProvider != .null {
                     VStack {
-                        Text("\(s.cgmProvider.presentable) Settings").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.leading)
+                        Text("\(s.cgmProvider.presentable) Settings", comment: "Settings for CGM providers. For example: Dexcom Share Settings").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.leading)
                         GroupBox {
                             if s.cgmProvider == .simulator {
                                 SimulatorView().padding()

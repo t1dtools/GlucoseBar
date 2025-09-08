@@ -146,9 +146,6 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         case CGMProvider.dexcomshare.presentable:
             self.cgmProvider = .dexcomshare
             self.logger.debug("cgmProvider was dexcomshare")
-        case CGMProvider.librelinkup.presentable:
-            self.cgmProvider = .librelinkup
-            self.logger.debug("cgmProvider was librelinkup")
         default:
             self.cgmProvider = .null
             self.logger.debug("cgmProvider was default")

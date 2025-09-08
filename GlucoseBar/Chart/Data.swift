@@ -30,13 +30,13 @@ public enum ForecastType: String, CaseIterable, Identifiable {
         case .none:
             return ""
         case .zt:
-            return "Zero Temp"
+            return String(localized: "Zero Temp", comment: "Zero temporary basal rate from the oref algorithmic output, used for the legend when choosing forecast lines (not necessarily translated in Trio)")
         case .uam:
-            return "Unannounced Meal"
+            return String(localized: "Unannounced Meal", comment: "Unannounced meal from the oref algorithmic output, used for the legend when choosing forecast lines (not necessarily translated in Trio)")
         case .iob:
-            return "Insulin On Board"
+            return String(localized: "Insulin On Board", comment: "Insulin on board from the oref algorithmic output, used for the legend when choosing forecast lines (not necessarily translated in Trio)")
         case .cob:
-            return "Carbs On Board"
+            return String(localized: "Carbs On Board", comment: "Carbohydrates on board from the oref algorithmic output, used for the legend when choosing forecast lines (not necessarily translated in Trio)")
         }
     }
     public var int: Int {

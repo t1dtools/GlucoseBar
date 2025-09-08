@@ -22,27 +22,27 @@ public enum MenuBarItem: String, CaseIterable, Identifiable, Sendable, Codable {
     public var name: String {
         switch self {
         case .glucosevalue:
-            return "Glucose Value"
+            return String(localized: "Glucose Value", comment: "The name of the Glucose Value menu bar item")
         case .glucosetrend:
-            return "Glucose Trend"
+            return String(localized: "Glucose Trend", comment: "The name of the Glucose Trend menu bar item")
         case .glucosedelta:
-            return "Glucose Delta"
+            return String(localized: "Glucose Delta", comment: "The name of the Glucose Delta menu bar item")
         case .glucosedot:
-            return "Glucose Dot"
+            return String(localized: "Glucose Dot", comment: "The name of the Glucose Dot menu bar item")
 
         // Trio
         case .loopstatus:
-            return "Loop Status"
+            return String(localized: "Loop Status", comment: "The name of the Loop Status menu bar item")
         case .eventualglucose:
-            return "Eventual Glucose"
+            return String(localized: "Eventual Glucose", comment: "The name of the Eventual Glucose menu bar item")
         case .iob:
-            return "Insulin On Board"
+            return String(localized: "Insulin On Board", comment: "The name of the Insulin On Board menu bar item")
         case .cob:
-            return "Carbs On Board"
+            return String(localized: "Carbs On Board", comment: "The name of the Carbs on Board menu bar item")
 
         // Separator
         case .separator:
-            return "Separator"
+            return String(localized: "Separator", comment: "The name of the Separator menu bar item")
 
         }
     }
@@ -127,7 +127,6 @@ public class MenuBarItemContainer: Equatable, Identifiable, Hashable, Codable, O
     init(type: MenuBarItem) {
         self.type = type
 
-        // TODO: Assign settings depending on type
         switch type {
         case .glucosevalue:
             self.settings = [

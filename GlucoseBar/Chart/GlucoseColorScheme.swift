@@ -11,9 +11,9 @@ public enum GlucoseColorScheme: String, CaseIterable, Identifiable, Codable, Has
     var displayName: String {
         switch self {
         case .staticColor:
-            return String(localized: "Static")
+            return String(localized: "Static", comment: "The descriptive name for the traditional glucose color scheme of red, green and yellow")
         case .dynamicColor:
-            return String(localized: "Dynamic")
+            return String(localized: "Dynamic", comment: "The descriptive name for the dynamic glucose color scheme which transitions from purple, through green over to red")
         }
     }
 }

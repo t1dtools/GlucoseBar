@@ -14,20 +14,17 @@ public enum CGMProvider: String, CaseIterable, Identifiable {
     case simulator
     case nightscout
     case dexcomshare
-    case librelinkup
     public var id: String { self.rawValue }
     public var presentable: String {
         switch self {
         case .null:
-            return "No provider"
+            return String(localized: "No provider", comment: "The name for when no CGM data provider has been chosen yet")
         case .simulator:
-            return "Simulator"
+            return String(localized: "Simulator", comment: "The name for the Simulator CGM data provider")
         case .nightscout:
-            return "Nightscout"
+            return String(localized: "Nightscout", comment: "The name for the Nightscout CGM data provider")
         case .dexcomshare:
-            return "Dexcom Share"
-        case .librelinkup:
-            return "Libre LinkUp"
+            return String(localized: "Dexcom Share", comment: "The name for the Dexcom Share CGM data provider")
         }
     }
 }
