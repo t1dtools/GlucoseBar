@@ -33,8 +33,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : " (If you've gotten this error a few times in a row, this could also mean that the Dexcom servers have given you a short timeout before you can login again)"
+            "state" : "translated",
+            "value" : " (Si vous avez reçu cette erreur plusieurs fois de suite, cela pourrait également signifier que les serveurs Dexcom vous ont imposé un court délai avant que vous puissiez vous reconnecter)"
           }
         }
       }
@@ -271,8 +271,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "< 1 min. ago"
+            "state" : "translated",
+            "value" : "Il y a <1 min."
           }
         }
       }
@@ -905,8 +905,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Cone"
+            "state" : "translated",
+            "value" : "Cône"
           }
         }
       }
@@ -1076,7 +1076,7 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Dexcom Share"
           }
         }
@@ -1092,8 +1092,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Dexcom Share Error: "
+            "state" : "translated",
+            "value" : "Erreur de Dexcom Share : "
           }
         }
       }
@@ -1419,8 +1419,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Glucose Delta"
+            "state" : "translated",
+            "value" : "Delta de glycémie"
           }
         }
       }
@@ -1436,8 +1436,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Glucose Dot"
+            "state" : "translated",
+            "value" : "Point de glycémie"
           }
         }
       }
@@ -1475,8 +1475,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Glucose Trend"
+            "state" : "translated",
+            "value" : "Tendance de la glycémie"
           }
         }
       }
@@ -1514,8 +1514,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Glucose Value"
+            "state" : "translated",
+            "value" : "Valeur de glycémie"
           }
         }
       }
@@ -1884,8 +1884,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Lines"
+            "state" : "translated",
+            "value" : "Lignes"
           }
         }
       }
@@ -1967,8 +1967,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Loop Status"
+            "state" : "translated",
+            "value" : "Statut de la boucle"
           }
         }
       }
@@ -2182,8 +2182,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No extras"
+            "state" : "translated",
+            "value" : "Aucun extra"
           }
         }
       }
@@ -2199,8 +2199,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No provider"
+            "state" : "translated",
+            "value" : "Aucun fournisseur"
           }
         }
       }
@@ -2282,8 +2282,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Outside USA"
+            "state" : "translated",
+            "value" : "Hors des États-Unis"
           }
         }
       }
@@ -2320,8 +2320,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Password can not be empty"
+            "state" : "translated",
+            "value" : "Le mot de passe ne peut pas être vide"
           }
         }
       }
@@ -2468,8 +2468,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Request timed out"
+            "state" : "translated",
+            "value" : "Requête expirée"
           }
         }
       }
@@ -2750,8 +2750,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Simulator"
+            "state" : "translated",
+            "value" : "Simulateur"
           }
         }
       }
@@ -3229,8 +3229,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unable to create request"
+            "state" : "translated",
+            "value" : "Impossible de créer la requête"
           }
         }
       }
@@ -3245,8 +3245,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unable to get Trio data: Request timed out"
+            "state" : "translated",
+            "value" : "Impossible d'obtenir les données de Trio : La requête a expiré"
           }
         }
       }
@@ -3261,8 +3261,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unable to read data from Dexcom Share: Data corrupted."
+            "state" : "translated",
+            "value" : "Impossible de lire les données du partage Dexcom : Données corrompues."
           }
         }
       }
@@ -3277,8 +3277,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unable to read data from Dexcom Share: Missing key "
+            "state" : "translated",
+            "value" : "Impossible de lire les données à partir du partage Dexcom : Clé manquante "
           }
         }
       }
@@ -3293,8 +3293,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unable to read data from Dexcom Share: Missing required value"
+            "state" : "translated",
+            "value" : "Impossible de lire les données à partir du partage Dexcom : Valeur requise manquante"
           }
         }
       }
@@ -3309,8 +3309,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unable to read data from Dexcom Share: Value type mismatch."
+            "state" : "translated",
+            "value" : "Impossible de lire les données de Dexcom Partage : Différence de type valeur."
           }
         }
       }
@@ -3325,8 +3325,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unable to read data from Dexcom: Data corrupted."
+            "state" : "translated",
+            "value" : "Impossible de lire les données de Dexcom : Données corrompues."
           }
         }
       }
@@ -3342,8 +3342,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unannounced Meal"
+            "state" : "translated",
+            "value" : "Repas non annoncé"
           }
         }
       }
@@ -3380,8 +3380,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unknown Dexcom Share Issue"
+            "state" : "translated",
+            "value" : "Problème de partage Dexcom inconnu"
           }
         }
       }
@@ -3396,8 +3396,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unknown Dexcom Share Issue: %lld"
+            "state" : "translated",
+            "value" : "Problème de partage Dexcom inconnu : %lld"
           }
         }
       }
@@ -3413,8 +3413,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "USA"
+            "state" : "translated",
+            "value" : "États-Unis"
           }
         }
       }
@@ -3429,8 +3429,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Username can not be empty"
+            "state" : "translated",
+            "value" : "Le nom d'utilisateur ne peut être vide"
           }
         }
       }
@@ -3507,12 +3507,12 @@
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nul Temp"
+            "value" : "Zero Temp"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Zero Temp"
           }
         }
