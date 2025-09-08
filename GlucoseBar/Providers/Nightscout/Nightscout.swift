@@ -298,15 +298,16 @@ class Nightscout: Provider, @unchecked Sendable {
             let res = response as! HTTPURLResponse
             if res.statusCode > 299 {
                 self.logger.debug("status code over 299: \(res.statusCode). Body: \(data)")
-                var providerError = ""
-                do {
-                    let result = try JSONDecoder().decode(NightscoutAuthErrorResponse.self, from: data)
-                    providerError = "\(result.message): \(result.description)"
-                } catch {
-                    providerError = "Unknown Nightscout Issue"
+                DispatchQueue.main.async {
+                    var providerError = ""
+                    do {
+                        let result = try JSONDecoder().decode(NightscoutAuthErrorResponse.self, from: data)
+                        providerError = "\(result.message): \(result.description)"
+                    } catch {
+                        providerError = "Unknown Nightscout Issue"
+                    }
+                    self.providerIssue = providerError
                 }
-
-                self.providerIssue = providerError
                 return
             } else {
                 do {
