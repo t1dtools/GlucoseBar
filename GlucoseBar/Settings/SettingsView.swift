@@ -48,6 +48,12 @@ struct SettingsView: View {
                             selectedItem = "Trio"
                         }
                     }
+
+                    NavigationLink(destination: AboutView().environmentObject(s)) {
+                        Label("About", systemImage: "info.circle")
+                    }.tag("About").onTapGesture {
+                        selectedItem = "About"
+                    }
                 }
                 .toolbar(removing: .sidebarToggle)
                 .listStyle(.sidebar)
@@ -60,15 +66,14 @@ struct SettingsView: View {
 //                        Spacer()
                         Button("Quit") {
                             NSApplication.shared.terminate(nil)
-                        }
+                        }.padding(.bottom, 10)
 //                    }.padding(.horizontal)
-                    Text("\(Bundle.main.appName) Version: \(Bundle.main.appVersionLong) (\(Bundle.main.appBuild)) ").font(.footnote).padding(2)
                 }.frame(alignment: .bottomTrailing).padding(.bottom, 5)
             }
         } detail: {
-            ScrollView {
+//            ScrollView {
                 GeneralSettingsView().environmentObject(s)
-            }
+//            }
         }.frame(maxHeight: .infinity, alignment: .top)
             .navigationSplitViewColumnWidth(min: 440, ideal: 440)
             .frame(minWidth: 715, maxWidth: 715, minHeight: 500, maxHeight: .infinity)

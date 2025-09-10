@@ -195,6 +195,7 @@
       }
     },
     "%@ Version: %@ (%@) " : {
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -474,6 +475,12 @@
           }
         }
       }
+    },
+    "About" : {
+
+    },
+    "Acknowledgements" : {
+
     },
     "Additional Info: %@" : {
       "localizations" : {
@@ -955,6 +962,9 @@
         }
       }
     },
+    "Danish, English" : {
+
+    },
     "Default" : {
       "localizations" : {
         "da" : {
@@ -1042,6 +1052,9 @@
           }
         }
       }
+    },
+    "Developers" : {
+
     },
     "Dexcom Region" : {
       "localizations" : {
@@ -1342,6 +1355,9 @@
         }
       }
     },
+    "French" : {
+
+    },
     "General" : {
       "localizations" : {
         "da" : {
@@ -1363,6 +1379,12 @@
           }
         }
       }
+    },
+    "Get Involved" : {
+
+    },
+    "GitHub" : {
+
     },
     "Glucose" : {
       "localizations" : {
@@ -3043,6 +3065,9 @@
         }
       }
     },
+    "These amazing people have helped make GlucoseBar a reality." : {
+
+    },
     "These credentials are the ones from your primary Dexcom account. You must also have at least one follower in the Dexcom app." : {
       "localizations" : {
         "da" : {
@@ -3174,6 +3199,9 @@
           }
         }
       }
+    },
+    "Translations" : {
+
     },
     "Trio Integration" : {
       "localizations" : {
@@ -3434,6 +3462,9 @@
           }
         }
       }
+    },
+    "We are always looking for help with ideas, bugfixes and translations. If you want to contribute, please see the GitHub respository." : {
+
     },
     "Weight" : {
       "localizations" : {

@@ -24,6 +24,15 @@ GlucoseBar is available in the following languages currently:
 
 If you would like to help translate GlucoseBar into your language, please send an email to glucosebar@t1d.tools with the language you would like to help with, and we can take it from there.
 
+### Translators
+
+This is a list of our amazing translators who have helped make GlucoseBar available in multiple languages:
+
+Name | Languages |  |
+----|----|----
+Corentin Cras-Méneur | French | [cortig.net](https://www.cortig.net/localisations), Mastodon: @cortig@mastodon.social, BlueSky: @cortig
+Andreas Stokholm | Danish, English | [@AndreasStokholm](https://github.com/AndreasStokholm)
+
 ## Readings from  Nightscout
 
 To configure nightscout, input your Nightscout instance URL with no path. Eg. `https://my.ns.service.com`. If you use a non-standard port, add that after the domain `http://my.ns.service.com:1337`.
