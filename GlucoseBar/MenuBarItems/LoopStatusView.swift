@@ -19,21 +19,23 @@ struct LoopStatusView: View {
     var body: some View {
         HStack {
 
-            if viewSettings.get(.icon) != .iconColorHidden && viewSettings.get(.iconPlacement) == .iconPlacementLeading {
+            if viewSettings.get(.displayTextAndIcon) != .displayText && viewSettings.get(.iconPlacement) == .iconPlacementLeading {
                 drawIcon()
             }
 
-            if let enactedAt = g.provider.GlucoseSourceExtras.enactedAt {
-                Text("\(relativeTime(time: enactedAt))")
-                    .foregroundStyle(getForegroundStyle())
-                    .fontWeight(getFontWeight())
-            } else {
-                Text("Unknown")
-                    .foregroundStyle(getForegroundStyle())
-                    .fontWeight(getFontWeight())
+            if viewSettings.get(.displayTextAndIcon) != .displayIcon {
+                if let enactedAt = g.provider.GlucoseSourceExtras.enactedAt {
+                    Text("\(relativeTime(time: enactedAt))")
+                        .foregroundStyle(getForegroundStyle())
+                        .fontWeight(getFontWeight())
+                } else {
+                    Text("Unknown")
+                        .foregroundStyle(getForegroundStyle())
+                        .fontWeight(getFontWeight())
+                }
             }
 
-            if viewSettings.get(.icon) != .iconColorHidden && viewSettings.get(.iconPlacement) == .iconPlacementTrailing {
+            if viewSettings.get(.displayTextAndIcon) != .displayText && viewSettings.get(.iconPlacement) == .iconPlacementTrailing {
                 drawIcon()
             }
         }.frame(alignment: .leading)

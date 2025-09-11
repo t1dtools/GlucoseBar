@@ -592,6 +592,9 @@
         }
       }
     },
+    "After Time Since Loop" : {
+
+    },
     "Are you sure you want to remove data for %@?" : {
       "localizations" : {
         "da" : {
@@ -701,6 +704,9 @@
           }
         }
       }
+    },
+    "Before Time Since Loop" : {
+
     },
     "Bold" : {
       "localizations" : {

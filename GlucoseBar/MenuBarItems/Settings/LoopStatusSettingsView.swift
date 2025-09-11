@@ -14,7 +14,6 @@ struct LoopStatusSettingsView: View {
     @State private var display: settingValue?
     @State private var color: settingValue?
     @State private var fontWeight: settingValue?
-    @State private var showIcon: settingValue?
     @State private var iconPlacement: settingValue?
 
     @ObservedObject var itemSettings: MenuBarItemContainer
@@ -31,7 +30,6 @@ struct LoopStatusSettingsView: View {
         _display = State(initialValue: itemSettings.get(.displayTextAndIcon))
         _color = State(initialValue: itemSettings.get(.textColor))
         _fontWeight = State(initialValue: itemSettings.get(.fontWeight))
-        _showIcon = State(initialValue: itemSettings.get(.icon))
         _iconPlacement = State(initialValue: itemSettings.get(.iconPlacement))
     }
 
@@ -75,13 +73,13 @@ struct LoopStatusSettingsView: View {
                 }
             }
 
-            if display == .displayBoth || display == .displayIcon {
+            if display == .displayBoth {
                 GridRow {
                     Text("Icon Location").frame(width: 150, alignment: .leading)
                     Spacer()
                     Picker("", selection: $iconPlacement) {
-                        Text("Before Glucose Value").tag(settingValue.iconPlacementLeading)
-                        Text("After Glucose Value").tag(settingValue.iconPlacementTrailing)
+                        Text("Before Time Since Loop").tag(settingValue.iconPlacementLeading)
+                        Text("After Time Since Loop").tag(settingValue.iconPlacementTrailing)
                     }.onChange(of: iconPlacement ?? .iconPlacementLeading) { _, newVal in
                         itemSettings.set(.iconPlacement, newVal)
                     }.frame(width: 200)
