@@ -95,7 +95,7 @@ struct GlucoseBarApp: App {
                     Image(
                         nsImage: NSImage(systemSymbolName: "bolt.horizontal", accessibilityDescription: "Can not start GlucoseBar while offline")!)
                 } else {
-                    Image(nsImage: NSImage(systemSymbolName: "drop.halffull", accessibilityDescription: "Starting GlucoseBar")!.withSymbolConfiguration(NSImage.SymbolConfiguration(pointSize: 16, weight: .light))!)
+                    Image(nsImage: NSImage(systemSymbolName: "drop.halffull", accessibilityDescription: "Starting GlucoseBar")!)
                 }
             }
         }
