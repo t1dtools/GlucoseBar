@@ -70,7 +70,7 @@ struct CGMSettingsView: View {
                         Picker("", selection: $s.trioEnableIntegration) {
                             Text("Yes").tag(true)
                             Text("No").tag(false)
-                        }.pickerStyle(SegmentedPickerStyle()).frame(width: 200)
+                        }.pickerStyle(SegmentedPickerStyle()).frame(width: 200, alignment: .trailing)
                     }
                     HStack {
                         Text("Trio is an Open Source Automated Insulin Delivery system, that can upload it's algorithm output to Nightscout with every successful Loop.").font(.footnote)
@@ -231,7 +231,7 @@ struct CGMSettingsView: View {
                             Text(provider.presentable).tag(provider)
                         }
                     }
-                }.frame(width: 200).onChange(of: s.trioChartForecastDisplay) {
+                }.frame(width: 200, alignment: .trailing).onChange(of: s.trioChartForecastDisplay) {
                     s.save()
                 }
             }.padding()

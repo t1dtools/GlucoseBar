@@ -41,7 +41,7 @@ struct GlucoseTrendSettingsView: View {
                     Text("Dynamic Glucose Color").tag(settingValue.textColorDynamicGlucose)
                 }.onChange(of: color ?? .textColorDefault) { _, newVal in
                     itemSettings.set(.textColor, newVal)
-                }.frame(width: 200)
+                }.frame(width: 200, alignment: .trailing)
             }
             GridRow {
                 Text("Font Weight").frame(width: 150, alignment: .leading)
@@ -52,7 +52,7 @@ struct GlucoseTrendSettingsView: View {
                     Text("Bold").tag(settingValue.fontWeightBold)
                 }.onChange(of: fontWeight ?? .fontWeightRegular) { _, newVal in
                     itemSettings.set(.fontWeight, newVal)
-                }.frame(width: 200)
+                }.frame(width: 200, alignment: .trailing)
             }
         }
     }

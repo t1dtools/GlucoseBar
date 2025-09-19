@@ -45,7 +45,7 @@ struct LoopStatusSettingsView: View {
                     Text("Loop Icon and Time Since Loop").tag(settingValue.displayBoth)
                 }.onChange(of: display ?? .displayBoth) { _, newVal in
                     itemSettings.set(.displayTextAndIcon, newVal)
-                }.frame(width: 200)
+                }.frame(width: 200, alignment: .trailing)
             }
 
             if display == .displayBoth || display == .displayText {
@@ -58,7 +58,7 @@ struct LoopStatusSettingsView: View {
                         Text("Dynamic Glucose Color").tag(settingValue.textColorDynamicGlucose)
                     }.onChange(of: color ?? .textColorDefault) { _, newVal in
                         itemSettings.set(.textColor, newVal)
-                    }.frame(width: 200)
+                    }.frame(width: 200, alignment: .trailing)
                 }
                 GridRow {
                     Text("Font Weight").frame(width: 150, alignment: .leading)
@@ -69,7 +69,7 @@ struct LoopStatusSettingsView: View {
                         Text("Bold").tag(settingValue.fontWeightBold)
                     }.onChange(of: fontWeight ?? .fontWeightRegular) { _, newVal in
                         itemSettings.set(.fontWeight, newVal)
-                    }.frame(width: 200)
+                    }.frame(width: 200, alignment: .trailing)
                 }
             }
 
@@ -82,7 +82,7 @@ struct LoopStatusSettingsView: View {
                         Text("After Time Since Loop").tag(settingValue.iconPlacementTrailing)
                     }.onChange(of: iconPlacement ?? .iconPlacementLeading) { _, newVal in
                         itemSettings.set(.iconPlacement, newVal)
-                    }.frame(width: 200)
+                    }.frame(width: 200, alignment: .trailing)
                 }
             }
         }

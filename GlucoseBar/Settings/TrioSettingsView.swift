@@ -42,7 +42,7 @@ struct TrioSettingsView: View {
                             Picker("", selection: $s.trioChartForecastDisplay) {
                                 Text("\(ForecastDisplay.lines.presentable)").tag(ForecastDisplay.lines)
                                 Text("\(ForecastDisplay.cone.presentable)").tag(ForecastDisplay.cone)
-                            }.frame(width: 100).onChange(of: s.trioChartForecastDisplay) {
+                            }.frame(width: 100, alignment: .trailing).onChange(of: s.trioChartForecastDisplay) {
                                 s.save()
                             }
                         }

@@ -45,7 +45,7 @@ struct SeparatorSettingsView: View {
                     Text("\\").tag(settingValue.separatorCharBackslash)
                 }.onChange(of: character ?? .separatorCharPipe) { _, newVal in
                     itemSettings.set(.character, newVal)
-                }.frame(width: 200).pickerStyle(SegmentedPickerStyle())
+                }.frame(width: 200, alignment: .trailing).pickerStyle(SegmentedPickerStyle())
             }
             GridRow {
                 Text("Separator Color").frame(width: 150, alignment: .leading)
@@ -56,7 +56,7 @@ struct SeparatorSettingsView: View {
                     Text("Dynamic Glucose Color").tag(settingValue.textColorDynamicGlucose)
                 }.onChange(of: color ?? .textColorDefault) { _, newVal in
                     itemSettings.set(.textColor, newVal)
-                }.frame(width: 200)
+                }.frame(width: 200, alignment: .trailing)
             }
             GridRow {
                 Text("Weight").frame(width: 150, alignment: .leading)
@@ -67,7 +67,7 @@ struct SeparatorSettingsView: View {
                     Text("Bold").tag(settingValue.fontWeightBold)
                 }.onChange(of: fontWeight ?? .fontWeightRegular) { _, newVal in
                     itemSettings.set(.fontWeight, newVal)
-                }.frame(width: 200)
+                }.frame(width: 200, alignment: .trailing)
             }
         }
     }

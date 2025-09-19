@@ -46,7 +46,7 @@ struct COBSettingsView: View {
                     Text("No").tag(settingValue.hideZeroFalse)
                 }.onChange(of: hideZero ?? .hideZeroTrue) { _, newVal in
                     itemSettings.set(.hideZero, newVal)
-                }.frame(width: 200).pickerStyle(SegmentedPickerStyle())
+                }.frame(width: 200, alignment: .trailing).pickerStyle(SegmentedPickerStyle())
             }
             GridRow {
                 Text("Text Color").frame(width: 150, alignment: .leading)
@@ -57,7 +57,7 @@ struct COBSettingsView: View {
                     Text("Dynamic Glucose Color").tag(settingValue.textColorDynamicGlucose)
                 }.onChange(of: color ?? .textColorDefault) { _, newVal in
                     itemSettings.set(.textColor, newVal)
-                }.frame(width: 200)
+                }.frame(width: 200, alignment: .trailing)
             }
             GridRow {
                 Text("Font Weight").frame(width: 150, alignment: .leading)
@@ -68,7 +68,7 @@ struct COBSettingsView: View {
                     Text("Bold").tag(settingValue.fontWeightBold)
                 }.onChange(of: fontWeight ?? .fontWeightRegular) { _, newVal in
                     itemSettings.set(.fontWeight, newVal)
-                }.frame(width: 200)
+                }.frame(width: 200, alignment: .trailing)
             }
             GridRow {
                 Text("Icon").frame(width: 150, alignment: .leading)
@@ -81,7 +81,7 @@ struct COBSettingsView: View {
                     Text("Dynamic Glucose Color").tag(settingValue.iconColorDynamicGlucose)
                 }.onChange(of: showIcon ?? .iconColorHidden) { _, newVal in
                     itemSettings.set(.icon, newVal)
-                }.frame(width: 200)
+                }.frame(width: 200, alignment: .trailing)
             }
             if showIcon != .iconColorHidden {
                 GridRow {
@@ -92,7 +92,7 @@ struct COBSettingsView: View {
                         Text("After COB Value").tag(settingValue.iconPlacementTrailing)
                     }.onChange(of: iconPlacement ?? .iconPlacementLeading) { _, newVal in
                         itemSettings.set(.iconPlacement, newVal)
-                    }.frame(width: 200)
+                    }.frame(width: 200, alignment: .trailing)
                 }
             }
         }

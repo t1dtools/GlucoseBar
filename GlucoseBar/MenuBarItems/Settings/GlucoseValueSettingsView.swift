@@ -45,7 +45,7 @@ struct GlucoseValueSettingsView: View {
                     Text("Dynamic Glucose Color").tag(settingValue.textColorDynamicGlucose)
                 }.onChange(of: color ?? .textColorDefault) { _, newVal in
                     itemSettings.set(.textColor, newVal)
-                }.frame(width: 200)
+                }.frame(width: 200, alignment: .trailing)
             }
             GridRow {
                 Text("Font Weight").frame(width: 150, alignment: .leading)
@@ -56,7 +56,7 @@ struct GlucoseValueSettingsView: View {
                     Text("Bold").tag(settingValue.fontWeightBold)
                 }.onChange(of: fontWeight ?? .fontWeightRegular) { _, newVal in
                     itemSettings.set(.fontWeight, newVal)
-                }.frame(width: 200)
+                }.frame(width: 200, alignment: .trailing)
             }
             GridRow {
                 Text("Icon").frame(width: 150, alignment: .leading)
@@ -68,7 +68,7 @@ struct GlucoseValueSettingsView: View {
                     Text("Dynamic Glucose Color").tag(settingValue.iconColorDynamicGlucose)
                 }.onChange(of: showIcon ?? .iconColorHidden) { _, newVal in
                     itemSettings.set(.icon, newVal)
-                }.frame(width: 200)
+                }.frame(width: 200, alignment: .trailing)
             }
             if showIcon != .iconColorHidden {
                 GridRow {
@@ -79,7 +79,7 @@ struct GlucoseValueSettingsView: View {
                         Text("After Glucose Value").tag(settingValue.iconPlacementTrailing)
                     }.onChange(of: iconPlacement ?? .iconPlacementLeading) { _, newVal in
                         itemSettings.set(.iconPlacement, newVal)
-                    }.frame(width: 200)
+                    }.frame(width: 200, alignment: .trailing)
                 }
             }
         }
