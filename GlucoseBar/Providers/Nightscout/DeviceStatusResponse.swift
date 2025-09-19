@@ -41,13 +41,14 @@ struct Openaps: Codable {
 
 // MARK: - Ted
 struct Ted: Codable {
-    let insulinForManualBolus: Double
+    let insulinForManualBolus: Double?
     let received: Bool
     let sensitivityRatio: Double
     let insulinReq: Double
     let minDelta, reservoir, tdd: Double
     let reason: String
-    let manualBolusErrorString, currentTarget, duration: Double
+    let manualBolusErrorString: Double?
+    let currentTarget, duration: Double
     let expectedDelta: Double
     let timestamp: String
     let bg: Double
