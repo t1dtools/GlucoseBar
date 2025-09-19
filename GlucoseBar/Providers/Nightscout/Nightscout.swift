@@ -319,7 +319,8 @@ class Nightscout: Provider, @unchecked Sendable {
 
                     isAuthenticating = false
                     self.logger.debug("Authentication is successful.")
-                    
+                    isAuthenticated = true
+
                     // Check glucose source device to see if we support extra features
                     let gs = GlucoseSource(baseURL: self.baseURL, token: result.token)
                     let source = await gs.checkDeviceStatusForGSE()
