@@ -43,7 +43,7 @@ struct AboutView: View {
                         }
                         Spacer()
                     }.padding()
-                }.padding(.top, 5)
+                }
 
                 Text("Acknowledgements").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 10)
                 GroupBox {
