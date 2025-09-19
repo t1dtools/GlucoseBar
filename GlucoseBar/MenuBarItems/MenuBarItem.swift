@@ -228,31 +228,4 @@ public class MenuBarItemContainer: Equatable, Identifiable, Hashable, Codable, O
 //            self.objectWillChange.send()
 //        })
     }
-
-    @MainActor
-    func getView() -> any View {
-        switch type {
-        case .glucosevalue:
-            return GlucoseValueView(viewSettings: self)
-        case .glucosetrend:
-            return GlucoseTrendView(viewSettings: self)
-        case .glucosedelta:
-            return GlucoseDeltaView(viewSettings: self)
-        case .glucosedot:
-            return ZenModeView()
-
-        case .loopstatus:
-            return LoopStatusView(viewSettings: self)
-        case .eventualglucose:
-            return EventualGlucoseView(viewSettings: self)
-        case .cob:
-            return COBView(viewSettings: self)
-        case .iob:
-            return IOBView(viewSettings: self)
-
-        case MenuBarItem.separator:
-            return SeparatorView(viewSettings: self)
-        }
-    }
-
 }
