@@ -32,6 +32,7 @@ struct ZenModeView: View {
 
         return Image(systemName: icon)
             .foregroundStyle(strikeColor, glucoseColor)
+            .font(.system(size: 26))
             .fontWeight(.heavy)
             .offset(y: 1)
     }

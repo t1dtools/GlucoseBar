@@ -68,12 +68,14 @@ struct MenuBarView: View {
     var menuStack: any View {
         HStack {
             ForEach(menuBarItems, id: \.id) { item in
-
                 // trio integration only works with nightscout, so don't draw it's views for other providers
                 if s.cgmProvider != .nightscout && [.loopstatus, .eventualglucose, .cob, .iob].contains(item.type) {
                     EmptyView()
                 } else {
-                    drawMenuBarItem(item).fixedSize()
+                    drawMenuBarItem(item)
+                        .fixedSize()
+                        .font(.system(size: 26))
+                        .padding(.horizontal, 4)
                 }
             }
         }
@@ -86,20 +88,20 @@ struct MenuBarView: View {
     var body: some View {
         if s.zenMode {
             let r = ImageRenderer(content: AnyView(zenMode))
-            let menuBarImage = r.nsImage
+            let menuBarImage = r.cgImage
             Group {
                 if menuBarImage != nil {
-                    Image(nsImage: menuBarImage!)
+                    Image(menuBarImage!, scale: 2, label: Text(""))
                 } else {
                     Image(systemName: "questionmark.circle.dashed")
                 }
             }
         } else {
             let r = ImageRenderer(content: AnyView(menuStack))
-            let menuBarImage = r.nsImage
+            let menuBarImage = r.cgImage
             Group {
                 if menuBarImage != nil {
-                    Image(nsImage: menuBarImage!)
+                    Image(menuBarImage!, scale: 2, label: Text(""))
                 } else {
                     Image(systemName: "questionmark.circle.dashed")
                 }
