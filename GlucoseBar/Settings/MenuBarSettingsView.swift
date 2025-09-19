@@ -171,9 +171,16 @@ struct MenuBarSettingsView: View {
             HStack {
                 Spacer()
                 ReorderableForEach($menuBarItems) { item, isDragged in
-                    let viewImageRenderer = ImageRenderer(content: drawMenuBarItem(item).environmentObject(s).environmentObject(g).environment(\.colorScheme, colorScheme == .light ? .light : .dark))
-                    if let viewImage = viewImageRenderer.nsImage {
-                        Image(nsImage: viewImage).onTapGesture {
+                    let viewImageRenderer = ImageRenderer(content: drawMenuBarItem(item)
+                        .fixedSize()
+                        .font(.system(size: 26))
+                        .padding(.horizontal, 4)
+                        .environmentObject(s)
+                        .environmentObject(g)
+                        .environment(\.colorScheme, colorScheme == .light ? .light : .dark)
+                    )
+                    if let viewImage = viewImageRenderer.cgImage {
+                        Image(viewImage, scale: 2, label: Text("")).onTapGesture {
                             focusMenuBarItem(item)
                         }.help(item.type.name)
                     }
