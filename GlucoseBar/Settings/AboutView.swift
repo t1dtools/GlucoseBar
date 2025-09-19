@@ -75,7 +75,7 @@ struct AboutView: View {
                                                 NSWorkspace.shared.open(URL(string: "https://mastodon.social/@cortig")!)
                                             }) {
                                                 HStack {
-                                                    Text(verbatim: "@cortig@mastodon.social")
+                                                    Text(verbatim: "@cortig")
                                                 }
                                             }.buttonStyle(.plain).foregroundStyle(.blue)
                                         }

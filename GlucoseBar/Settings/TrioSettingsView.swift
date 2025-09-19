@@ -15,7 +15,7 @@ struct TrioSettingsView: View {
         ScrollView {
             VStack {
                 Text("Trio Integration").font(.headline).frame(maxWidth: .infinity, alignment: .leading)
-                    Text("GlucoseBar has detected Trio data in your Nightscout instance, and is able to show you some of the data from there.").font(.footnote)
+                    Text("You have enabled the Trio integration, which allows GlucoseBar to show you extra data.").font(.footnote)
             }.padding(.horizontal).padding(.top)
 
             VStack {
