@@ -8,62 +8,10 @@
 import Foundation
 import SwiftUI
 import LaunchAtLogin
-import Charts
+
 
 struct GeneralSettingsView: View {
     @EnvironmentObject var s: SettingsStore
-
-    func createMockGlucoseData(scheme: GlucoseColorScheme) -> [GraphEntry] {
-        let range = 0..<60
-        let amplitude: Double = 75     // Half of the peak-to-peak range (e.g., (200 - 70) / 2)
-        let midline: Double = 125      // Midpoint of the range (e.g., (200 + 70) / 2)
-        let frequency: Double = 2.0    // Number of complete sine wave cycles
-
-        var entries: [GraphEntry] = []
-        for i in range {
-            let date = Date().addingTimeInterval(TimeInterval(i * 5 * 60))
-
-            let x = Double(i) / Double(range.count) // Normalized 0 to 1
-            let sine = sin(2 * .pi * frequency * x) // 2 full sine cycles
-            let value = midline + amplitude * sine  // Scale to desired glucose range
-
-            let color = getDynamicGlucoseColor(glucoseValue: Decimal(value), highGlucoseColorValue: 180, lowGlucoseColorValue: 70, targetGlucose: Decimal(90), glucoseColorScheme: scheme)
-            entries.append(GraphEntry(date: date, value: value, trend: .notComputable, delta: 0, color: color, forecastType: .none, glucoseType: .sensor))
-        }
-
-        return entries
-    }
-
-    var mockGlucoseDataStatic: [GraphEntry] = []
-    var mockGlucoseDataDynamic: [GraphEntry] = []
-
-    init() {
-        mockGlucoseDataStatic = createMockGlucoseData(scheme: .staticColor)
-        mockGlucoseDataDynamic = createMockGlucoseData(scheme: .dynamicColor)
-    }
-
-    struct exampleChart: View {
-        let data: [GraphEntry]
-        let scheme: GlucoseColorScheme
-
-        var body: some View {
-            Chart {
-                if scheme == .staticColor {
-                    RuleMark(y: .value("High", 180)).foregroundStyle(.orange).lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
-                    RuleMark(y: .value("Low", 70)).foregroundStyle(.red).lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
-                } else if scheme == .dynamicColor {
-                    RuleMark(y: .value("High", 180)).foregroundStyle(dynamicPurple).lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
-                    RuleMark(y: .value("Low", 70)).foregroundStyle(dynamicRed).lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
-                }
-                DrawGlucose(data: data)
-            }.chartLegend(.hidden)
-                .chartXAxis(.hidden)
-                .chartYAxis(.hidden)
-                .padding()
-                .padding(.bottom, -20)
-        }
-
-    }
 
     var body: some View {
         ScrollView {
@@ -158,39 +106,6 @@ struct GeneralSettingsView: View {
                             Spacer()
                         }
                     }.padding()
-                }
-
-                Text("Glucose Chart Color Scheme").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.top)
-                GroupBox {
-                    HStack {
-                        VStack {
-                            Picker("", selection: $s.glucoseColorScheme) {
-                                Group {
-                                    VStack {
-                                        HStack {
-                                            Text("\(GlucoseColorScheme.dynamicColor.displayName)").frame(alignment: .leading).padding(.leading, 4)
-                                            Spacer()
-                                        }
-                                        exampleChart(data: mockGlucoseDataDynamic, scheme: .dynamicColor).frame(height: 100)
-                                    }
-                                }.tag(GlucoseColorScheme.dynamicColor)
-                                Group {
-                                    VStack {
-                                        HStack {
-                                            Text("\(GlucoseColorScheme.staticColor.displayName)").frame(alignment: .leading).padding(.leading, 4)
-                                            Spacer()
-                                        }
-                                        exampleChart(data: mockGlucoseDataStatic, scheme: .staticColor).frame(height: 100)
-                                    }
-                                }.tag(GlucoseColorScheme.staticColor)
-                            }.pickerStyle(.radioGroup)
-                                .horizontalRadioGroupLayout()
-                                .onChange(of: s.glucoseColorScheme) {
-                                    s.save()
-                                }
-                        }.padding()
-                        Spacer()
-                    }
                 }
 
                 Text("Launch Behavior").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 10)

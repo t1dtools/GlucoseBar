@@ -15,7 +15,7 @@ struct TrioSettingsView: View {
         ScrollView {
             VStack {
                 Text("Trio Integration").font(.headline).frame(maxWidth: .infinity, alignment: .leading)
-                    Text("You have enabled the Trio integration, which allows GlucoseBar to show you extra data.").font(.footnote)
+                Text("You have enabled the Trio integration, which allows GlucoseBar to show you extra data.").font(.footnote).frame(maxWidth: .infinity, alignment: .leading)
             }.padding(.horizontal).padding(.top)
 
             VStack {

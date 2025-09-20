@@ -41,6 +41,12 @@ struct SettingsView: View {
                         selectedItem = "MenuBar"
                     }
 
+                    NavigationLink(destination: ChartSettingsView().environmentObject(s)) {
+                        Label("Chart", systemImage: "chart.dots.scatter")
+                    }.tag("Chart").onTapGesture {
+                        selectedItem = "Chart"
+                    }
+
                     if s.trioEnableIntegration && s.cgmProvider == .nightscout {
                         NavigationLink(destination: TrioSettingsView().environmentObject(s)) {
                             Label("Trio Integration", systemImage: "apps.iphone")

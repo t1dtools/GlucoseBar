@@ -21,6 +21,7 @@ struct GraphView: View {
     @State private var hoveredDelta: Double?
     @State private var isHovering: Bool = false
     @State private var legends: [String : Color] = [:]
+    @State private var isLoading: Bool = false
 
     var gse: GlucoseSourceExtraProperties = GlucoseSourceExtraProperties()
 
@@ -108,6 +109,14 @@ struct GraphView: View {
         }
 
         return data
+    }
+
+    func reloadData() {
+        Task {
+            isLoading = true
+            await g.provider.fetch()
+            isLoading = false
+        }
     }
 
     func changeTimeFrame(minutes: Int) -> [GraphEntry] {
@@ -198,18 +207,47 @@ struct GraphView: View {
                         buttonFocusState = false
                     }.clipShape(Capsule()).buttonStyle(.bordered).focused($buttonFocusState)
                 }
+                if data.count > 0 {
+                    Spacer()
+                    Button(action: {
+                        reloadData()
+                    }) {
+                        HStack {
+                            if isLoading {
+                                ProgressView().scaleEffect(0.5, anchor: .center).frame(width: 16, height: 16)
+                            } else {
+                                Image(systemName: "arrow.clockwise")
+                            }
+                        }.contentShape(Rectangle())
+                    }.help("Refresh all data")
+                        .clipShape(Capsule())
+                        .buttonStyle(.bordered)
+                        .focused($buttonFocusState)
+                        .disabled(isLoading)
+                }
             }.padding().frame(alignment: .leading)
 
             Chart {
-                if true {
-                    if s.glucoseColorScheme == .staticColor {
+                if s.glucoseColorScheme == .staticColor {
+                    if s.showHighThreshold {
                         RuleMark(y: .value("High", highThresholdRuleMark)).foregroundStyle(.orange).lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
+                    }
+                    if s.showLowThreshold {
                         RuleMark(y: .value("Low", lowThresholdRuleMark)).foregroundStyle(.red).lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
-                    } else if s.glucoseColorScheme == .dynamicColor {
+                    }
+                } else if s.glucoseColorScheme == .dynamicColor {
+                    if s.showHighThreshold {
                         RuleMark(y: .value("High", highThresholdRuleMark)).foregroundStyle(dynamicPurple).lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
+                    }
+                    if s.showLowThreshold {
                         RuleMark(y: .value("Low", lowThresholdRuleMark)).foregroundStyle(dynamicRed).lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
                     }
                 }
+
+                if s.showTarget {
+                    RuleMark(y: .value("Target", 90)).foregroundStyle(.green).lineStyle(StrokeStyle(lineWidth: 1))
+                }
+
 
                 if s.trioChartShowForecast {
                     DrawForecast(

@@ -14,7 +14,6 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     @Published var highThreshold: Double = 180
     @Published var lowThreshold: Double = 70
     @Published var glucoseTarget: Double = 100
-    @Published var glucoseColorScheme: GlucoseColorScheme = .dynamicColor
 
     @Published var cgmProvider: CGMProvider = .null
     @Published var graphMinutes: Int = 180
@@ -41,6 +40,12 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     @Published var showMenuBarIcon: Bool = false
     @Published var menuBarItems: [MenuBarItemContainer] = []
     @Published var zenMode: Bool = false
+
+    // Chart settings
+    @Published var glucoseColorScheme: GlucoseColorScheme = .dynamicColor
+    @Published var showHighThreshold: Bool = true
+    @Published var showLowThreshold: Bool = true
+    @Published var showTarget: Bool = true
 
     // Trio Specifics
     @Published var trioEnableIntegration: Bool = false
@@ -184,6 +189,10 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
             }
         }
 
+        self.showHighThreshold = defaults.bool(forKey: "showHighThreshold")
+        self.showLowThreshold = defaults.bool(forKey: "showLowThreshold")
+        self.showTarget = defaults.bool(forKey: "showTarget")
+
         self.trioEnableIntegration = defaults.bool(forKey: "trioEnableIntegration")
 
         self.trioBarShowIOB = defaults.bool(forKey: "trioBarShowIOB")
@@ -258,6 +267,9 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 
         defaults.set(self.glucoseTarget, forKey: "glucoseTarget")
         defaults.set(self.glucoseColorScheme.displayName, forKey: "glucoseColorScheme")
+        defaults.set(self.showHighThreshold, forKey: "showHighThreshold")
+        defaults.set(self.showLowThreshold, forKey: "showLowThreshold")
+        defaults.set(self.showTarget, forKey: "showTarget")
 
         defaults.set(self.trioEnableIntegration, forKey: "trioEnableIntegration")
         defaults.set(self.trioBarShowIOB, forKey: "trioBarShowIOB")

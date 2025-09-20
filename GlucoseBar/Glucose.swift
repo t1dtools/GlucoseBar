@@ -49,7 +49,6 @@ class Glucose: ObservableObject, Sendable {
         }
         var shouldFetch: Bool = false
         if !vs.isOnline {
-            shouldFetch = false
             self.logger.info("Aborting fetch because network is offline")
             return
         }
