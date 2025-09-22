@@ -22,6 +22,8 @@ GlucoseBar is available in the following languages currently:
 - French
 - Danish
 
+[![Crowdin](https://badges.crowdin.net/glucosebar/localized.svg)](https://crowdin.com/project/glucosebar)
+
 If you would like to help translate GlucoseBar into your language, please send an email to glucosebar@t1d.tools with the language you would like to help with, and we can take it from there.
 
 ### Translators
