@@ -76,7 +76,7 @@ class Nightscout: Provider, @unchecked Sendable {
         var limit = 288
         if self.GlucoseEntries.count > 1 {
             limit = 1
-            logger.info("Time since last fetch: \(self.lastFetch.timeIntervalSinceNow * -1) seconds")
+            logger.info("Time since last fetch: \(self.lastFetch.timeIntervalSinceNow * -1, privacy: .public) seconds")
             if self.lastFetch.timeIntervalSinceNow < -400 {
                 logger.info("re-setting limit to full fetch because last fetch was more than 400 seconds ago")
                 limit = 288
@@ -140,14 +140,14 @@ class Nightscout: Provider, @unchecked Sendable {
                                 )}
 
                             if uniqueNewEntries.count > 0 {
-                                self.logger.debug("Fetched \(uniqueNewEntries.count) new entries")
+                                self.logger.debug("Fetched \(uniqueNewEntries.count, privacy: .public) new entries")
                                 self.GlucoseEntries.insert(contentsOf: newEntries, at: 0)
 
                                 if self.GlucoseEntries.countExcedes(288) {
-                                    self.logger.debug("removing entry from glucoseentries: \(self.GlucoseEntries.last!.glucose)")
+                                    self.logger.debug("removing entry from glucoseentries: \(self.GlucoseEntries.last!.glucose, privacy: .private)")
                                     self.GlucoseEntries.removeLast()
                                 }
-                                self.logger.debug("Latest glucose entry: \(String(describing: self.GlucoseEntries.first?.glucose))")
+                                self.logger.debug("Latest glucose entry: \(String(describing: self.GlucoseEntries.first?.glucose), privacy: .private)")
                             }
                         }
                     }
@@ -176,7 +176,7 @@ class Nightscout: Provider, @unchecked Sendable {
                         self.providerIssue = "Unable to read data from Nightscout: Value type mismatch. Is this a new version of Nightscout?"
                     }
                 } catch {
-                    self.logger.error("Error parsing NS response: \(String(describing: error))")
+                    self.logger.error("Error parsing NS response: \(String(describing: error), privacy: .public)")
                     DispatchQueue.main.async {
                         self.providerIssue = "Unable to parse glucose data from nightscout: Error unknown."
                     }
@@ -192,7 +192,7 @@ class Nightscout: Provider, @unchecked Sendable {
                         self.providerIssue = "Error from Nightscout: \(result.message)"
                     }
                 } catch {
-                    self.logger.error("Error parsing NS error response: \(String(describing: error))")
+                    self.logger.error("Error parsing NS error response: \(String(describing: error), privacy: .public)")
                 }
             }
         } catch {
@@ -289,8 +289,6 @@ class Nightscout: Provider, @unchecked Sendable {
         self.logger.debug("Nightscout.authenticate")
         var request = URLRequest(url: URL(string: "\(baseURL)/api/v2/authorization/request/\(token)")!, timeoutInterval: httpTimeout)
         request.httpMethod = "GET"
-
-        self.logger.info("Token URL: \(self.baseURL)/api/v2/authorization/request/\(self.token)")
 
         do {
             let (data, response) = try await URLSession.shared.data(for: request)

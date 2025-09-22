@@ -144,11 +144,11 @@ class DexcomShare: Provider, @unchecked Sendable {
                     providerError = "\(result.Code): \(result.Message)"
                 } catch {
                     providerError = String(localized: "Unknown Dexcom Share Issue: \(res.statusCode)")
-                    self.logger.error("Unknown Dexcom Share Issue: \(String(describing: error))")
+                    self.logger.error("Unknown Dexcom Share Issue: \(String(describing: error), privacy: .public)")
 
-                    self.logger.error("Request info: Status Code: \(res.statusCode)")
+                    self.logger.error("Request info: Status Code: \(res.statusCode, privacy: .public)")
                     if let str = String(data: data, encoding: .utf8) {
-                        self.logger.error("Request info: Response Body: \(str)")
+                        self.logger.error("Request info: Response Body: \(str, privacy: .public)")
                     } else {
                         self.logger.error("Request info: No response body.")
                     }
@@ -174,7 +174,7 @@ class DexcomShare: Provider, @unchecked Sendable {
                 } catch DecodingError.typeMismatch(_, _) {
                     self.providerIssue = String(localized: "Unable to read data from Dexcom Share: Value type mismatch.")
                 } catch {
-                    self.logger.error("\(String(describing: error))")
+                    self.logger.error("\(String(describing: error), privacy: .public)")
                 }
             }
         } catch {
@@ -254,7 +254,7 @@ class DexcomShare: Provider, @unchecked Sendable {
             let res = response as! HTTPURLResponse
             if res.statusCode > 299 {
                 var providerError: String? = nil
-                self.logger.error("\(String(data: data, encoding: .utf8)!)")
+                self.logger.error("\(String(data: data, encoding: .utf8)!, privacy: .public)")
 
                 do {
                     let result = try JSONDecoder().decode(DexcomShareErrorResponse.self, from: data)
@@ -273,7 +273,7 @@ class DexcomShare: Provider, @unchecked Sendable {
                     providerError = String(localized: "Unable to read data from Dexcom Share: Value type mismatch.")
                 } catch {
                     providerError = "Unknown Dexcom Share Issue"
-                    self.logger.error("Unknown Dexcom Share Issue: \(String(describing: error))")
+                    self.logger.error("Unknown Dexcom Share Issue: \(String(describing: error), privacy: .public)")
                 }
 
                 self.providerIssue = providerError

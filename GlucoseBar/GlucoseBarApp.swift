@@ -53,8 +53,6 @@ struct GlucoseBarApp: App {
     @State private var hasSettings: Bool = true
     @State private var mainViewPresented: Bool = false
 
-    let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "main")
-
     @StateObject var s: SettingsStore = SettingsStore()
     @StateObject var g: Glucose = Glucose(SettingsStore())
     @StateObject var vs: ViewState = ViewState()

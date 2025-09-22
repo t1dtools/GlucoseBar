@@ -107,7 +107,7 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
                 }
                 return .null
             } catch {
-                self.logger.error("Unable to decode NS response when checking for GSE: \(String(describing: error))")
+                self.logger.error("Unable to decode NS response when checking for GSE: \(String(describing: error), privacy: .public)")
                 return .null
             }
 
@@ -124,7 +124,7 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
                 self.GlucoseSourceExtras = gsep
             }
 
-            self.logger.error("Error parsing NS response: \(err)")
+            self.logger.error("Error parsing NS response: \(err, privacy: .public)")
             return .null
         }
     }
@@ -192,7 +192,7 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
                     return GlucoseSourceExtraProperties(iob: enacted.iob, cob: enacted.cob, eventualGlucose: enacted.eventualBG, reason: enacted.reason, enactedAt: ts, forecasts: forecasts, glucoseTarget: enacted.currentTarget)
                 }
             } catch {
-                self.logger.error("Unable to decode NS response when checking for GSE: \(String(describing: error))")
+                self.logger.error("Unable to decode NS response when checking for GSE: \(String(describing: error), privacy: .public)")
             }
         } catch {
             var err = String(describing: error)
@@ -200,7 +200,7 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
                 err = String(localized: "Unable to get Trio data: Request timed out")
             }
 
-            self.logger.error("Error fetching GlucoseSourceExtra: \(err)")
+            self.logger.error("Error fetching GlucoseSourceExtra: \(err, privacy: .public)")
         }
 
         return empty

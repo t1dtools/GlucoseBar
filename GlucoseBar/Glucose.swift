@@ -49,19 +49,19 @@ class Glucose: ObservableObject, Sendable {
         }
         var shouldFetch: Bool = false
         if !vs.isOnline {
-            self.logger.info("Aborting fetch because network is offline")
+            self.logger.notice("Aborting fetch because network is offline")
             return
         }
 
         if self.provider.lastFetch.timeIntervalSinceNow <= -60 {
             shouldFetch = true
-            self.logger.info("Glucose.timer initiating fetch because last fetch was over 1 minute ago")
+            self.logger.notice("Glucose.timer initiating fetch because last fetch was over 1 minute ago")
         }
 
         if let entries = self.entries, let firstEntry = entries.first {
             if firstEntry.date.timeIntervalSinceNow <= -300 && self.provider.lastFetch.timeIntervalSinceNow <= -10 {
                 shouldFetch = true
-                self.logger.info("Glucose.timer initiating fetch because latest reading is over 5 minutes old and last fetch was over 10 seconds ago")
+                self.logger.notice("Glucose.timer initiating fetch because latest reading is over 5 minutes old and last fetch was over 10 seconds ago")
             }
         }
 
@@ -102,7 +102,7 @@ class Glucose: ObservableObject, Sendable {
         timer.eventHandler = timerEventHandler
         timer.resume()
 
-        self.logger.info("Reset glucose object")
+        self.logger.notice("Reset glucose object")
     }
 
     func registerForNotifications() {

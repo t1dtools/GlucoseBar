@@ -132,7 +132,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
                     let decoded = try decoder.decode([MenuBarItemContainer].self, from: data)
                     self.menuBarItems = decoded
                 } catch {
-                    logger.error("Unable to decode menuBarItems object from json saved in UserDefaults: \(String(describing: error))")
+                    logger.error("Unable to decode menuBarItems object from json saved in UserDefaults: \(String(describing: error), privacy: .public)")
                     self.menuBarItems = []
                 }
             }
@@ -144,16 +144,16 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         switch cgmProv {
         case CGMProvider.simulator.presentable:
             self.cgmProvider = .simulator
-            self.logger.debug("cgmProvider was simulator")
+            self.logger.notice("cgmProvider was simulator")
         case CGMProvider.nightscout.presentable:
             self.cgmProvider = .nightscout
-            self.logger.debug("cgmProvider was nightscout")
+            self.logger.notice("cgmProvider was nightscout")
         case CGMProvider.dexcomshare.presentable:
             self.cgmProvider = .dexcomshare
-            self.logger.debug("cgmProvider was dexcomshare")
+            self.logger.notice("cgmProvider was dexcomshare")
         default:
             self.cgmProvider = .null
-            self.logger.debug("cgmProvider was default")
+            self.logger.notice("cgmProvider was default")
         }
 
         let gunit = defaults.string(forKey: "glucoseUnit") ?? GlucoseUnit.mmoll.presentable
@@ -240,7 +240,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
                 logger.error("Unable to convert encoded menuBarItems object to string")
             }
         } catch {
-            logger.error("failed to encode menuBarItems object: \(error.localizedDescription)")
+            logger.error("failed to encode menuBarItems object: \(String(describing: error), privacy: .public)")
         }
 
         defaults.set(self.zenMode, forKey: "zenMode")
@@ -310,22 +310,19 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 
     func testCGMProvider() async -> Bool {
         var provider: Provider
+        self.logger.notice("testCGMProvider: \(self.cgmProvider.presentable, privacy: .public)")
         switch self.cgmProvider {
         case .simulator:
-            self.logger.debug("testCGMProvider.simulator")
             provider = Simulator("test auth")
         case .nightscout:
-            self.logger.debug("testCGMProvider.nightscout")
             provider = Nightscout(baseURL: self.nsURL, token: self.nsSecret)
         case .dexcomshare:
-            self.logger.debug("testCGMProvider.dexcomshare")
             provider = DexcomShare(username: self.dxEmail, password: self.dxPassword, server: self.dxServer)
         default:
-            self.logger.debug("testCGMProvider.simulator")
             provider = Simulator("")
         }
 
-        self.logger.debug("testCGMProvider calling verifyCredentials with provider: \(provider.type.presentable)")
+        self.logger.notice("testCGMProvider calling verifyCredentials with provider: \(provider.type.presentable, privacy: .public)")
         return await provider.verifyCredentials()
     }
 }

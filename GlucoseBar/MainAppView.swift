@@ -70,7 +70,7 @@ struct MainAppView: View {
                 url.append(queryItems: [URLQueryItem(name: "token", value: s.nsSecret)])
             }
             if NSWorkspace.shared.open(url) {
-                self.logger.debug("opened ns from button action")
+                self.logger.notice("opened ns from button action")
             }
         }) {
             HStack {

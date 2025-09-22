@@ -15,8 +15,6 @@ struct SettingsView: View {
     @EnvironmentObject var s: SettingsStore
     @EnvironmentObject var g: Glucose
 
-    internal var logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "settingsview")
-
     @State var selectedItem: String = "General"
 
     var body: some View {
