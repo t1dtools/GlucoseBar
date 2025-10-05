@@ -133,10 +133,29 @@ struct GraphView: View {
         var minY = 0.0
 
         var entries: [GraphEntry] = []
+        let coneData = calculateConeData(entries: data)
 
         for(_, entry) in data.enumerated() {
-            if s.trioChartShowForecast || entry.forecastType == .none {
+            if entry.forecastType == .none {
                 entries.append(entry)
+            }
+        }
+
+        if s.trioChartShowForecast {
+            if s.trioChartForecastDisplay == .cone {
+                // Calculate highest entry from coneData
+                let maxConeData = coneData.1.max(by: {$0.v < $1.v})?.v ?? 0
+                if maxConeData > 0 {
+                    entries.append(GraphEntry(date: Date(), value: maxConeData, trend: GlucoseEntry.GlucoseTrend.flat, delta: 0, color: Color.blue, forecastType: .none))
+                }
+            }
+
+            if s.trioChartForecastDisplay == .lines {
+                for(_, entry) in data.enumerated() {
+                    if entry.forecastType != .none && entry.date <= Date(timeIntervalSinceNow: TimeInterval(forecastDuration)) {
+                        entries.append(entry)
+                    }
+                }
             }
         }
 
