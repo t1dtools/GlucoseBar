@@ -70,6 +70,9 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
 
             do {
                 let result = try JSONDecoder().decode(DeviceStatusResponse.self, from: data)
+                if result.result.first == nil {
+                    return .null
+                }
 
                 if result.result.first!.device == "Trio" {
                     let enacted = result.result.first!.openaps.enacted
@@ -81,19 +84,19 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
                     gsep.reason = enacted.reason
                     
                     var oapsf = OpenAPSForecasts()
-                    if let iob = enacted.predBGs.iob {
+                    if let iob = enacted.predBGs?.iob {
                         oapsf.iob = iob
                     }
                     
-                    if let cob = enacted.predBGs.cob {
+                    if let cob = enacted.predBGs?.cob {
                         oapsf.cob = cob
                     }
                     
-                    if let uam = enacted.predBGs.uam {
+                    if let uam = enacted.predBGs?.uam {
                         oapsf.uam = uam
                     }
                     
-                    if let zt = enacted.predBGs.zt {
+                    if let zt = enacted.predBGs?.zt {
                         oapsf.zt = zt
                     }
                     gsep.forecasts = oapsf
@@ -166,19 +169,19 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
                 if result.result.first!.device == "Trio" {
                     let enacted = result.result.first!.openaps.enacted
                     var forecasts = OpenAPSForecasts()
-                    if let iob = enacted.predBGs.iob {
+                    if let iob = enacted.predBGs?.iob {
                         forecasts.iob = iob
                     }
 
-                    if let cob = enacted.predBGs.cob {
+                    if let cob = enacted.predBGs?.cob {
                         forecasts.cob = cob
                     }
 
-                    if let zt = enacted.predBGs.zt {
+                    if let zt = enacted.predBGs?.zt {
                         forecasts.zt = zt
                     }
 
-                    if let uam = enacted.predBGs.uam {
+                    if let uam = enacted.predBGs?.uam {
                         forecasts.uam = uam
                     }
 
@@ -187,7 +190,7 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
                     dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
                     dateFormatter.timeZone = TimeZone.init(secondsFromGMT: 0)
                     
-                    let ts = dateFormatter.date(from: enacted.deliverAt)
+                    let ts = dateFormatter.date(from: enacted.deliverAt ?? " ") // " " because that causes nil instead of now
 
                     return GlucoseSourceExtraProperties(iob: enacted.iob, cob: enacted.cob, eventualGlucose: enacted.eventualBG, reason: enacted.reason, enactedAt: ts, forecasts: forecasts, glucoseTarget: enacted.currentTarget)
                 }

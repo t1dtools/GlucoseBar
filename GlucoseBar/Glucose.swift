@@ -19,7 +19,6 @@ class Glucose: ObservableObject, Sendable {
     @Published var trend: String = ""
     @Published var fetchedGlucose: Bool = false
     @Published var entries: [GlucoseEntry]? = nil
-
     @Published var error: String = ""
 
     @Published var provider: Provider
@@ -167,7 +166,8 @@ class Glucose: ObservableObject, Sendable {
         formatter.unitsStyle = .short
         formatter.formattingContext = .listItem
 
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
             self.glucose = glucoseEntries[0].glucose
             self.glucoseTime = glucoseEntries[0].date
             self.trend = glucoseEntries[0].trend?.arrows ?? ""

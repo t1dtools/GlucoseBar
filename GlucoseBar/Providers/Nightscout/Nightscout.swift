@@ -120,7 +120,9 @@ class Nightscout: Provider, @unchecked Sendable {
 
             if res!.statusCode == 200 {
                 do {
-                    try DispatchQueue.global().sync {
+                    try DispatchQueue.global().sync { [weak self] in
+                        guard let self = self else { return }
+
                         let result = try JSONDecoder().decode(NightscoutEntriesResponse.self, from: data)
 
                         var previous: GlucoseEntry? = nil
@@ -155,29 +157,35 @@ class Nightscout: Provider, @unchecked Sendable {
                     if RemoteGlucoseSource != .null {
                         let gs = GlucoseSource(baseURL: self.baseURL, token: self.auth?.token ?? "invalid")
                         let gse = await gs.getGlucoseSourceExtras()
-                        DispatchQueue.main.async {
+                        DispatchQueue.main.async { [weak self] in
+                            guard let self = self else { return }
                             self.GlucoseSourceExtras = gse
                         }
                     }
                 } catch DecodingError.dataCorrupted(_) {
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self = self else { return }
                         self.providerIssue = "Unable to read data from Nightscout: Data corrupted."
                     }
                 } catch let DecodingError.keyNotFound(key, _) {
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self = self else { return }
                         self.providerIssue = "Unable to read data from Nightscout: Missing key \(key)"
                     }
                 } catch DecodingError.valueNotFound(_, _) {
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self = self else { return }
                         self.providerIssue = "Unable to read data from Nightscout: Missing required value"
                     }
                 } catch DecodingError.typeMismatch(_, _) {
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self = self else { return }
                         self.providerIssue = "Unable to read data from Nightscout: Value type mismatch. Is this a new version of Nightscout?"
                     }
                 } catch {
                     self.logger.error("Error parsing NS response: \(String(describing: error), privacy: .public)")
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self = self else { return }
                         self.providerIssue = "Unable to parse glucose data from nightscout: Error unknown."
                     }
                 }
@@ -188,7 +196,8 @@ class Nightscout: Provider, @unchecked Sendable {
             } else {
                 do {
                     let result = try JSONDecoder().decode(NightscoutEntriesErrorResponse.self, from: data)
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self = self else { return }
                         self.providerIssue = "Error from Nightscout: \(result.message)"
                     }
                 } catch {
@@ -196,7 +205,9 @@ class Nightscout: Provider, @unchecked Sendable {
                 }
             }
         } catch {
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+
                 var err = String(describing: error)
 
                 if (error as? URLError)?.code == .timedOut {
@@ -296,7 +307,9 @@ class Nightscout: Provider, @unchecked Sendable {
             let res = response as! HTTPURLResponse
             if res.statusCode > 299 {
                 self.logger.debug("status code over 299: \(res.statusCode). Body: \(data)")
-                DispatchQueue.main.async {
+                DispatchQueue.main.async { [weak self] in
+                    guard let self = self else { return }
+
                     var providerError = ""
                     do {
                         let result = try JSONDecoder().decode(NightscoutAuthErrorResponse.self, from: data)
