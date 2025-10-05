@@ -133,8 +133,7 @@ struct MainAppView: View {
                         }.offset(y: -10)
                         Spacer()
                     }
-                }
-                if g.glucoseTime.timeIntervalSinceNow < -360 {
+                } else if g.glucoseTime.timeIntervalSinceNow < -360 {
                     VStack {
                         HStack {
                             Spacer()
