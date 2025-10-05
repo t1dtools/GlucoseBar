@@ -27,6 +27,8 @@ struct GeneralSettingsView: View {
                                 ForEach(GlucoseUnit.allCases) { unit in
                                     Text(unit.presentable).tag(unit)
                                 }
+                            }.onChange(of: s.glucoseUnit) {
+                                s.save()
                             }
                         }
 
