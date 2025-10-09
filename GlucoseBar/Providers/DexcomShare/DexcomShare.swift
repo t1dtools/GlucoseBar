@@ -100,7 +100,7 @@ class DexcomShare: Provider, @unchecked Sendable {
         if !isAuthValid() {
             logger.debug("calling authenticate from fetch")
             await authenticate()
-            await self.fetch()
+            await fetch()
             return
         }
 
