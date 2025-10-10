@@ -8,14 +8,14 @@
 import Foundation
 import SwiftUI
 
-struct TrioSettingsView: View {
+struct AidSettingsView: View {
     @EnvironmentObject var s: SettingsStore
 
     var body: some View {
         ScrollView {
             VStack {
-                Text("Trio Integration").font(.headline).frame(maxWidth: .infinity, alignment: .leading)
-                Text("You have enabled the Trio integration, which allows GlucoseBar to show you extra data.").font(.footnote).frame(maxWidth: .infinity, alignment: .leading)
+                Text("AID Integration").font(.headline).frame(maxWidth: .infinity, alignment: .leading)
+                Text("You have enabled the AID integration, which allows GlucoseBar to show you extra data.").font(.footnote).frame(maxWidth: .infinity, alignment: .leading)
             }.padding(.horizontal).padding(.top)
 
             VStack {
@@ -28,21 +28,21 @@ struct TrioSettingsView: View {
                     HStack {
                         Text("Show Forecast")
                         Spacer()
-                        Toggle(isOn: $s.trioChartShowForecast, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.trioChartShowForecast, initial: false) {
+                        Toggle(isOn: $s.aidChartShowForecast, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowForecast, initial: false) {
                             s.save()
                         }.fixedSize()
                             .scaleEffect(0.7, anchor: .trailing)
                     }
                     Divider()
 
-                    if s.trioChartShowForecast {
+                    if s.aidChartShowForecast {
                         HStack {
                             Text("Forecast Kind")
                             Spacer()
-                            Picker("", selection: $s.trioChartForecastDisplay) {
+                            Picker("", selection: $s.aidChartForecastDisplay) {
                                 Text("\(ForecastDisplay.lines.presentable)").tag(ForecastDisplay.lines)
                                 Text("\(ForecastDisplay.cone.presentable)").tag(ForecastDisplay.cone)
-                            }.frame(width: 100, alignment: .trailing).onChange(of: s.trioChartForecastDisplay) {
+                            }.frame(width: 100, alignment: .trailing).onChange(of: s.aidChartForecastDisplay) {
                                 s.save()
                             }
                         }
@@ -52,7 +52,7 @@ struct TrioSettingsView: View {
                     HStack {
                         Text("Show Insulin On Board")
                         Spacer()
-                        Toggle(isOn: $s.trioChartShowIOB, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.trioChartShowIOB, initial: false) {
+                        Toggle(isOn: $s.aidChartShowIOB, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowIOB, initial: false) {
                             s.save()
                         }.fixedSize()
                             .scaleEffect(0.7, anchor: .trailing)
@@ -62,7 +62,7 @@ struct TrioSettingsView: View {
                     HStack {
                         Text("Show Carbs On Board")
                         Spacer()
-                        Toggle(isOn: $s.trioChartShowCOB, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.trioChartShowCOB, initial: false) {
+                        Toggle(isOn: $s.aidChartShowCOB, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowCOB, initial: false) {
                             s.save()
                         }.fixedSize()
                             .scaleEffect(0.7, anchor: .trailing)
@@ -72,7 +72,7 @@ struct TrioSettingsView: View {
                     HStack {
                         Text("Show Loop Status")
                         Spacer()
-                        Toggle(isOn: $s.trioChartShowLoopStatus, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.trioChartShowLoopStatus, initial: false) {
+                        Toggle(isOn: $s.aidChartShowLoopStatus, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowLoopStatus, initial: false) {
                             s.save()
                         }.fixedSize()
                             .scaleEffect(0.7, anchor: .trailing)
@@ -82,7 +82,7 @@ struct TrioSettingsView: View {
                     HStack {
                         Text("Show Eventual Glucose")
                         Spacer()
-                        Toggle(isOn: $s.trioChartShowEventualGlucose, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.trioChartShowEventualGlucose, initial: false) {
+                        Toggle(isOn: $s.aidChartShowEventualGlucose, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowEventualGlucose, initial: false) {
                             s.save()
                         }.fixedSize()
                             .scaleEffect(0.7, anchor: .trailing)

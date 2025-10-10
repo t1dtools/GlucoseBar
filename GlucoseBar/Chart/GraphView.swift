@@ -141,8 +141,8 @@ struct GraphView: View {
             }
         }
 
-        if s.trioChartShowForecast {
-            if s.trioChartForecastDisplay == .cone {
+        if s.aidChartShowForecast {
+            if s.aidChartForecastDisplay == .cone {
                 // Calculate highest entry from coneData
                 let maxConeData = coneData.1.max(by: {$0.v < $1.v})?.v ?? 0
                 if maxConeData > 0 {
@@ -150,7 +150,7 @@ struct GraphView: View {
                 }
             }
 
-            if s.trioChartForecastDisplay == .lines {
+            if s.aidChartForecastDisplay == .lines {
                 for(_, entry) in data.enumerated() {
                     if entry.forecastType != .none && entry.date <= Date(timeIntervalSinceNow: TimeInterval(forecastDuration)) {
                         entries.append(entry)
@@ -193,10 +193,11 @@ struct GraphView: View {
                     Text("\(printFormattedGlucose(settings: s, glucose: headlineGlucose)) \(headlineTrend.arrows != "↔" ? headlineTrend.arrows : "")").font(.largeTitle)
                 }.padding(.leading, 25).padding(.top, 10)
 
-                if s.cgmProvider == .nightscout && g.provider.RemoteGlucoseSource == .trio {
-                    if s.trioChartShowCOB || s.trioChartShowIOB || s.trioChartShowLoopStatus || s.trioChartShowEventualGlucose {
+                // Currently, all three supported AIDs support these options.
+                if s.cgmProvider == .nightscout && g.provider.RemoteGlucoseSource != .null {
+                    if s.aidChartShowCOB || s.aidChartShowIOB || s.aidChartShowLoopStatus || s.aidChartShowEventualGlucose {
                         Spacer()
-                        TrioGridView(g: g).environmentObject(s)
+                        AidGridView(g: g).environmentObject(s)
                     }
                 }
             }.padding()
@@ -268,12 +269,12 @@ struct GraphView: View {
                 }
 
 
-                if s.trioChartShowForecast {
+                if s.aidChartShowForecast {
                     DrawForecast(
                         data: data,
                         yMin: minY <= defaultMinGlucose ? minY : defaultMinGlucose,
                         yMax: maxY >= defaultMaxGlucose ? (maxY + maxYMargin) : defaultMaxGlucose,
-                        forecastType: s.trioChartForecastDisplay
+                        forecastType: s.aidChartForecastDisplay
                     )
                 }
                 DrawGlucose(data: data)
@@ -337,7 +338,7 @@ struct GraphView: View {
                         }
                     }
             }.chartForegroundStyleScale(["UAM": .orange, "ZT": .purple, "IOB": .blue, "COB": .yellow]
-            ).chartLegend(s.trioChartShowForecast && s.trioChartForecastDisplay == .lines ? .visible : .hidden)
+            ).chartLegend(s.aidChartShowForecast && s.aidChartForecastDisplay == .lines ? .visible : .hidden)
             .padding()
         }
     }

@@ -17,8 +17,9 @@ struct DeviceStatusResponse: Codable {
 struct DeviceStatusResult: Codable {
 //    let pump: Pump
 //    let uploader: Uploader
-    let device: String
-    let openaps: Openaps
+    let app: String?
+    let device: String?
+    let openaps: Openaps?
 //    let createdAt: String
 //    let utcOffset: Int
 //    let identifier: String
@@ -26,7 +27,7 @@ struct DeviceStatusResult: Codable {
 
     enum CodingKeys: String, CodingKey {
 //        case pump, uploader, device, openaps
-        case device, openaps
+        case app, device, openaps
 //        case createdAt = "created_at"
 //        case utcOffset, identifier, srvModified, srvCreated
     }
@@ -34,9 +35,10 @@ struct DeviceStatusResult: Codable {
 
 // MARK: - Openaps
 struct Openaps: Codable {
-    let iob: Iob
-    let version: String
-    let suggested, enacted: Ted
+    let iob: Iob?
+    //let version: String
+    let suggested: Ted?
+    let enacted: Ted?
 }
 
 // MARK: - Ted
@@ -60,6 +62,7 @@ struct Ted: Codable {
     let deliverAt, temp: String?
     let predBGs: PredBGs?
     let isf, cr: Double?
+    let dynamicIsf: Double?
 
     enum CodingKeys: String, CodingKey {
         case insulinForManualBolus
@@ -72,6 +75,7 @@ struct Ted: Codable {
         case cob = "COB"
         case threshold, rate, deliverAt, temp, predBGs
         case isf = "ISF"
+        case dynamicIsf = "variable_sens"
         case cr = "CR"
     }
 }

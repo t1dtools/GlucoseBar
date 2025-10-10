@@ -48,18 +48,18 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     @Published var showTarget: Bool = true
 
     // Trio Specifics
-    @Published var trioEnableIntegration: Bool = false
+    @Published var aidEnableIntegration: Bool = false
 
     @Published var trioBarShowIOB: Bool = false
     @Published var trioBarShowCOB: Bool = false
     @Published var trioBarShowEventualGlucose: Bool = false
 
-    @Published var trioChartShowForecast: Bool = true
-    @Published var trioChartForecastDisplay: ForecastDisplay = .lines
-    @Published var trioChartShowIOB: Bool = true
-    @Published var trioChartShowCOB: Bool = true
-    @Published var trioChartShowEventualGlucose: Bool = true
-    @Published var trioChartShowLoopStatus: Bool = true
+    @Published var aidChartShowForecast: Bool = true
+    @Published var aidChartForecastDisplay: ForecastDisplay = .lines
+    @Published var aidChartShowIOB: Bool = true
+    @Published var aidChartShowCOB: Bool = true
+    @Published var aidChartShowEventualGlucose: Bool = true
+    @Published var aidChartShowLoopStatus: Bool = true
 
     @Published var validSettings: Bool = false
 
@@ -193,33 +193,33 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         self.showLowThreshold = defaults.bool(forKey: "showLowThreshold")
         self.showTarget = defaults.bool(forKey: "showTarget")
 
-        self.trioEnableIntegration = defaults.bool(forKey: "trioEnableIntegration")
+        self.aidEnableIntegration = defaults.bool(forKey: "trioEnableIntegration")
 
         self.trioBarShowIOB = defaults.bool(forKey: "trioBarShowIOB")
         self.trioBarShowCOB = defaults.bool(forKey: "trioBarShowCOB")
         self.trioBarShowEventualGlucose = defaults.bool(forKey: "trioBarShowEventualGlucose")
 
-        self.trioChartShowForecast = defaults.bool(forKey: "trioChartShowForecast")
+        self.aidChartShowForecast = defaults.bool(forKey: "trioChartShowForecast")
         let forecastDisplay = defaults.string(forKey: "trioChartForecastDisplay") ?? ForecastDisplay.lines.presentable
         switch forecastDisplay {
         case ForecastDisplay.lines.presentable:
             DispatchQueue.main.async {
-                self.trioChartForecastDisplay = .lines
+                self.aidChartForecastDisplay = .lines
             }
         case ForecastDisplay.cone.presentable:
             DispatchQueue.main.async {
-                self.trioChartForecastDisplay = .cone
+                self.aidChartForecastDisplay = .cone
             }
         default:
             DispatchQueue.main.async {
-                self.trioChartForecastDisplay = .lines
+                self.aidChartForecastDisplay = .lines
             }
         }
 
-        self.trioChartShowIOB = defaults.bool(forKey: "trioChartShowIOB")
-        self.trioChartShowCOB = defaults.bool(forKey: "trioChartShowCOB")
-        self.trioChartShowEventualGlucose = defaults.bool(forKey: "trioChartShowEventualGlucose")
-        self.trioChartShowLoopStatus = defaults.bool(forKey: "trioChartShowLoopStatus")
+        self.aidChartShowIOB = defaults.bool(forKey: "trioChartShowIOB")
+        self.aidChartShowCOB = defaults.bool(forKey: "trioChartShowCOB")
+        self.aidChartShowEventualGlucose = defaults.bool(forKey: "trioChartShowEventualGlucose")
+        self.aidChartShowLoopStatus = defaults.bool(forKey: "trioChartShowLoopStatus")
     }
 
     func save() {
@@ -271,16 +271,16 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         defaults.set(self.showLowThreshold, forKey: "showLowThreshold")
         defaults.set(self.showTarget, forKey: "showTarget")
 
-        defaults.set(self.trioEnableIntegration, forKey: "trioEnableIntegration")
+        defaults.set(self.aidEnableIntegration, forKey: "trioEnableIntegration")
         defaults.set(self.trioBarShowIOB, forKey: "trioBarShowIOB")
         defaults.set(self.trioBarShowCOB, forKey: "trioBarShowCOB")
         defaults.set(self.trioBarShowEventualGlucose, forKey: "trioBarShowEventualGlucose")
-        defaults.set(self.trioChartShowForecast, forKey: "trioChartShowForecast")
-        defaults.set(self.trioChartForecastDisplay.presentable, forKey: "trioChartForecastDisplay")
-        defaults.set(self.trioChartShowIOB, forKey: "trioChartShowIOB")
-        defaults.set(self.trioChartShowCOB, forKey: "trioChartShowCOB")
-        defaults.set(self.trioChartShowEventualGlucose, forKey: "trioChartShowEventualGlucose")
-        defaults.set(self.trioChartShowLoopStatus, forKey: "trioChartShowLoopStatus")
+        defaults.set(self.aidChartShowForecast, forKey: "trioChartShowForecast")
+        defaults.set(self.aidChartForecastDisplay.presentable, forKey: "trioChartForecastDisplay")
+        defaults.set(self.aidChartShowIOB, forKey: "trioChartShowIOB")
+        defaults.set(self.aidChartShowCOB, forKey: "trioChartShowCOB")
+        defaults.set(self.aidChartShowEventualGlucose, forKey: "trioChartShowEventualGlucose")
+        defaults.set(self.aidChartShowLoopStatus, forKey: "trioChartShowLoopStatus")
 
         defaults.synchronize()
         self.load()
