@@ -15,6 +15,8 @@ class ViewState: ObservableObject, @unchecked Sendable {
     @Published var isPanePresented: Bool = false
     @Published var isOnline: Bool = false
 
+    private let queue = DispatchQueue(label: "tools.t1d.GlucoseBar.ViewState", attributes: .concurrent)
+
     // This exists to filter out VPNs since they give false positives
     // when network isn't available
     func isOnlyOtherInterface(_ path: NWPath) -> Bool {
@@ -29,7 +31,8 @@ class ViewState: ObservableObject, @unchecked Sendable {
 
     init() {
         let networkMonitor = NWPathMonitor()
-        networkMonitor.pathUpdateHandler = { path in
+        networkMonitor.pathUpdateHandler = { [weak self] path in
+            guard let self = self else { return }
             DispatchQueue.main.async {
                 if path.status == .satisfied && !self.isOnlyOtherInterface(path) {
                     self.isOnline = true
@@ -124,16 +127,26 @@ struct GlucoseBarApp: App {
 class AppDelegate: NSObject, NSApplicationDelegate {
 
     let notificationCenter = NotificationCenter.default
+    private var workspaceObserver: NSObjectProtocol?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(sleepListener(_:)),
-                                                          name: NSWorkspace.didWakeNotification, object: nil)
+        workspaceObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didWakeNotification,
+            object: nil,
+            queue: nil) { [weak self] _ in
+                self?.sleepListener()
+        }
     }
 
-    @objc private func sleepListener(_ aNotification: Notification) {
-        if aNotification.name == NSWorkspace.didWakeNotification {
-            self.notificationCenter.post(.makeComputerSleepEventNotification(forName: .computerDidWakeUp))
+    deinit {
+        if let observer = workspaceObserver {
+            NSWorkspace.shared.notificationCenter.removeObserver(observer)
+            workspaceObserver = nil
         }
+    }
+
+    private func sleepListener() {
+        self.notificationCenter.post(.makeComputerSleepEventNotification(forName: .computerDidWakeUp))
     }
 }
 

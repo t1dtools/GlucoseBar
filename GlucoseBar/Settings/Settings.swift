@@ -10,6 +10,8 @@ import OSLog
 
 class SettingsStore: ObservableObject, @unchecked Sendable {
 
+    private let settingsQueue = DispatchQueue(label: "tools.t1d.GlucoseBar.settings", attributes: .concurrent)
+
     @Published var glucoseUnit: GlucoseUnit = .mgdl
     @Published var highThreshold: Double = 180
     @Published var lowThreshold: Double = 70
@@ -70,7 +72,12 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     }
 
     func load() {
+        settingsQueue.sync {
+            loadInternal()
+        }
+    }
 
+    private func loadInternal() {
         let defaults = UserDefaults.standard
 
         // Clear everything for testing purposes
@@ -171,7 +178,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
                 self.glucoseUnit = .mgdl
             }
         }
-        
+
         self.glucoseTarget = defaults.double(forKey: "glucoseTarget")
         if self.glucoseTarget == 0 {
             self.glucoseTarget = 100.0
@@ -223,6 +230,13 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     }
 
     func save() {
+        settingsQueue.async(flags: .barrier) { [weak self] in
+            guard let self = self else { return }
+            self.saveInternal()
+        }
+    }
+
+    private func saveInternal() {
         let defaults = UserDefaults.standard
         defaults.set(true, forKey: "validSettings")
         defaults.set(self.glucoseUnit.presentable, forKey: "glucoseUnit")
@@ -283,10 +297,19 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         defaults.set(self.trioChartShowLoopStatus, forKey: "trioChartShowLoopStatus")
 
         defaults.synchronize()
-        self.load()
+        DispatchQueue.main.async { [weak self] in
+            self?.loadInternal()
+        }
     }
 
     func deleteCGMProvider() {
+        settingsQueue.async(flags: .barrier) { [weak self] in
+            guard let self = self else { return }
+            self.deleteCGMProviderInternal()
+        }
+    }
+
+    private func deleteCGMProviderInternal() {
         let defaults = UserDefaults.standard
 
         switch self.cgmProvider {

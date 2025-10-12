@@ -35,11 +35,16 @@ struct DrawForecast: ChartContent {
             return Date()
         }
 
-        if latestDate! > Date().addingTimeInterval(forecastDuration) {
-            latestDate = Date().addingTimeInterval(forecastDuration)
+        guard let safeLatestDate = latestDate else {
+            return Date()
         }
 
-        return latestDate!
+        if safeLatestDate > Date().addingTimeInterval(forecastDuration) {
+            latestDate = Date().addingTimeInterval(forecastDuration)
+            return latestDate!
+        }
+
+        return safeLatestDate
     }
 
     var body: some ChartContent {

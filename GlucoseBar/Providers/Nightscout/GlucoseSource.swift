@@ -42,8 +42,17 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
     @MainActor
     public func checkDeviceStatusForGSE() async -> GlucoseSourceDevice {
         logger.debug("Nightscout.GlucoseSource.checkDeviceStatusForGSE")
-        while isAuthenticating {
-            usleep(1000)
+
+        // Wait for authentication to complete using proper async pattern
+        var retryCount = 0
+        while isAuthenticating && retryCount < 30 { // Max 30 seconds wait
+            try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
+            retryCount += 1
+        }
+
+        if isAuthenticating {
+            logger.warning("Timeout waiting for authentication to complete")
+            return .null
         }
 
         let url = "\(baseURL)/api/v3/devicestatus?sort%24desc=created_at&limit=1&skip=0&fields=_all"
@@ -82,27 +91,27 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
                     gsep.iob = enacted.iob ?? 0
                     gsep.eventualGlucose = enacted.eventualBG
                     gsep.reason = enacted.reason
-                    
+
                     var oapsf = OpenAPSForecasts()
                     if let iob = enacted.predBGs?.iob {
                         oapsf.iob = iob
                     }
-                    
+
                     if let cob = enacted.predBGs?.cob {
                         oapsf.cob = cob
                     }
-                    
+
                     if let uam = enacted.predBGs?.uam {
                         oapsf.uam = uam
                     }
-                    
+
                     if let zt = enacted.predBGs?.zt {
                         oapsf.zt = zt
                     }
                     gsep.forecasts = oapsf
                     gsep.glucoseTarget = enacted.currentTarget
-                    
-                    DispatchQueue.global().sync {
+
+                    await MainActor.run {
                         self.GlucoseSourceExtras = gsep
                     }
 
@@ -121,7 +130,7 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
                 err = String(localized: "Unable to get Trio data: Request timed out")
             }
 
-            DispatchQueue.global().sync {
+            await MainActor.run {
                 var gsep = GlucoseSourceExtraProperties()
                 gsep.error = err
                 self.GlucoseSourceExtras = gsep
@@ -137,8 +146,17 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
         let empty = GlucoseSourceExtraProperties()
 
         logger.debug("Nightscout.GlucoseSource.getGlucoseSourceExtras")
-        while isAuthenticating {
-            usleep(1000)
+
+        // Wait for authentication to complete using proper async pattern
+        var retryCount = 0
+        while isAuthenticating && retryCount < 30 { // Max 30 seconds wait
+            try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
+            retryCount += 1
+        }
+
+        if isAuthenticating {
+            logger.warning("Timeout waiting for authentication to complete")
+            return empty
         }
 
         let url = "\(baseURL)/api/v3/devicestatus?sort%24desc=created_at&limit=1&skip=0&fields=_all"
@@ -189,7 +207,7 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
                     dateFormatter.locale = Locale(identifier: "en_US_POSIX")
                     dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
                     dateFormatter.timeZone = TimeZone.init(secondsFromGMT: 0)
-                    
+
                     let ts = dateFormatter.date(from: enacted.deliverAt ?? " ") // " " because that causes nil instead of now
 
                     return GlucoseSourceExtraProperties(iob: enacted.iob, cob: enacted.cob, eventualGlucose: enacted.eventualBG, reason: enacted.reason, enactedAt: ts, forecasts: forecasts, glucoseTarget: enacted.currentTarget)

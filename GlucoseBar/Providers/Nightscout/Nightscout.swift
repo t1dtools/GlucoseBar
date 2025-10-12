@@ -19,27 +19,27 @@ class Nightscout: Provider, @unchecked Sendable {
 
     var baseURL: String
     var token: String
-    
+
     init(baseURL: String, token: String) {
-        
+
         // Do some basic validation
         if baseURL.isEmpty {
             validSettings = false
             settingsError = "Host can not be empty"
         }
-        
+
         if !baseURL.hasPrefix("https://") && !baseURL.hasPrefix("http://") {
             validSettings = false
             settingsError = "Host must start with http:// or https://"
         }
-        
+
         self.baseURL = baseURL
         self.token = token
-        
+
         if baseURL.hasSuffix("/") {
             self.baseURL = String(self.baseURL.dropLast())
         }
-        
+
         super.init()
         self.isBaseProvider = false
         self.type = .nightscout
@@ -120,40 +120,39 @@ class Nightscout: Provider, @unchecked Sendable {
 
             if res!.statusCode == 200 {
                 do {
-                    try DispatchQueue.global().sync { [weak self] in
-                        guard let self = self else { return }
+                    let result = try JSONDecoder().decode(NightscoutEntriesResponse.self, from: data)
 
-                        let result = try JSONDecoder().decode(NightscoutEntriesResponse.self, from: data)
+                    var previous: GlucoseEntry? = nil
+                    let currentEntries = self.getSafeGlucoseEntries()
+                    if currentEntries.count > 0 {
+                        previous = currentEntries[0]
+                    }
 
-                        var previous: GlucoseEntry? = nil
-                        if self.GlucoseEntries.count > 0 {
-                            previous = self.GlucoseEntries[0]
-                        }
+                    let newEntries = self.nsEntriesToGlucoseEntries(input: result.result, previous: previous)
 
-                        let newEntries = self.nsEntriesToGlucoseEntries(input: result.result, previous: previous)
-
-                        if lim > 1 {
-                            self.GlucoseEntries = newEntries
-                        } else {
-                            let uniqueNewEntries = newEntries.filter { newEntry in
-                                !self.GlucoseEntries.contains(where: {
-                                    $0.id == newEntry.id
-                                }
-                                )}
-
-                            if uniqueNewEntries.count > 0 {
-                                self.logger.debug("Fetched \(uniqueNewEntries.count, privacy: .public) new entries")
-                                self.GlucoseEntries.insert(contentsOf: newEntries, at: 0)
-
-                                if self.GlucoseEntries.countExcedes(288) {
-                                    self.logger.debug("removing entry from glucoseentries: \(self.GlucoseEntries.last!.glucose, privacy: .private)")
-                                    self.GlucoseEntries.removeLast()
-                                }
-                                self.logger.debug("Latest glucose entry: \(String(describing: self.GlucoseEntries.first?.glucose), privacy: .private)")
+                    if lim > 1 {
+                        self.setGlucoseEntries(newEntries)
+                    } else {
+                        let uniqueNewEntries = newEntries.filter { newEntry in
+                            !currentEntries.contains(where: {
+                                $0.id == newEntry.id
                             }
+                            )}
+
+                        if uniqueNewEntries.count > 0 {
+                            self.logger.debug("Fetched \(uniqueNewEntries.count, privacy: .public) new entries")
+                            var updatedEntries = currentEntries
+                            updatedEntries.insert(contentsOf: newEntries, at: 0)
+
+                            if updatedEntries.count > 288 {
+                                self.logger.debug("removing entry from glucoseentries: \(updatedEntries.last!.glucose, privacy: .private)")
+                                updatedEntries.removeLast()
+                            }
+                            self.logger.debug("Latest glucose entry: \(String(describing: updatedEntries.first?.glucose), privacy: .private)")
+                            self.setGlucoseEntries(updatedEntries)
                         }
                     }
-                    
+
                     if RemoteGlucoseSource != .null {
                         let gs = GlucoseSource(baseURL: self.baseURL, token: self.auth?.token ?? "invalid")
                         let gse = await gs.getGlucoseSourceExtras()
@@ -252,7 +251,7 @@ class Nightscout: Provider, @unchecked Sendable {
                 ge.append(entry)
             }
         }
-        
+
         return ge
     }
 
@@ -304,7 +303,13 @@ class Nightscout: Provider, @unchecked Sendable {
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
 
-            let res = response as! HTTPURLResponse
+            guard let res = response as? HTTPURLResponse else {
+                DispatchQueue.main.async { [weak self] in
+                    guard let self = self else { return }
+                    self.providerIssue = "Invalid response from Nightscout"
+                }
+                return
+            }
             if res.statusCode > 299 {
                 self.logger.debug("status code over 299: \(res.statusCode). Body: \(data)")
                 DispatchQueue.main.async { [weak self] in

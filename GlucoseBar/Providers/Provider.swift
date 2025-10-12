@@ -59,7 +59,8 @@ class Provider: ObservableObject, @unchecked Sendable {
     internal var readingInterval: Double = 300 // Seconds between readings
     internal var logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "provider")
     @Published var RemoteGlucoseSource: GlucoseSourceDevice = .null
-    @Published var GlucoseEntries: [GlucoseEntry] = []
+    @Published private var _glucoseEntries: [GlucoseEntry] = []
+    private let glucoseEntriesQueue = DispatchQueue(label: "tools.t1d.GlucoseBar.glucoseEntries", attributes: .concurrent)
     @Published var GlucoseSourceExtras: GlucoseSourceExtraProperties = GlucoseSourceExtraProperties()
     @Published public var providerIssue: String?
     @Published public var lastFetch: Date = Date().addingTimeInterval(TimeInterval(-5*60))
@@ -74,33 +75,64 @@ class Provider: ObservableObject, @unchecked Sendable {
         if self.isBaseProvider {
             return
         }
-        
+
         Task {
             await self.fetch()
         }
         startTimer()
     }
-    
+
+    // Thread-safe getter for GlucoseEntries
+    var GlucoseEntries: [GlucoseEntry] {
+        get {
+            return glucoseEntriesQueue.sync {
+                return _glucoseEntries
+            }
+        }
+    }
+
+    // Thread-safe setter for GlucoseEntries - must be called from main thread for UI updates
+    func setGlucoseEntries(_ entries: [GlucoseEntry]) {
+        glucoseEntriesQueue.async(flags: .barrier) { [weak self] in
+            guard let self = self else { return }
+            self._glucoseEntries = entries
+        }
+
+        // Update UI on main thread
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.objectWillChange.send()
+        }
+    }
+
+    // Thread-safe method to get a safe copy of entries for UI use
+    func getSafeGlucoseEntries() -> [GlucoseEntry] {
+        return glucoseEntriesQueue.sync {
+            return Array(_glucoseEntries) // Create a copy
+        }
+    }
+
     internal func startTimer() {
         let _ = Timer.publish(every: readingInterval, on: .main, in: .default)
     }
-    
+
     func verifyCredentials() async -> Bool {
         return true
     }
-    
+
     func getCurrent() -> GlucoseEntry {
-        return GlucoseEntries.count > 0 ? GlucoseEntries[0] : GlucoseEntry(glucose: 1, date: Date(), changeRate: 0.0)
+        let entries = getSafeGlucoseEntries()
+        return entries.count > 0 ? entries[0] : GlucoseEntry(glucose: 1, date: Date(), changeRate: 0.0)
     }
-    
+
     func getData(completion: @escaping ([GlucoseEntry]) -> Void) {
-        completion(GlucoseEntries)
+        completion(getSafeGlucoseEntries())
     }
 
     func isAuthValid() -> Bool {
         return false
     }
-    
+
     internal func fetch() async {
         self.logger.error("Base fetch function called. This should not happen. Occurrences of this message means that your CGM provider implementation does not have it's own `fetch` implementation, or that no provider is configured.")
         // Should be implemented in the discrete providers
