@@ -69,7 +69,7 @@ func calculateConeData(entries: [GraphEntry]) -> ([ConeData], [ConeData]) {
     for entry in entries {
         if entry.forecastType != .none {
             if counters.contains(where: {$0.key == entry.forecastType}) {
-                counters[entry.forecastType]! += 1
+                counters[entry.forecastType, default: 0] += 1
             } else {
                 counters[entry.forecastType] = 1
             }

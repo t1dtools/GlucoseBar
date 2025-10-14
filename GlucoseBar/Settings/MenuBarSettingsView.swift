@@ -115,11 +115,6 @@ struct MenuBarSettingsView: View {
             }
         }
             .frame(height: 24)
-            .offset(y: focusedMenuBarItem == item ? 9 : 0)
-
-        if focusedMenuBarItem == item {
-            Image(systemName: "arrowtriangle.up.fill").foregroundStyle(.blue).frame(width: 10, height: 10).offset(y: 3)
-        }
     }
 
     @ViewBuilder

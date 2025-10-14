@@ -21,6 +21,10 @@ final class StatusItemManager: ObservableObject {
     private var sizePassthrough = PassthroughSubject<CGSize, Never>()
     private var sizeCancellable: AnyCancellable?
 
+    deinit {
+        cleanup()
+    }
+
     func createStatusItem(popover: NSPopover) {
         self.popover = popover
         let statusItem: NSStatusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -35,21 +39,40 @@ final class StatusItemManager: ObservableObject {
         self.hostingView = hostingView
 
         sizeCancellable = sizePassthrough.sink { [weak self] size in
+            guard let self = self else { return }
             let frame = NSRect(origin: .zero, size: .init(width: size.width, height: 24))
-            self?.hostingView?.frame = frame
-            self?.statusItem?.view?.frame = frame
+            self.hostingView?.frame = frame
+            self.statusItem?.view?.frame = frame
         }
     }
 
     @MainActor
     @objc func statusBarButtonClicked(_ sender: NSStatusBarButton) {
-        if let btn = self.statusItem!.button {
-            if self.popover!.isShown {
-                self.popover?.performClose(sender)
-            } else {
-                self.popover?.show(relativeTo: btn.bounds, of: btn, preferredEdge: NSRectEdge.minY)
-            }
+        guard let statusItem = self.statusItem,
+              let button = statusItem.button,
+              let popover = self.popover else {
+            return
         }
+
+        if popover.isShown {
+            popover.performClose(sender)
+        } else {
+            popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
+        }
+    }
+
+    @MainActor
+    private func cleanup() {
+        sizeCancellable?.cancel()
+        sizeCancellable = nil
+
+        statusItem?.statusBar?.removeStatusItem(statusItem!)
+        statusItem = nil
+
+        hostingView?.removeFromSuperview()
+        hostingView = nil
+
+        popover = nil
     }
 }
 

@@ -26,6 +26,9 @@ class Glucose: ObservableObject, Sendable {
     @ObservedObject var vs: ViewState = ViewState()
 
     private var timer: DispatchTimer
+    private var isFetching: Bool = false
+    private let fetchQueue = DispatchQueue(label: "tools.t1d.GlucoseBar.fetchQueue")
+    private var notificationObserver: NSObjectProtocol?
 
     let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "glucose")
     let notificationCenter = NotificationCenter.default
@@ -40,6 +43,18 @@ class Glucose: ObservableObject, Sendable {
         timer.resume()
 
         registerForNotifications()
+    }
+
+    deinit {
+        cleanup()
+    }
+
+    private func cleanup() {
+        timer.suspend()
+        if let observer = notificationObserver {
+            notificationCenter.removeObserver(observer)
+            notificationObserver = nil
+        }
     }
 
     func timerEventHandler() {
@@ -65,8 +80,17 @@ class Glucose: ObservableObject, Sendable {
         }
 
         if shouldFetch {
-            Task {
-                await self.provider.fetch()
+            fetchQueue.async { [weak self] in
+                guard let self = self else { return }
+                if self.isFetching {
+                    self.logger.debug("Skipping fetch - already in progress")
+                    return
+                }
+                self.isFetching = true
+                Task {
+                    defer { self.isFetching = false }
+                    await self.provider.fetch()
+                }
             }
         }
 
@@ -101,16 +125,22 @@ class Glucose: ObservableObject, Sendable {
         timer.eventHandler = timerEventHandler
         timer.resume()
 
+        // Re-register notifications after reset
+        if let observer = notificationObserver {
+            notificationCenter.removeObserver(observer)
+        }
+        registerForNotifications()
+
         self.logger.notice("Reset glucose object")
     }
 
     func registerForNotifications() {
-        notificationCenter
+        notificationObserver = notificationCenter
             .addObserver(forName: .computerDidWakeUp,
                          object: nil,
-                         queue: nil) {(notification) in
+                         queue: nil) { [weak self] notification in
                 DispatchQueue.main.async {
-                    self.getGlucose()
+                    self?.getGlucose()
                 }
         }
     }
@@ -156,7 +186,8 @@ class Glucose: ObservableObject, Sendable {
             }
         }
 
-        let glucoseEntries = self.provider.GlucoseEntries
+        // Get a thread-safe copy of glucose entries
+        let glucoseEntries = self.provider.getSafeGlucoseEntries()
 
         if glucoseEntries.isEmpty {
             return
@@ -168,6 +199,13 @@ class Glucose: ObservableObject, Sendable {
 
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
+
+            // Triple-check bounds with the copied array to prevent any remaining race conditions
+            guard !glucoseEntries.isEmpty else {
+                self.logger.warning("GlucoseEntries became empty in main dispatch block")
+                return
+            }
+
             self.glucose = glucoseEntries[0].glucose
             self.glucoseTime = glucoseEntries[0].date
             self.trend = glucoseEntries[0].trend?.arrows ?? ""
@@ -175,6 +213,8 @@ class Glucose: ObservableObject, Sendable {
 
             if glucoseEntries.count > 1 {
                 self.delta = glucoseEntries[0].glucose - glucoseEntries[1].glucose
+            } else {
+                self.delta = 0.0
             }
 
             self.glucoseAge = formatter.localizedString(for: glucoseEntries[0].date, relativeTo: Date())

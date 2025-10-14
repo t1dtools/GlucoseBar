@@ -21,32 +21,29 @@ class Simulator: Provider, @unchecked Sendable {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
 
+            var currentEntries = self.getSafeGlucoseEntries()
             var previousEntry: GlucoseEntry? = nil
-            if !self.GlucoseEntries.isEmpty {
-                previousEntry = self.GlucoseEntries.first
+            if !currentEntries.isEmpty {
+                previousEntry = currentEntries.first
             }
 
-            if self.GlucoseEntries.isEmpty {
-                while self.GlucoseEntries.count < 288 {
+            if currentEntries.isEmpty {
+                while currentEntries.count < 288 {
 
-                    if !self.GlucoseEntries.isEmpty {
-                        previousEntry = self.GlucoseEntries.first
+                    if !currentEntries.isEmpty {
+                        previousEntry = currentEntries.first
                     }
-                    //                    DispatchQueue.main.async {
-                    self.GlucoseEntries.insert(self.generateGlucoseEntry(previousEntry: previousEntry), at: 0)
-                    //                    }
+                    currentEntries.insert(self.generateGlucoseEntry(previousEntry: previousEntry), at: 0)
                 }
             } else {
-                //                DispatchQueue.main.async {
-                self.GlucoseEntries.insert(self.generateGlucoseEntry(previousEntry: previousEntry), at: 0)
-                //                }
+                currentEntries.insert(self.generateGlucoseEntry(previousEntry: previousEntry), at: 0)
             }
 
-            if self.GlucoseEntries.count > 288 {
-                //                DispatchQueue.main.async {
-                self.GlucoseEntries.remove(at: self.GlucoseEntries.count - 1)
-                //                }
+            if currentEntries.count > 288 {
+                currentEntries.remove(at: currentEntries.count - 1)
             }
+
+            self.setGlucoseEntries(currentEntries)
         }
     }
 
@@ -97,7 +94,7 @@ class Simulator: Provider, @unchecked Sendable {
             glucose = base
             trend = .downDownDown
         }
-        
+
         if let prevE = previousEntry {
             delta = glucose - prevE.glucose
         }

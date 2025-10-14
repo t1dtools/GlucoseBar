@@ -15,11 +15,11 @@ struct MenuBarView: View {
     @Environment(\.colorScheme) private var colorScheme
 
     @State private var menuBarItems: [MenuBarItemContainer] = []
-    private var renderer: ImageRenderer<AnyView>?
+    @State private var cachedMenuImage: CGImage?
+    @State private var cachedZenImage: CGImage?
+    @State private var lastUpdateTime: Date = Date()
 
-    init() {
-        loadRenderer()
-    }
+    private let imageCache = NSCache<NSString, NSImage>()
 
     private func loadMenuBarItems() {
         if s.menuBarItems.isEmpty {
@@ -33,8 +33,14 @@ struct MenuBarView: View {
         }
     }
 
-    private mutating func loadRenderer() {
-        self.renderer = ImageRenderer(content: AnyView(menuStack))
+    private func generateMenuBarImage() -> CGImage? {
+        let renderer = ImageRenderer(content: AnyView(menuStack))
+        return renderer.cgImage
+    }
+
+    private func generateZenModeImage() -> CGImage? {
+        let renderer = ImageRenderer(content: AnyView(zenMode))
+        return renderer.cgImage
     }
 
     @ViewBuilder
@@ -87,28 +93,63 @@ struct MenuBarView: View {
 
     var body: some View {
         if s.zenMode {
-            let r = ImageRenderer(content: AnyView(zenMode))
-            let menuBarImage = r.cgImage
             Group {
-                if menuBarImage != nil {
-                    Image(menuBarImage!, scale: 2, label: Text(""))
+                if let cachedZenImage = cachedZenImage {
+                    Image(cachedZenImage, scale: 2, label: Text(""))
                 } else {
                     Image(systemName: "questionmark.circle.dashed")
+                        .onAppear {
+                            Task {
+                                await MainActor.run {
+                                    self.cachedZenImage = generateZenModeImage()
+                                }
+                            }
+                        }
+                }
+            }
+            .onReceive(g.$glucose.combineLatest(g.$trend)) { _, _ in
+                // Refresh zen mode image when glucose or trend changes
+                Task {
+                    await MainActor.run {
+                        self.cachedZenImage = generateZenModeImage()
+                    }
                 }
             }
         } else {
-            let r = ImageRenderer(content: AnyView(menuStack))
-            let menuBarImage = r.cgImage
             Group {
-                if menuBarImage != nil {
-                    Image(menuBarImage!, scale: 2, label: Text(""))
+                if let cachedMenuImage = cachedMenuImage {
+                    Image(cachedMenuImage, scale: 2, label: Text(""))
                 } else {
                     Image(systemName: "questionmark.circle.dashed")
+                        .onAppear {
+                            loadMenuBarItems()
+                            Task {
+                                await MainActor.run {
+                                    self.cachedMenuImage = generateMenuBarImage()
+                                }
+                            }
+                        }
                 }
-            }.onAppear {
+            }
+            .onReceive(s.$menuBarItems) { _ in
                 loadMenuBarItems()
-            }.onReceive(s.$menuBarItems) {_ in
-                loadMenuBarItems()
+                Task {
+                    await MainActor.run {
+                        self.cachedMenuImage = generateMenuBarImage()
+                    }
+                }
+            }
+            .onReceive(g.$glucose.combineLatest(g.$delta, g.$trend)) { _, _, _ in
+                // Refresh menu image when glucose data changes
+                let now = Date()
+                if now.timeIntervalSince(lastUpdateTime) > 1.0 { // Throttle updates to max 1 per second
+                    lastUpdateTime = now
+                    Task {
+                        await MainActor.run {
+                            self.cachedMenuImage = generateMenuBarImage()
+                        }
+                    }
+                }
             }
         }
     }

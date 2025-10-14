@@ -126,7 +126,10 @@ class DexcomShare: Provider, @unchecked Sendable {
 
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
-            let res = response as! HTTPURLResponse
+            guard let res = response as? HTTPURLResponse else {
+                self.providerIssue = String(localized: "Invalid response from Dexcom Share")
+                return
+            }
             if res.statusCode > 299 {
                 var providerError = ""
 
@@ -159,11 +162,13 @@ class DexcomShare: Provider, @unchecked Sendable {
                 do {
                     let result = try JSONDecoder().decode([DXEntriesResult].self, from: data)
                     var previous: GlucoseEntry? = nil
-                    if self.GlucoseEntries.count > 0 {
-                        previous = self.GlucoseEntries[0]
+                    let currentEntries = self.getSafeGlucoseEntries()
+                    if currentEntries.count > 0 {
+                        previous = currentEntries[0]
                     }
 
-                    self.GlucoseEntries = self.dexcomEntriesToGlucoseEntries(input: result, previous: previous)
+                    let newEntries = self.dexcomEntriesToGlucoseEntries(input: result, previous: previous)
+                    self.setGlucoseEntries(newEntries)
                     self.lastFetch = Date()
                 } catch DecodingError.dataCorrupted(_) {
                     self.providerIssue = String(localized: "Unable to read data from Dexcom Share: Data corrupted.")
@@ -251,10 +256,14 @@ class DexcomShare: Provider, @unchecked Sendable {
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
 
-            let res = response as! HTTPURLResponse
+            guard let res = response as? HTTPURLResponse else {
+                self.providerIssue = String(localized: "Invalid response from Dexcom Share")
+                return
+            }
             if res.statusCode > 299 {
                 var providerError: String? = nil
-                self.logger.error("\(String(data: data, encoding: .utf8)!, privacy: .public)")
+                let responseString = String(data: data, encoding: .utf8) ?? "Unable to decode response"
+                self.logger.error("\(responseString, privacy: .public)")
 
                 do {
                     let result = try JSONDecoder().decode(DexcomShareErrorResponse.self, from: data)
@@ -280,7 +289,11 @@ class DexcomShare: Provider, @unchecked Sendable {
 
             } else {
                 self.logger.debug("successful auth to Dexcom Share")
-                self.accountID = String(data: data, encoding: .utf8)!.replacingOccurrences(of: "\"", with: "")
+                guard let responseString = String(data: data, encoding: .utf8) else {
+                    self.providerIssue = String(localized: "Unable to decode account ID from Dexcom Share")
+                    return
+                }
+                self.accountID = responseString.replacingOccurrences(of: "\"", with: "")
             }
         } catch {
             var err = String(localized: "Dexcom Share Error: ") + "\(String(describing: error))"
@@ -314,10 +327,14 @@ class DexcomShare: Provider, @unchecked Sendable {
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
 
-            let res = response as! HTTPURLResponse
+            guard let res = response as? HTTPURLResponse else {
+                self.providerIssue = String(localized: "Invalid response from Dexcom Share")
+                return
+            }
             if res.statusCode > 299 {
                 var providerError = ""
-                self.logger.error("\(String(data: data, encoding: .utf8)!)")
+                let responseString = String(data: data, encoding: .utf8) ?? "Unable to decode response"
+                self.logger.error("\(responseString)")
 
                 do {
                     let result = try JSONDecoder().decode(DexcomShareErrorResponse.self, from: data)
@@ -338,7 +355,11 @@ class DexcomShare: Provider, @unchecked Sendable {
                 self.providerIssue = providerError
             } else {
                 self.logger.debug("successful session to Dexcom Share")
-                self.sessionID = String(data: data, encoding: .utf8)!.replacingOccurrences(of: "\"", with: "")
+                guard let responseString = String(data: data, encoding: .utf8) else {
+                    self.providerIssue = String(localized: "Unable to decode session ID from Dexcom Share")
+                    return
+                }
+                self.sessionID = responseString.replacingOccurrences(of: "\"", with: "")
             }
         } catch {
             var err = String(localized: "Dexcom Share Error: ") + "\(String(describing: error))"
@@ -372,7 +393,7 @@ class DexcomShare: Provider, @unchecked Sendable {
 
     override internal func verifyCredentials() async -> Bool {
         self.logger.debug("dexcomshare.verifyCredentials")
-        
+
         await self.getAccountID()
         if self.accountID != "" {
             await self.getSessionID()
@@ -382,4 +403,3 @@ class DexcomShare: Provider, @unchecked Sendable {
         return false
     }
 }
-
