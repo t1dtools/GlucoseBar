@@ -7,7 +7,6 @@
 
 import SwiftUI
 import NightscoutKit
-import OSLog
 import AppKit
 import Network
 
