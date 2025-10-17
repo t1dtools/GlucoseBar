@@ -6,8 +6,6 @@
 //
 
 import SwiftUI
-import NightscoutKit
-import AppKit
 import Network
 
 class ViewState: ObservableObject, @unchecked Sendable {
