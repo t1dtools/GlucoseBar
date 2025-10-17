@@ -43,6 +43,11 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
     public func checkDeviceStatusForGSE() async -> GlucoseSourceDevice {
         logger.debug("Nightscout.GlucoseSource.checkDeviceStatusForGSE")
 
+        if !aidEnabled {
+            logger.debug("AID integration not enabled, bailing out.")
+            return .null
+        }
+
         // Wait for authentication to complete using proper async pattern
         var retryCount = 0
         while isAuthenticating && retryCount < 30 { // Max 30 seconds wait

@@ -115,7 +115,7 @@ class Glucose: ObservableObject, Sendable {
             case .dexcomshare:
             provider = DexcomShare(username: settings.dxEmail, password: settings.dxPassword, server: settings.dxServer)
         case .nightscout:
-            provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret)
+            provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.trioEnableIntegration)
         default:
             provider = Simulator("defaulted")
         }
@@ -155,7 +155,7 @@ class Glucose: ObservableObject, Sendable {
             DispatchQueue.main.async {
                 switch settings.cgmProvider {
                 case .nightscout:
-                    self.provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret)
+                    self.provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.trioEnableIntegration)
                 case .dexcomshare:
                     self.provider = DexcomShare(username: settings.dxEmail, password: settings.dxPassword, server: settings.dxServer)
                 case .simulator:
@@ -200,7 +200,6 @@ class Glucose: ObservableObject, Sendable {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
 
-            // Triple-check bounds with the copied array to prevent any remaining race conditions
             guard !glucoseEntries.isEmpty else {
                 self.logger.warning("GlucoseEntries became empty in main dispatch block")
                 return

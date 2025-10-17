@@ -36,6 +36,7 @@ struct CGMSettingsView: View {
 
         @FocusState var nsSecretFailedValidationFocus: Bool
         @State var nsSecretFailedValidation: Bool = false
+        @State var aidEnabled: Bool
 
         var body: some View {
             VStack {
@@ -67,10 +68,14 @@ struct CGMSettingsView: View {
                     HStack {
                         Text("Enable Trio Integration")
                         Spacer()
-                        Picker("", selection: $s.trioEnableIntegration) {
+                        Picker("", selection: $aidEnabled) {
                             Text("Yes").tag(true)
                             Text("No").tag(false)
                         }.pickerStyle(SegmentedPickerStyle()).frame(width: 200, alignment: .trailing)
+                        .onChange(of: aidEnabled) {
+                            s.trioEnableIntegration = aidEnabled
+                            s.save()
+                        }
                     }
                     HStack {
                         Text("Trio is an Open Source Automated Insulin Delivery system, that can upload it's algorithm output to Nightscout with every successful Loop.").font(.footnote)
@@ -256,7 +261,7 @@ struct CGMSettingsView: View {
                             }
 
                             if s.cgmProvider == .nightscout {
-                                NightscoutView().padding()
+                                NightscoutView(aidEnabled: s.trioEnableIntegration).padding()
                             }
 
                             if s.cgmProvider == .dexcomshare {
