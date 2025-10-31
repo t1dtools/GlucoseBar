@@ -7,7 +7,6 @@
 
 import Foundation
 import SwiftUI
-import OSLog
 
 struct MenuBarSettingsView: View {
 
@@ -178,6 +177,9 @@ struct MenuBarSettingsView: View {
                         Image(viewImage, scale: 2, label: Text("")).onTapGesture {
                             focusMenuBarItem(item)
                         }.help(item.type.name)
+                        .onReceive(NotificationCenter.default.publisher(for: Notification.Name.init("menuitemsettingchange"))) { _ in
+                            loadMenuBarItems()
+                        }
                     }
                 }
                 Spacer()

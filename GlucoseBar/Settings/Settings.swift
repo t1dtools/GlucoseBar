@@ -338,7 +338,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         case .simulator:
             provider = Simulator("test auth")
         case .nightscout:
-            provider = Nightscout(baseURL: self.nsURL, token: self.nsSecret)
+            provider = Nightscout(baseURL: self.nsURL, token: self.nsSecret, aidEnabled: false)
         case .dexcomshare:
             provider = DexcomShare(username: self.dxEmail, password: self.dxPassword, server: self.dxServer)
         default:

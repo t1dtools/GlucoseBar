@@ -8,7 +8,6 @@
 import Foundation
 import SwiftUI
 import LaunchAtLogin
-import OSLog
 
 struct SettingsView: View {
     

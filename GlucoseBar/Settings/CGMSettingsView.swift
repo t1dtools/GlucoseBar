@@ -36,6 +36,7 @@ struct CGMSettingsView: View {
 
         @FocusState var nsSecretFailedValidationFocus: Bool
         @State var nsSecretFailedValidation: Bool = false
+        @State var aidEnabled: Bool
 
         var body: some View {
             VStack {
@@ -67,10 +68,14 @@ struct CGMSettingsView: View {
                     HStack {
                         Text("Enable AID Integration")
                         Spacer()
-                        Picker("", selection: $s.aidEnableIntegration) {
+                        Picker("", selection: $aidEnabled) {
                             Text("Yes").tag(true)
                             Text("No").tag(false)
                         }.pickerStyle(SegmentedPickerStyle()).frame(width: 200, alignment: .trailing)
+                        .onChange(of: aidEnabled) {
+                            s.trioEnableIntegration = aidEnabled
+                            s.save()
+                        }
                     }
                     HStack {
                         Text("AID stands for Automated Insulin Delivery system. Such systems can provide extra information, like Loop Status, IOB, COB, Eventual Glucose, prediction lines and more.").font(.footnote)
@@ -256,7 +261,7 @@ struct CGMSettingsView: View {
                             }
 
                             if s.cgmProvider == .nightscout {
-                                NightscoutView().padding()
+                                NightscoutView(aidEnabled: s.trioEnableIntegration).padding()
                             }
 
                             if s.cgmProvider == .dexcomshare {

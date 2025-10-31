@@ -6,9 +6,6 @@
 //
 
 import SwiftUI
-import NightscoutKit
-import OSLog
-import AppKit
 import Network
 
 class ViewState: ObservableObject, @unchecked Sendable {

@@ -19,8 +19,9 @@ class Nightscout: Provider, @unchecked Sendable {
 
     var baseURL: String
     var token: String
+    var aidEnabled: Bool
 
-    init(baseURL: String, token: String) {
+    init(baseURL: String, token: String, aidEnabled: Bool) {
 
         // Do some basic validation
         if baseURL.isEmpty {
@@ -35,6 +36,7 @@ class Nightscout: Provider, @unchecked Sendable {
 
         self.baseURL = baseURL
         self.token = token
+        self.aidEnabled = aidEnabled
 
         if baseURL.hasSuffix("/") {
             self.baseURL = String(self.baseURL.dropLast())
@@ -153,8 +155,8 @@ class Nightscout: Provider, @unchecked Sendable {
                         }
                     }
 
-                    if RemoteGlucoseSource != .null {
-                        let gs = GlucoseSource(baseURL: self.baseURL, token: self.auth?.token ?? "invalid")
+                    if aidEnabled && RemoteGlucoseSource != .null {
+                        let gs = GlucoseSource(baseURL: self.baseURL, token: self.auth?.token ?? "invalid", aidEnabled: aidEnabled)
                         let gse = await gs.getGlucoseSourceExtras()
                         DispatchQueue.main.async { [weak self] in
                             guard let self = self else { return }
@@ -338,7 +340,7 @@ class Nightscout: Provider, @unchecked Sendable {
                     isAuthenticated = true
 
                     // Check glucose source device to see if we support extra features
-                    let gs = GlucoseSource(baseURL: self.baseURL, token: result.token)
+                    let gs = GlucoseSource(baseURL: self.baseURL, token: result.token, aidEnabled: aidEnabled)
                     let source = await gs.checkDeviceStatusForGSE()
                     if source != GlucoseSourceDevice.null {
                         RemoteGlucoseSource = source

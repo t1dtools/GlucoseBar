@@ -220,12 +220,10 @@ public class MenuBarItemContainer: Equatable, Identifiable, Hashable, Codable, O
         let index = indices.first!
         self.settings[index] = MenuBarItemSetting(key: key, value: val)
 
-//        self.settings.publisher.sink(receiveCompletion: {
-//            print ("completion: \($0)")
-//            print("here is when we should somehow update the view")
-//        }, receiveValue: {
-//            print ("value: \($0)")
-//            self.objectWillChange.send()
-//        })
+        _ = self.settings.publisher.sink(receiveCompletion: { _ in
+            NotificationCenter.default.post(name: Notification.Name("menuitemsettingchange"), object: nil)
+        }, receiveValue: { _ in
+            self.objectWillChange.send()
+        })
     }
 }
