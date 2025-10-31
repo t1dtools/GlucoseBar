@@ -212,7 +212,7 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
                     dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
                     dateFormatter.timeZone = TimeZone.init(secondsFromGMT: 0)
 
-                    let ts = dateFormatter.date(from: enacted.deliverAt ?? " ") // " " because that causes nil instead of now
+                    let ts = dateFormatter.date(from: enacted?.deliverAt ?? " ") // " " because that causes nil instead of now
 
                     return GlucoseSourceExtraProperties(
                         iob: enacted!.iob,
