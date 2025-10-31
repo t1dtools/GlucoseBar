@@ -115,7 +115,7 @@ class Glucose: ObservableObject, Sendable {
             case .dexcomshare:
             provider = DexcomShare(username: settings.dxEmail, password: settings.dxPassword, server: settings.dxServer)
         case .nightscout:
-            provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.trioEnableIntegration)
+            provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.aidEnableIntegration)
         default:
             provider = Simulator("defaulted")
         }
@@ -155,7 +155,7 @@ class Glucose: ObservableObject, Sendable {
             DispatchQueue.main.async {
                 switch settings.cgmProvider {
                 case .nightscout:
-                    self.provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.trioEnableIntegration)
+                    self.provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.aidEnableIntegration)
                 case .dexcomshare:
                     self.provider = DexcomShare(username: settings.dxEmail, password: settings.dxPassword, server: settings.dxServer)
                 case .simulator:

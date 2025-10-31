@@ -73,7 +73,7 @@ struct CGMSettingsView: View {
                             Text("No").tag(false)
                         }.pickerStyle(SegmentedPickerStyle()).frame(width: 200, alignment: .trailing)
                         .onChange(of: aidEnabled) {
-                            s.trioEnableIntegration = aidEnabled
+                            s.aidEnableIntegration = aidEnabled
                             s.save()
                         }
                     }
@@ -261,7 +261,7 @@ struct CGMSettingsView: View {
                             }
 
                             if s.cgmProvider == .nightscout {
-                                NightscoutView(aidEnabled: s.trioEnableIntegration).padding()
+                                NightscoutView(aidEnabled: s.aidEnableIntegration).padding()
                             }
 
                             if s.cgmProvider == .dexcomshare {
