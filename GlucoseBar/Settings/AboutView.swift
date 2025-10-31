@@ -106,6 +106,11 @@ struct AboutView: View {
                                         Text(verbatim: "Andreas Stokholm")
                                     }
                                 }
+                                Button(action: {
+                                    NSWorkspace.shared.open(URL(string: "https://github.com/t1dtools/GlucoseBar/graphs/contributors")!)
+                                }) {
+                                    Text("Full list of contributors")
+                                }.buttonStyle(.plain).foregroundStyle(.blue).padding(.top, 5)
                             }.padding(.top, 10)
                             Spacer()
                         }.padding(.bottom, 5)
