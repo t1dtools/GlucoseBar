@@ -10,6 +10,7 @@ import Foundation
 class Nightscout: Provider, @unchecked Sendable {
 
     private var isAuthenticated = false
+    private var unsuccessfulAuthAttempts = 0
     public var validSettings: Bool = true
     public var settingsError: String = ""
 
@@ -67,6 +68,11 @@ class Nightscout: Provider, @unchecked Sendable {
 
     override internal func fetch() async {
         logger.debug("Nightscout.fetch")
+        if unsuccessfulAuthAttempts > 5 {
+            self.providerIssue = "Unable to connect to Nightscout after 5 attempts. Please check your credentials."
+            return
+        }
+
         if token.count > 0 && !isAuthValid() {
             await authenticate()
         }
@@ -313,6 +319,7 @@ class Nightscout: Provider, @unchecked Sendable {
                 return
             }
             if res.statusCode > 299 {
+                unsuccessfulAuthAttempts += 1
                 self.logger.debug("status code over 299: \(res.statusCode). Body: \(data)")
                 DispatchQueue.main.async { [weak self] in
                     guard let self = self else { return }
@@ -335,9 +342,10 @@ class Nightscout: Provider, @unchecked Sendable {
                         self.auth = ProviderAuth(token: result.token, expiry: result.exp)
                     }
 
-                    isAuthenticating = false
                     self.logger.debug("Authentication is successful.")
+                    isAuthenticating = false
                     isAuthenticated = true
+                    unsuccessfulAuthAttempts = 0
 
                     // Check glucose source device to see if we support extra features
                     let gs = GlucoseSource(baseURL: self.baseURL, token: result.token, aidEnabled: aidEnabled)
@@ -357,6 +365,7 @@ class Nightscout: Provider, @unchecked Sendable {
             if (error as? URLError)?.code == .timedOut {
                 err = "Request timed out"
             }
+            self.unsuccessfulAuthAttempts += 1
             self.providerIssue = err
         }
     }
