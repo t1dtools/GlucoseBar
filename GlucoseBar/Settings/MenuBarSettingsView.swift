@@ -44,7 +44,7 @@ struct MenuBarSettingsView: View {
         ]
         var defaultItemsInverse: [MenuBarItemContainer] = []
 
-        if s.trioEnableIntegration && s.cgmProvider == .nightscout {
+        if s.aidEnableIntegration && s.cgmProvider == .nightscout {
             defaultItemsInverse.append(MenuBarItemContainer.init(type: .loopstatus))
             defaultItemsInverse.append(MenuBarItemContainer.init(type: .eventualglucose))
             defaultItemsInverse.append(MenuBarItemContainer.init(type: .cob))

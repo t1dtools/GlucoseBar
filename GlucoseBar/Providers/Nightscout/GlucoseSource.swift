@@ -10,6 +10,8 @@ import Foundation
 public enum GlucoseSourceDevice: String, CaseIterable, Identifiable, Sendable {
     case null
     case trio
+    case openaps
+    case aaps
     public var id: String { self.rawValue }
     public var presentable: String {
         switch self {
@@ -17,7 +19,26 @@ public enum GlucoseSourceDevice: String, CaseIterable, Identifiable, Sendable {
             return String(localized: "No extras")
         case .trio:
             return "Trio"
+        case .openaps:
+            return "OpenAPS"
+        case .aaps:
+            return "AAPS"
         }
+    }
+    
+    static func fromDS(status: DeviceStatusResult) -> GlucoseSourceDevice {
+        if status.device == "Trio" {
+            return .trio
+        } else if status.device?.starts(with: "openaps://") == true {
+            if (status.app == "AAPS") {
+                return .aaps
+            } else {
+                return .openaps
+            }
+        } else {
+            return .null
+        }
+        
     }
 }
 
@@ -81,48 +102,34 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
             if res!.statusCode != 200 {
                 return .null
             }
-
+            
             do {
                 let result = try JSONDecoder().decode(DeviceStatusResponse.self, from: data)
                 if result.result.first == nil {
                     return .null
                 }
 
-                if result.result.first!.device == "Trio" {
-                    let enacted = result.result.first!.openaps.enacted
-
+                let device = GlucoseSourceDevice.fromDS(status: result.result.first!)
+                if device != GlucoseSourceDevice.null {
+                    let enacted = result.result.first!.openaps?.enacted ?? result.result.first!.openaps?.suggested
+                    if enacted == nil {
+                        self.logger.error("No enacted/suggested found in DeviceStatus")
+                        return .null
+                    }
+                    
                     var gsep = GlucoseSourceExtraProperties()
-                    gsep.cob = enacted.cob ?? 0
-                    gsep.iob = enacted.iob ?? 0
-                    gsep.eventualGlucose = enacted.eventualBG
-                    gsep.reason = enacted.reason
-
-                    var oapsf = OpenAPSForecasts()
-                    if let iob = enacted.predBGs?.iob {
-                        oapsf.iob = iob
-                    }
-
-                    if let cob = enacted.predBGs?.cob {
-                        oapsf.cob = cob
-                    }
-
-                    if let uam = enacted.predBGs?.uam {
-                        oapsf.uam = uam
-                    }
-
-                    if let zt = enacted.predBGs?.zt {
-                        oapsf.zt = zt
-                    }
-                    gsep.forecasts = oapsf
-                    gsep.glucoseTarget = enacted.currentTarget
-
+                    gsep.cob = enacted!.cob ?? 0
+                    gsep.iob = enacted!.iob ?? 0
+                    gsep.eventualGlucose = enacted!.eventualBG
+                    gsep.reason = enacted!.reason
+                    gsep.forecasts = OpenAPSForecasts.fromPredBGs(predBGs: enacted!.predBGs)
+                    gsep.glucoseTarget = enacted!.currentTarget
+                    
                     await MainActor.run {
                         self.GlucoseSourceExtras = gsep
                     }
-
-                    return .trio
                 }
-                return .null
+                return device
             } catch {
                 self.logger.error("Unable to decode NS response when checking for GSE: \(String(describing: error), privacy: .public)")
                 return .null
@@ -188,24 +195,16 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
 
             do {
                 let result = try JSONDecoder().decode(DeviceStatusResponse.self, from: data)
+                if (result.result.first == nil) {
+                    return empty
+                }
 
-                if result.result.first!.device == "Trio" {
-                    let enacted = result.result.first!.openaps.enacted
-                    var forecasts = OpenAPSForecasts()
-                    if let iob = enacted.predBGs?.iob {
-                        forecasts.iob = iob
-                    }
-
-                    if let cob = enacted.predBGs?.cob {
-                        forecasts.cob = cob
-                    }
-
-                    if let zt = enacted.predBGs?.zt {
-                        forecasts.zt = zt
-                    }
-
-                    if let uam = enacted.predBGs?.uam {
-                        forecasts.uam = uam
+                let device = GlucoseSourceDevice.fromDS(status: result.result.first!)
+                if device != GlucoseSourceDevice.null {
+                    let enacted = result.result.first!.openaps?.enacted ?? result.result.first!.openaps?.suggested
+                    if enacted == nil {
+                        self.logger.error("No enacted/suggested found in DeviceStatus")
+                        return empty
                     }
 
                     let dateFormatter = DateFormatter()
@@ -215,7 +214,15 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
 
                     let ts = dateFormatter.date(from: enacted.deliverAt ?? " ") // " " because that causes nil instead of now
 
-                    return GlucoseSourceExtraProperties(iob: enacted.iob, cob: enacted.cob, eventualGlucose: enacted.eventualBG, reason: enacted.reason, enactedAt: ts, forecasts: forecasts, glucoseTarget: enacted.currentTarget)
+                    return GlucoseSourceExtraProperties(
+                        iob: enacted!.iob,
+                        cob: enacted!.cob,
+                        eventualGlucose: enacted!.eventualBG,
+                        reason: enacted!.reason,
+                        enactedAt: dateFormatter.date(from: enacted!.deliverAt ?? " "),
+                        forecasts: OpenAPSForecasts.fromPredBGs(predBGs: enacted!.predBGs),
+                        glucoseTarget: enacted!.currentTarget
+                    )
                 }
             } catch {
                 self.logger.error("Unable to decode NS response when checking for GSE: \(String(describing: error), privacy: .public)")

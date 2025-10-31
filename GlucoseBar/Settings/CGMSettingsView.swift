@@ -66,7 +66,7 @@ struct CGMSettingsView: View {
 
                 VStack {
                     HStack {
-                        Text("Enable Trio Integration")
+                        Text("Enable AID Integration")
                         Spacer()
                         Picker("", selection: $aidEnabled) {
                             Text("Yes").tag(true)
@@ -78,11 +78,11 @@ struct CGMSettingsView: View {
                         }
                     }
                     HStack {
-                        Text("Trio is an Open Source Automated Insulin Delivery system, that can upload it's algorithm output to Nightscout with every successful Loop.").font(.footnote)
+                        Text("AID stands for Automated Insulin Delivery system. Such systems can provide extra information, like Loop Status, IOB, COB, Eventual Glucose, prediction lines and more.").font(.footnote)
                         Spacer()
                     }
                     HStack {
-                        Text("Enabling this integration will pull extra information from Nightscout to show Loop Status, IOB, COB, Eventual Glucose, prediction lines and more.").font(.footnote)
+                        Text("Supported AIDs are Trio, OpenAPS, AAPS.").font(.footnote)
                         Spacer()
                     }
                     HStack {
@@ -236,7 +236,7 @@ struct CGMSettingsView: View {
                             Text(provider.presentable).tag(provider)
                         }
                     }
-                }.frame(width: 200, alignment: .trailing).onChange(of: s.trioChartForecastDisplay) {
+                }.frame(width: 200, alignment: .trailing).onChange(of: s.aidChartForecastDisplay) {
                     s.save()
                 }
             }.padding()

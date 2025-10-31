@@ -50,6 +50,15 @@ struct OpenAPSForecasts: Decodable {
     var cob: [Int]?
     var zt: [Int]?
     var uam: [Int]?
+    
+    static func fromPredBGs(predBGs: PredBGs?) -> OpenAPSForecasts {
+        return OpenAPSForecasts(
+            iob: predBGs?.iob,
+            cob: predBGs?.cob,
+            zt: predBGs?.zt,
+            uam: predBGs?.uam
+        )
+    }
 }
 
 class Provider: ObservableObject, @unchecked Sendable {

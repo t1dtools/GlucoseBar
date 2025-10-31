@@ -44,11 +44,11 @@ struct SettingsView: View {
                         selectedItem = "Chart"
                     }
 
-                    if s.trioEnableIntegration && s.cgmProvider == .nightscout {
-                        NavigationLink(destination: TrioSettingsView().environmentObject(s)) {
-                            Label("Trio Integration", systemImage: "apps.iphone")
-                        }.tag("Trio").onTapGesture {
-                            selectedItem = "Trio"
+                    if s.aidEnableIntegration && s.cgmProvider == .nightscout {
+                        NavigationLink(destination: AidSettingsView().environmentObject(s)) {
+                            Label("AID Integration", systemImage: "apps.iphone")
+                        }.tag("AID").onTapGesture {
+                            selectedItem = "AID"
                         }
                     }
 
