@@ -76,8 +76,6 @@ class Provider: ObservableObject, @unchecked Sendable {
     @Published public var isAuthenticating: Bool = false
     @Published var auth: ProviderAuth?
 
-    // TODO: How to move this out of this file and keep it accessible for Settings UI?
-//    @Published var connections: [LibreLinkUp.LibreLinkUpConnectionsResponse] = []
     @Published var connectionID: String = ""
 
     init() {

@@ -294,6 +294,13 @@ class Nightscout: Provider, @unchecked Sendable {
 
     private func authenticate() async {
 
+        if isAuthenticating {
+            self.logger.info("Already authenticating actively. Returning.")
+            return
+        }
+
+        isAuthenticating = true
+
         if !baseURL.hasPrefix("https://") && !baseURL.hasPrefix("http://") {
             self.providerIssue = "Invalid Nightscout URL. Must start with either http:// or https://"
             return
@@ -335,6 +342,7 @@ class Nightscout: Provider, @unchecked Sendable {
                 }
                 return
             } else {
+                self.logger.debug("status code under 300: \(res.statusCode). Body: \(data)")
                 do {
                     let result = try JSONDecoder().decode(NightscoutAuthResponse.self, from: data)
 
@@ -357,6 +365,7 @@ class Nightscout: Provider, @unchecked Sendable {
                     return
                 } catch {
                     self.providerIssue = "Unable to parse response from Nightscout: \(String(describing: error))"
+                    isAuthenticating = false
                     return
                 }
             }
@@ -368,6 +377,8 @@ class Nightscout: Provider, @unchecked Sendable {
             self.unsuccessfulAuthAttempts += 1
             self.providerIssue = err
         }
+
+        isAuthenticating = false
     }
 
     override internal func verifyCredentials() async -> Bool {
