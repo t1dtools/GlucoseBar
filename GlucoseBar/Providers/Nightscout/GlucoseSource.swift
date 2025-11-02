@@ -219,7 +219,7 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
                         cob: enacted!.cob,
                         eventualGlucose: enacted!.eventualBG,
                         reason: enacted!.reason,
-                        enactedAt: dateFormatter.date(from: enacted!.deliverAt ?? " "),
+                        enactedAt: ts,
                         forecasts: OpenAPSForecasts.fromPredBGs(predBGs: enacted!.predBGs),
                         glucoseTarget: enacted!.currentTarget
                     )

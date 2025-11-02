@@ -130,8 +130,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         workspaceObserver = NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.didWakeNotification,
             object: nil,
-            queue: nil) { [weak self] _ in
-                self?.sleepListener()
+            queue: nil) { _ in
+                AppDelegate.sleepListener()
         }
     }
 
@@ -142,8 +142,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    private func sleepListener() {
-        self.notificationCenter.post(.makeComputerSleepEventNotification(forName: .computerDidWakeUp))
+    private static func sleepListener() {
+        NotificationCenter.default.post(.makeComputerSleepEventNotification(forName: .computerDidWakeUp))
     }
 }
 

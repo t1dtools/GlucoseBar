@@ -10,6 +10,7 @@ import SwiftUI
 import CryptoKit
 import OSLog
 
+@MainActor
 class Glucose: ObservableObject, Sendable {
 
     @Published var glucose: Double = 0.0
@@ -45,11 +46,8 @@ class Glucose: ObservableObject, Sendable {
         registerForNotifications()
     }
 
+    @MainActor
     deinit {
-        cleanup()
-    }
-
-    private func cleanup() {
         timer.suspend()
         if let observer = notificationObserver {
             notificationCenter.removeObserver(observer)
@@ -82,13 +80,14 @@ class Glucose: ObservableObject, Sendable {
         if shouldFetch {
             fetchQueue.async { [weak self] in
                 guard let self = self else { return }
-                if self.isFetching {
-                    self.logger.debug("Skipping fetch - already in progress")
-                    return
-                }
-                self.isFetching = true
                 Task {
-                    defer { self.isFetching = false }
+                    let alreadyFetching = await MainActor.run { self.isFetching }
+                    if alreadyFetching {
+                        await MainActor.run { self.logger.debug("Skipping fetch - already in progress") }
+                        return
+                    }
+                    await MainActor.run { self.isFetching = true }
+                    defer { Task { await MainActor.run { self.isFetching = false } } }
                     await self.provider.fetch()
                 }
             }
@@ -135,14 +134,16 @@ class Glucose: ObservableObject, Sendable {
     }
 
     func registerForNotifications() {
-        notificationObserver = notificationCenter
-            .addObserver(forName: .computerDidWakeUp,
-                         object: nil,
-                         queue: nil) { [weak self] notification in
-                DispatchQueue.main.async {
-                    self?.getGlucose()
+        notificationObserver = notificationCenter.addObserver(
+            forName: .computerDidWakeUp,
+            object: nil,
+            queue: .main,
+            using: { [weak self] notification in
+                guard let self = self else { return }
+                Task { @MainActor in
+                    self.getGlucose()
                 }
-        }
+            })
     }
 
     public func setSettings(_ settings: SettingsStore) {

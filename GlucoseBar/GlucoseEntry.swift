@@ -7,7 +7,7 @@
 //
 import Foundation
 
-public struct GlucoseEntry: Hashable {
+public struct GlucoseEntry: Hashable, Sendable {
     typealias RawValue = [String: Any]
 
     public let id: String?
@@ -39,17 +39,17 @@ public struct GlucoseEntry: Hashable {
         self.id = id
     }
 
-    public enum Condition: String {
+    public enum Condition: String, Sendable {
         case belowRange
         case aboveRange
     }
 
-    public enum GlucoseType: String {
+    public enum GlucoseType: String, Sendable {
         case meter
         case sensor
     }
 
-    public enum GlucoseTrend: Int, CaseIterable {
+    public enum GlucoseTrend: Int, CaseIterable, Sendable {
         case upUpUp         = 1
         case upUp           = 2
         case up             = 3
