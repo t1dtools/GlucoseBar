@@ -37,6 +37,11 @@ class DexcomShare: Provider, @unchecked Sendable {
     public var validSettings: Bool = true
     public var settingsError: String = ""
 
+    @MainActor
+    func setProviderIssue(_ value: String?) {
+        self.providerIssue = value
+    }
+
     // Hardcoded value found in https://github.com/gagebenne/pydexcom
     private let dexcomApplicationID = "d89443d2-327c-4a6f-89e5-496bbb0317db"
     private let httpTimeout = 30.0
@@ -104,7 +109,7 @@ class DexcomShare: Provider, @unchecked Sendable {
             return
         }
 
-        self.providerIssue = nil
+        await self.setProviderIssue(nil)
 
         let url = "\(self.server.url)/Publisher/ReadPublisherLatestGlucoseValues"
         let requestBody = DexcomShareListRequest(sessionId: self.sessionID, minutes: 1440, maxCount: 288)
@@ -118,16 +123,14 @@ class DexcomShare: Provider, @unchecked Sendable {
             request.httpBody = jsonData
         } catch {
             logger.info("Failed marshalling json, aborting fetch")
-            DispatchQueue.main.async {
-                self.providerIssue = String(localized: "Unable to create request")
-            }
+            await self.setProviderIssue(String(localized: "Unable to create request"))
             return
         }
 
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
             guard let res = response as? HTTPURLResponse else {
-                self.providerIssue = String(localized: "Invalid response from Dexcom Share")
+                await self.setProviderIssue(String(localized: "Invalid response from Dexcom Share"))
                 return
             }
             if res.statusCode > 299 {
@@ -157,7 +160,7 @@ class DexcomShare: Provider, @unchecked Sendable {
                     }
                 }
 
-                self.providerIssue = providerError
+                await self.setProviderIssue(providerError)
             } else {
                 do {
                     let result = try JSONDecoder().decode([DXEntriesResult].self, from: data)
@@ -171,13 +174,13 @@ class DexcomShare: Provider, @unchecked Sendable {
                     self.setGlucoseEntries(newEntries)
                     self.lastFetch = Date()
                 } catch DecodingError.dataCorrupted(_) {
-                    self.providerIssue = String(localized: "Unable to read data from Dexcom Share: Data corrupted.")
+                    await self.setProviderIssue(String(localized: "Unable to read data from Dexcom Share: Data corrupted."))
                 } catch let DecodingError.keyNotFound(key, _) {
-                    self.providerIssue = String(localized: "Unable to read data from Dexcom Share: Missing key ") + "\(key)"
+                    await self.setProviderIssue(String(localized: "Unable to read data from Dexcom Share: Missing key ") + "\(key)")
                 } catch DecodingError.valueNotFound(_, _) {
-                    self.providerIssue = String(localized: "Unable to read data from Dexcom Share: Missing required value")
+                    await self.setProviderIssue(String(localized: "Unable to read data from Dexcom Share: Missing required value"))
                 } catch DecodingError.typeMismatch(_, _) {
-                    self.providerIssue = String(localized: "Unable to read data from Dexcom Share: Value type mismatch.")
+                    await self.setProviderIssue(String(localized: "Unable to read data from Dexcom Share: Value type mismatch."))
                 } catch {
                     self.logger.error("\(String(describing: error), privacy: .public)")
                 }
@@ -187,7 +190,7 @@ class DexcomShare: Provider, @unchecked Sendable {
             if (error as? URLError)?.code == .timedOut {
                 err = String(localized: "Request timed out")
             }
-            self.providerIssue = err
+            await self.setProviderIssue(err)
         }
     }
 
@@ -236,7 +239,7 @@ class DexcomShare: Provider, @unchecked Sendable {
     // This function gets the accountID from the username and password (used for getting the sessionID)
     private func getAccountID() async {
         self.logger.debug("DexcomShare.getAccountID")
-        self.providerIssue = nil
+        await self.setProviderIssue(nil)
 
         let url = "\(self.server.url)/General/AuthenticatePublisherAccount"
         let requestBody = DexcomShareAccountIDRequest(accountName: self.username, password: self.password, applicationId: self.dexcomApplicationID)
@@ -257,7 +260,7 @@ class DexcomShare: Provider, @unchecked Sendable {
             let (data, response) = try await URLSession.shared.data(for: request)
 
             guard let res = response as? HTTPURLResponse else {
-                self.providerIssue = String(localized: "Invalid response from Dexcom Share")
+                await self.setProviderIssue(String(localized: "Invalid response from Dexcom Share"))
                 return
             }
             if res.statusCode > 299 {
@@ -285,12 +288,12 @@ class DexcomShare: Provider, @unchecked Sendable {
                     self.logger.error("Unknown Dexcom Share Issue: \(String(describing: error), privacy: .public)")
                 }
 
-                self.providerIssue = providerError
+                await self.setProviderIssue(providerError)
 
             } else {
                 self.logger.debug("successful auth to Dexcom Share")
                 guard let responseString = String(data: data, encoding: .utf8) else {
-                    self.providerIssue = String(localized: "Unable to decode account ID from Dexcom Share")
+                    await self.setProviderIssue(String(localized: "Unable to decode account ID from Dexcom Share"))
                     return
                 }
                 self.accountID = responseString.replacingOccurrences(of: "\"", with: "")
@@ -300,14 +303,14 @@ class DexcomShare: Provider, @unchecked Sendable {
             if (error as? URLError)?.code == .timedOut {
                 err = String(localized: "Request timed out")
             }
-            self.providerIssue = err
+            await self.setProviderIssue(err)
         }
     }
 
     // This function gets the sessionID (used for getting glucose entries)
     private func getSessionID() async {
         self.logger.debug("DexcomShare.getSessionID")
-        self.providerIssue = nil
+        await self.setProviderIssue(nil)
 
         let url = "\(self.server.url)/General/LoginPublisherAccountById"
         let requestBody = DexcomShareSessionIDRequest(accountId: self.accountID, password: self.password, applicationId: self.dexcomApplicationID)
@@ -328,7 +331,7 @@ class DexcomShare: Provider, @unchecked Sendable {
             let (data, response) = try await URLSession.shared.data(for: request)
 
             guard let res = response as? HTTPURLResponse else {
-                self.providerIssue = String(localized: "Invalid response from Dexcom Share")
+                await self.setProviderIssue(String(localized: "Invalid response from Dexcom Share"))
                 return
             }
             if res.statusCode > 299 {
@@ -352,11 +355,11 @@ class DexcomShare: Provider, @unchecked Sendable {
                     self.logger.error("Unknown Dexcom Share Issue: \(String(describing: error))")
                 }
 
-                self.providerIssue = providerError
+                await self.setProviderIssue(providerError)
             } else {
                 self.logger.debug("successful session to Dexcom Share")
                 guard let responseString = String(data: data, encoding: .utf8) else {
-                    self.providerIssue = String(localized: "Unable to decode session ID from Dexcom Share")
+                    await self.setProviderIssue(String(localized: "Unable to decode session ID from Dexcom Share"))
                     return
                 }
                 self.sessionID = responseString.replacingOccurrences(of: "\"", with: "")
@@ -366,7 +369,7 @@ class DexcomShare: Provider, @unchecked Sendable {
             if (error as? URLError)?.code == .timedOut {
                 err = String(localized: "Request timed out")
             }
-            self.providerIssue = err
+            await self.setProviderIssue(err)
         }
 
     }
@@ -376,9 +379,7 @@ class DexcomShare: Provider, @unchecked Sendable {
 
         isAuthenticating = true
 
-        DispatchQueue.main.async {
-            self.providerIssue = nil
-        }
+        await self.setProviderIssue(nil)
 
         // Do we need a full refresh?
         if self.accountID == "" {
