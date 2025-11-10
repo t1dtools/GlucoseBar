@@ -14,68 +14,82 @@ struct MenuBarSettingsView: View {
     @EnvironmentObject var g: Glucose
     @Environment(\.colorScheme) private var colorScheme
 
-    @State private var focusedMenuBarItem: MenuBarItemContainer? = nil
+    @State private var focusedMenuBarItemID: MenuBarItemContainer.ID? = nil
     @State private var menuBarItems: [MenuBarItemContainer] = []
     @State private var menuBarItemsInverse: [MenuBarItemContainer] = []
+    @State private var didInitialize: Bool = false
 
     private func loadMenuBarItems() {
-
-        if s.menuBarItems.count > 0 {
-            var seenItems: [MenuBarItem] = []
-            for item in s.menuBarItems {
-                if !self.menuBarItems.contains(where: { $0 == item }) {
-                    self.menuBarItems.append(item)
-                    seenItems.append(item.type)
+        if !didInitialize {
+            if s.menuBarItems.count > 0 {
+                var seen: Set<MenuBarItem> = []
+                self.menuBarItems = []
+                for item in s.menuBarItems {
+                    if item.type == .separator {
+                        self.menuBarItems.append(item)
+                    } else if !seen.contains(item.type) {
+                        self.menuBarItems.append(item)
+                        seen.insert(item.type)
+                    }
                 }
-            }
+            } else {
+                // Defaults
+                let defaultItems = [
+                    MenuBarItemContainer.init(type: .glucosevalue),
+                    MenuBarItemContainer.init(type: .glucosetrend),
+                    MenuBarItemContainer.init(type: .glucosedelta)
+                ]
+                var defaultItemsInverse: [MenuBarItemContainer] = []
 
-            for p in MenuBarItem.allCases {
-                if !seenItems.contains(where: { $0 == p }) && p != .separator {
-                    self.menuBarItemsInverse.append(MenuBarItemContainer.init(type: p))
+                if s.aidEnableIntegration && s.cgmProvider == .nightscout {
+                    defaultItemsInverse.append(MenuBarItemContainer.init(type: .loopstatus))
+                    defaultItemsInverse.append(MenuBarItemContainer.init(type: .eventualglucose))
+                    defaultItemsInverse.append(MenuBarItemContainer.init(type: .cob))
+                    defaultItemsInverse.append(MenuBarItemContainer(type: .iob))
                 }
+
+                self.menuBarItems = defaultItems
+                self.menuBarItemsInverse = defaultItemsInverse
             }
-            return
+            didInitialize = true
         }
 
-        let defaultItems = [
-            MenuBarItemContainer.init(type: .glucosevalue),
-            MenuBarItemContainer.init(type: .glucosetrend),
-            MenuBarItemContainer.init(type: .glucosedelta)
-        ]
-        var defaultItemsInverse: [MenuBarItemContainer] = []
-
-        if s.aidEnableIntegration && s.cgmProvider == .nightscout {
-            defaultItemsInverse.append(MenuBarItemContainer.init(type: .loopstatus))
-            defaultItemsInverse.append(MenuBarItemContainer.init(type: .eventualglucose))
-            defaultItemsInverse.append(MenuBarItemContainer.init(type: .cob))
-            defaultItemsInverse.append(MenuBarItemContainer.init(type: .iob))
+        // Always rebuild inverse list from current menuBarItems
+        self.menuBarItemsInverse.removeAll()
+        let currentTypes: Set<MenuBarItem> = Set(self.menuBarItems.map { $0.type })
+        for p in MenuBarItem.allCases where p != .separator {
+            if !currentTypes.contains(p) {
+                self.menuBarItemsInverse.append(MenuBarItemContainer(type: p))
+            }
         }
-
-        self.menuBarItems = defaultItems
-        self.menuBarItemsInverse = defaultItemsInverse
     }
 
     private func addViewToMenuBar(item: MenuBarItem) {
         let container = MenuBarItemContainer(type: item)
         menuBarItems.append(container)
         menuBarItemsInverse.count > 0 ? menuBarItemsInverse.removeAll { $0.type == item } : ()
-        focusedMenuBarItem = container
+        focusedMenuBarItemID = container.id
     }
 
     private func focusMenuBarItem(_ item: MenuBarItemContainer) {
-        if focusedMenuBarItem == item {
-            focusedMenuBarItem = nil
+        if focusedMenuBarItemID == item.id {
+            focusedMenuBarItemID = nil
         } else {
-            focusedMenuBarItem = item
+            focusedMenuBarItemID = item.id
         }
     }
 
     private func removeViewFromMenuBar(_ item: MenuBarItemContainer) {
         menuBarItems.count > 0 ? menuBarItems.removeAll { $0 == item } : ()
-        if item.type != .separator {
-            menuBarItemsInverse.append(item)
+        if item.type != .separator && !menuBarItemsInverse.contains(where: { $0.type == item.type }) {
+            menuBarItemsInverse.append(MenuBarItemContainer(type: item.type))
         }
-        focusedMenuBarItem = nil
+        focusedMenuBarItemID = nil
+    }
+
+    private func focusedContainer() -> MenuBarItemContainer? {
+        guard let id = focusedMenuBarItemID else { return nil }
+        return menuBarItems.first(where: { $0.id == id })
     }
 
     @ViewBuilder
@@ -84,33 +98,33 @@ struct MenuBarSettingsView: View {
             switch item.type {
             case .glucosevalue:
                 GlucoseValueView(viewSettings: item)
-                    .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                    .opacity(focusedMenuBarItemID != nil && focusedMenuBarItemID != item.id ? 0.4 : 1)
             case .glucosetrend:
                 GlucoseTrendView(viewSettings: item)
-                    .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                    .opacity(focusedMenuBarItemID != nil && focusedMenuBarItemID != item.id ? 0.4 : 1)
             case .glucosedelta:
                 GlucoseDeltaView(viewSettings: item)
-                    .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                    .opacity(focusedMenuBarItemID != nil && focusedMenuBarItemID != item.id ? 0.4 : 1)
             case .glucosedot:
                 ZenModeView()
-                    .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                    .opacity(focusedMenuBarItemID != nil && focusedMenuBarItemID != item.id ? 0.4 : 1)
 
             case .loopstatus:
                 LoopStatusView(viewSettings: item)
-                    .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                    .opacity(focusedMenuBarItemID != nil && focusedMenuBarItemID != item.id ? 0.4 : 1)
             case .eventualglucose:
                 EventualGlucoseView(viewSettings: item)
-                    .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                    .opacity(focusedMenuBarItemID != nil && focusedMenuBarItemID != item.id ? 0.4 : 1)
             case .cob:
                 COBView(viewSettings: item, isSettings: true)
-                    .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                    .opacity(focusedMenuBarItemID != nil && focusedMenuBarItemID != item.id ? 0.4 : 1)
             case .iob:
                 IOBView(viewSettings: item)
-                    .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                    .opacity(focusedMenuBarItemID != nil && focusedMenuBarItemID != item.id ? 0.4 : 1)
 
             case MenuBarItem.separator:
                 SeparatorView(viewSettings: item)
-                    .opacity(focusedMenuBarItem != nil && focusedMenuBarItem != item ? 0.4 : 1)
+                    .opacity(focusedMenuBarItemID != nil && focusedMenuBarItemID != item.id ? 0.4 : 1)
             }
         }
             .frame(height: 24)
@@ -208,24 +222,27 @@ struct MenuBarSettingsView: View {
                     .overlay(RoundedRectangle(cornerRadius: 5)
                         .background(Color.gray).opacity(0.1)
                     ).onTapGesture {
-                        if let item = focusedMenuBarItem {
+                        if let item = focusedContainer() {
                             focusMenuBarItem(item)
                         }
                     }.padding(5)
 
 
-                if focusedMenuBarItem != nil {
+                if let fc = focusedContainer() {
                     GroupBox {
                         HStack {
-                            Text("\(focusedMenuBarItem!.type.name) Settings").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 5)
+                            Text("\(fc.type.name) Settings").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 5)
                             Spacer()
                             Button(action: {
-                                removeViewFromMenuBar(focusedMenuBarItem!)
+                                removeViewFromMenuBar(fc)
                             }) {
                                 Image(systemName: "trash.fill")
-                            }.help("Remove \(focusedMenuBarItem!.type.name)")
+                            }.help("Remove \(fc.type.name)")
                         }.padding(.horizontal).padding(.top, 5)
-                        drawMenuBarItemSettings(focusedMenuBarItem!).padding(.horizontal).padding(.vertical, 10)
+                        drawMenuBarItemSettings(fc)
+                            .id(fc.id)
+                            .padding(.horizontal)
+                            .padding(.vertical, 10)
                     }.padding(.horizontal).padding(.vertical, 10)
                 } else {
                     Text("Click to edit, or drag to reorder items.").font(.footnote).frame(alignment: .trailing)
