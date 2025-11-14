@@ -2491,6 +2491,29 @@
         }
       }
     },
+    "Must start with http:// or https://" : {
+      "comment" : "A footnote displayed below the Nightscout server URL field, explaining that it must start with either \"http://\" or \"https://\".",
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skal starte med http:// eller https://"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Must start with http:// or https://"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Doit commencer par http:// ou https://"
+          }
+        }
+      }
+    },
     "Nightscout" : {
       "comment" : "The name for the Nightscout CGM data provider",
       "localizations" : {

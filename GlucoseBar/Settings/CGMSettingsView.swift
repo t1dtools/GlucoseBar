@@ -46,6 +46,10 @@ struct CGMSettingsView: View {
                     TextField("", text: $s.nsURL).textFieldStyle(RoundedBorderTextFieldStyle())
                 }
                 HStack {
+                    Text("Must start with http:// or https://").font(.footnote)
+                    Spacer()
+                }
+                HStack {
                     Text("Token").frame(width: 130, alignment: .leading)
                     Spacer()
                     TextField("", text: $s.nsSecret).textFieldStyle(RoundedBorderTextFieldStyle())
@@ -143,6 +147,9 @@ struct CGMSettingsView: View {
         @State var nsSecretFailedValidation: Bool = false
 
         var body: some View {
+            if let providerIssue = g.provider.providerIssue {
+                Text("Provider issue: \(providerIssue)")
+            }
             HStack {
                 if s.cgmProvider != .simulator {
                     Button(action: {
@@ -184,10 +191,7 @@ struct CGMSettingsView: View {
                         }
                     }) {
                         Text("Test Connection")
-                    }.disabled(isValidating) // TODO: State var for if it's currently testing
-                }
-                if let providerIssue = g.provider.providerIssue {
-                    Text("Provider issue: \(providerIssue)")
+                    }.disabled(isValidating)
                 }
                 if !isValidating && cgmCredentialsError && s.cgmProvider == validatedProvider {
                     Text("Invalid credentials or service unreachable").foregroundColor(.orange)

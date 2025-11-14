@@ -17,47 +17,39 @@ struct MenuBarSettingsView: View {
     @State private var focusedMenuBarItemID: MenuBarItemContainer.ID? = nil
     @State private var menuBarItems: [MenuBarItemContainer] = []
     @State private var menuBarItemsInverse: [MenuBarItemContainer] = []
-    @State private var didInitialize: Bool = false
 
     private func loadMenuBarItems() {
-        if !didInitialize {
-            if s.menuBarItems.count > 0 {
-                var seen: Set<MenuBarItem> = []
-                self.menuBarItems = []
-                for item in s.menuBarItems {
-                    if item.type == .separator {
-                        self.menuBarItems.append(item)
-                    } else if !seen.contains(item.type) {
-                        self.menuBarItems.append(item)
-                        seen.insert(item.type)
-                    }
+        if s.menuBarItems.count > 0 {
+            var seen: Set<MenuBarItem> = []
+            self.menuBarItems = []
+            for item in s.menuBarItems {
+                if item.type == .separator {
+                    self.menuBarItems.append(item)
+                } else if !seen.contains(item.type) {
+                    self.menuBarItems.append(item)
+                    seen.insert(item.type)
                 }
-            } else {
-                // Defaults
-                let defaultItems = [
-                    MenuBarItemContainer.init(type: .glucosevalue),
-                    MenuBarItemContainer.init(type: .glucosetrend),
-                    MenuBarItemContainer.init(type: .glucosedelta)
-                ]
-                var defaultItemsInverse: [MenuBarItemContainer] = []
-
-                if s.aidEnableIntegration && s.cgmProvider == .nightscout {
-                    defaultItemsInverse.append(MenuBarItemContainer.init(type: .loopstatus))
-                    defaultItemsInverse.append(MenuBarItemContainer.init(type: .eventualglucose))
-                    defaultItemsInverse.append(MenuBarItemContainer.init(type: .cob))
-                    defaultItemsInverse.append(MenuBarItemContainer(type: .iob))
-                }
-
-                self.menuBarItems = defaultItems
-                self.menuBarItemsInverse = defaultItemsInverse
             }
-            didInitialize = true
+        } else {
+            // Defaults
+            let defaultItems = [
+                MenuBarItemContainer.init(type: .glucosevalue),
+                MenuBarItemContainer.init(type: .glucosetrend),
+                MenuBarItemContainer.init(type: .glucosedelta)
+            ]
+
+
+            self.menuBarItems = defaultItems
+
         }
 
         // Always rebuild inverse list from current menuBarItems
         self.menuBarItemsInverse.removeAll()
         let currentTypes: Set<MenuBarItem> = Set(self.menuBarItems.map { $0.type })
         for p in MenuBarItem.allCases where p != .separator {
+            if (!s.aidEnableIntegration || s.cgmProvider != .nightscout) && [.loopstatus, .eventualglucose, .cob, .iob].contains(p) {
+                continue
+            }
             if !currentTypes.contains(p) {
                 self.menuBarItemsInverse.append(MenuBarItemContainer(type: p))
             }

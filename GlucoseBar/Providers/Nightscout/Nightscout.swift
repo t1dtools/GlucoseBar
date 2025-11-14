@@ -68,6 +68,11 @@ class Nightscout: Provider, @unchecked Sendable {
 
     override internal func fetch() async {
         logger.debug("Nightscout.fetch")
+        if !baseURL.hasPrefix("http://") && !baseURL.hasPrefix("https://") {
+            self.providerIssue = "Invalid Nightscout URL. It must start with http:// or https://"
+            return
+        }
+
         if unsuccessfulAuthAttempts > 5 {
             self.providerIssue = "Unable to connect to Nightscout after 5 attempts. Please check your credentials."
             return
@@ -75,6 +80,11 @@ class Nightscout: Provider, @unchecked Sendable {
 
         if token.count > 0 && !isAuthValid() {
             await authenticate()
+        }
+
+        if !isAuthValid() {
+            self.providerIssue = "Unable to fetch due to unknown issue. Please ensure the Nightscout Server URL is correct and begins with http:// or https://"
+            return
         }
 
         self.providerIssue = nil
