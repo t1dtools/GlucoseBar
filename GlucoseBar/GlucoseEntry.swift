@@ -7,7 +7,7 @@
 //
 import Foundation
 
-public struct GlucoseEntry: Hashable {
+public struct GlucoseEntry: Hashable, Sendable {
     typealias RawValue = [String: Any]
 
     public let id: String?
@@ -39,17 +39,17 @@ public struct GlucoseEntry: Hashable {
         self.id = id
     }
 
-    public enum Condition: String {
+    public enum Condition: String, Sendable {
         case belowRange
         case aboveRange
     }
 
-    public enum GlucoseType: String {
+    public enum GlucoseType: String, Sendable {
         case meter
         case sensor
     }
 
-    public enum GlucoseTrend: Int, CaseIterable {
+    public enum GlucoseTrend: Int, CaseIterable, Sendable {
         case upUpUp         = 1
         case upUp           = 2
         case up             = 3
@@ -59,7 +59,8 @@ public struct GlucoseEntry: Hashable {
         case downDownDown   = 7
         case notComputable  = 8
         case rateOutOfRange = 9
-        
+        case none           = 10
+
         init?(direction: String) {
             for trend in GlucoseTrend.allCases {
                 if direction == trend.direction {
@@ -67,6 +68,8 @@ public struct GlucoseEntry: Hashable {
                     return
                 }
             }
+
+            self = .notComputable
             return nil
         }
         
@@ -90,6 +93,8 @@ public struct GlucoseEntry: Hashable {
                 return "↔"
             case .rateOutOfRange:
                 return "?"
+            case .none:
+                return "↔"
             }
         }
 
@@ -113,6 +118,9 @@ public struct GlucoseEntry: Hashable {
                 return "NotComputable"
             case .rateOutOfRange:
                 return "RateOutOfRange"
+            case .none:
+                return "NONE"
+
             }
         }
     }

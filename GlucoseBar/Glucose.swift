@@ -10,6 +10,7 @@ import SwiftUI
 import CryptoKit
 import OSLog
 
+@MainActor
 class Glucose: ObservableObject, Sendable {
 
     @Published var glucose: Double = 0.0
@@ -19,7 +20,6 @@ class Glucose: ObservableObject, Sendable {
     @Published var trend: String = ""
     @Published var fetchedGlucose: Bool = false
     @Published var entries: [GlucoseEntry]? = nil
-
     @Published var error: String = ""
 
     @Published var provider: Provider
@@ -27,68 +27,123 @@ class Glucose: ObservableObject, Sendable {
     @ObservedObject var vs: ViewState = ViewState()
 
     private var timer: DispatchTimer
+    private var isFetching: Bool = false
+    private let fetchQueue = DispatchQueue(label: "tools.t1d.GlucoseBar.fetchQueue")
+    private var notificationObserver: NSObjectProtocol?
 
     let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "glucose")
     let notificationCenter = NotificationCenter.default
 
-    public init() {
+    public init(_ settingsStore: SettingsStore) {
         provider = Provider()
         settings = SettingsStore()
 
         timer = DispatchTimer(timeInterval: 5, queue: DispatchQueue(label: "tools.t1d.GlucoseBar.CGMQueue"))
         timer.suspend()
-        timer.eventHandler = { [self] in
-
-            if provider.isAuthenticating {
-                return
-            }
-
-            if self.settings.cgmProvider != self.provider.type {
-                self.setSettings(settings)
-            }
-            var shouldFetch: Bool = false
-            if !vs.isOnline {
-                shouldFetch = false
-                self.logger.info("Aborting fetch because network is offline")
-                return
-            }
-
-            if self.provider.lastFetch.timeIntervalSinceNow <= -60 {
-                shouldFetch = true
-                self.logger.info("Glucose.timer initiating fetch because last fetch was over 1 minute ago")
-            }
-
-            if self.entries != nil && self.entries!.first != nil {
-                if self.entries!.first!.date.timeIntervalSinceNow <= -300 && self.provider.lastFetch.timeIntervalSinceNow <= -10 {
-                    shouldFetch = true
-                    self.logger.info("Glucose.timer initiating fetch because latest reading is over 5 minutes old and last fetch was over 10 seconds ago")
-                }
-            }
-
-            if shouldFetch {
-                Task {
-                    await self.provider.fetch()
-                }
-            }
-
-            DispatchQueue.main.async {
-                self.getGlucose()
-            }
-        }
+        timer.eventHandler = timerEventHandler
         timer.resume()
 
         registerForNotifications()
     }
 
+    @MainActor
+    deinit {
+        timer.suspend()
+        if let observer = notificationObserver {
+            notificationCenter.removeObserver(observer)
+            notificationObserver = nil
+        }
+    }
+
+    func timerEventHandler() {
+        if self.settings.cgmProvider != self.provider.type {
+            self.setSettings(settings)
+        }
+        var shouldFetch: Bool = false
+        if !vs.isOnline {
+            self.logger.notice("Aborting fetch because network is offline")
+            return
+        }
+
+        if self.provider.lastFetch.timeIntervalSinceNow <= -60 {
+            shouldFetch = true
+            self.logger.notice("Glucose.timer initiating fetch because last fetch was over 1 minute ago")
+        }
+
+        if let entries = self.entries, let firstEntry = entries.first {
+            if firstEntry.date.timeIntervalSinceNow <= -300 && self.provider.lastFetch.timeIntervalSinceNow <= -10 {
+                shouldFetch = true
+                self.logger.notice("Glucose.timer initiating fetch because latest reading is over 5 minutes old and last fetch was over 10 seconds ago")
+            }
+        }
+
+        if shouldFetch {
+            fetchQueue.async { [weak self] in
+                guard let self = self else { return }
+                Task {
+                    let alreadyFetching = await MainActor.run { self.isFetching }
+                    if alreadyFetching {
+                        await MainActor.run { self.logger.debug("Skipping fetch - already in progress") }
+                        return
+                    }
+                    await MainActor.run { self.isFetching = true }
+                    defer { Task { await MainActor.run { self.isFetching = false } } }
+                    await self.provider.fetch()
+                }
+            }
+        }
+
+        DispatchQueue.main.async {
+            self.getGlucose()
+        }
+    }
+
+    func reset(_ settings: SettingsStore) {
+
+        self.setSettings(settings)
+        self.entries = nil
+        self.fetchedGlucose = false
+        self.glucose = 0.0
+        self.delta = 0.0
+        self.glucoseTime = Date()
+        self.glucoseAge = ""
+        self.trend = ""
+
+        // Load provider
+        switch settings.cgmProvider {
+            case .dexcomshare:
+            provider = DexcomShare(username: settings.dxEmail, password: settings.dxPassword, server: settings.dxServer)
+        case .nightscout:
+            provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.aidEnableIntegration)
+        default:
+            provider = Simulator("defaulted")
+        }
+
+        timer = DispatchTimer(timeInterval: 5, queue: DispatchQueue(label: "tools.t1d.GlucoseBar.CGMQueue"))
+        timer.suspend()
+        timer.eventHandler = timerEventHandler
+        timer.resume()
+
+        // Re-register notifications after reset
+        if let observer = notificationObserver {
+            notificationCenter.removeObserver(observer)
+        }
+        registerForNotifications()
+
+        self.logger.notice("Reset glucose object")
+    }
+
     func registerForNotifications() {
-        notificationCenter
-            .addObserver(forName: .computerDidWakeUp,
-                         object: nil,
-                         queue: nil) {(notification) in
-                DispatchQueue.main.async {
+        notificationObserver = notificationCenter.addObserver(
+            forName: .computerDidWakeUp,
+            object: nil,
+            queue: .main,
+            using: { [weak self] notification in
+                guard let self = self else { return }
+                Task { @MainActor in
                     self.getGlucose()
                 }
-        }
+            })
     }
 
     public func setSettings(_ settings: SettingsStore) {
@@ -101,11 +156,9 @@ class Glucose: ObservableObject, Sendable {
             DispatchQueue.main.async {
                 switch settings.cgmProvider {
                 case .nightscout:
-                    self.provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret)
+                    self.provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.aidEnableIntegration)
                 case .dexcomshare:
                     self.provider = DexcomShare(username: settings.dxEmail, password: settings.dxPassword, server: settings.dxServer)
-                case .librelinkup:
-                    self.provider = LibreLinkUp(username: settings.libreUsername, password: settings.librePassword)
                 case .simulator:
                     self.provider = Simulator("simulate")
                 default:
@@ -126,15 +179,16 @@ class Glucose: ObservableObject, Sendable {
 
     func getGlucose() {
         self.error = ""
-        if self.provider.providerIssue != nil {
+        if let providerIssue = self.provider.providerIssue {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
-                self.error = self.provider.providerIssue ?? "Unknown provider issue"
+                self.error = providerIssue
                 return
             }
         }
 
-        let glucoseEntries = self.provider.GlucoseEntries
+        // Get a thread-safe copy of glucose entries
+        let glucoseEntries = self.provider.getSafeGlucoseEntries()
 
         if glucoseEntries.isEmpty {
             return
@@ -144,7 +198,14 @@ class Glucose: ObservableObject, Sendable {
         formatter.unitsStyle = .short
         formatter.formattingContext = .listItem
 
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+
+            guard !glucoseEntries.isEmpty else {
+                self.logger.warning("GlucoseEntries became empty in main dispatch block")
+                return
+            }
+
             self.glucose = glucoseEntries[0].glucose
             self.glucoseTime = glucoseEntries[0].date
             self.trend = glucoseEntries[0].trend?.arrows ?? ""
@@ -152,6 +213,8 @@ class Glucose: ObservableObject, Sendable {
 
             if glucoseEntries.count > 1 {
                 self.delta = glucoseEntries[0].glucose - glucoseEntries[1].glucose
+            } else {
+                self.delta = 0.0
             }
 
             self.glucoseAge = formatter.localizedString(for: glucoseEntries[0].date, relativeTo: Date())

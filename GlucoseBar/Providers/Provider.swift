@@ -14,20 +14,17 @@ public enum CGMProvider: String, CaseIterable, Identifiable {
     case simulator
     case nightscout
     case dexcomshare
-    case librelinkup
     public var id: String { self.rawValue }
     public var presentable: String {
         switch self {
         case .null:
-            return "No provider"
+            return String(localized: "No provider", comment: "The name for when no CGM data provider has been chosen yet")
         case .simulator:
-            return "Simulator"
+            return String(localized: "Simulator", comment: "The name for the Simulator CGM data provider")
         case .nightscout:
-            return "Nightscout"
+            return String(localized: "Nightscout", comment: "The name for the Nightscout CGM data provider")
         case .dexcomshare:
-            return "Dexcom Share"
-        case .librelinkup:
-            return "Libre LinkUp"
+            return String(localized: "Dexcom Share", comment: "The name for the Dexcom Share CGM data provider")
         }
     }
 }
@@ -37,63 +34,114 @@ struct ProviderAuth: Decodable {
     var expiry: Double
 }
 
+struct GlucoseSourceExtraProperties {
+    var iob: Double? = nil
+    var cob: Double? = nil
+    var eventualGlucose: Double? = nil
+    var reason: String? = nil
+    var enactedAt: Date? = nil
+    var forecasts: OpenAPSForecasts = OpenAPSForecasts(iob: nil, cob: nil, zt: nil, uam: nil)
+    var glucoseTarget: Double? = nil
+    var error: String? = nil
+}
+
+struct OpenAPSForecasts: Decodable {
+    var iob: [Int]?
+    var cob: [Int]?
+    var zt: [Int]?
+    var uam: [Int]?
+    
+    static func fromPredBGs(predBGs: PredBGs?) -> OpenAPSForecasts {
+        return OpenAPSForecasts(
+            iob: predBGs?.iob,
+            cob: predBGs?.cob,
+            zt: predBGs?.zt,
+            uam: predBGs?.uam
+        )
+    }
+}
+
 class Provider: ObservableObject, @unchecked Sendable {
 
     var type: CGMProvider = .null
+    var isBaseProvider: Bool = true
     internal var readingInterval: Double = 300 // Seconds between readings
     internal var logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "provider")
-    @Published var GlucoseEntries: [GlucoseEntry] = []
-    @Published var GlucoseSourceExtras: [Any] = []
+    @Published var RemoteGlucoseSource: GlucoseSourceDevice = .null
+    @Published private var _glucoseEntries: [GlucoseEntry] = []
+    private let glucoseEntriesQueue = DispatchQueue(label: "tools.t1d.GlucoseBar.glucoseEntries", attributes: .concurrent)
+    @Published var GlucoseSourceExtras: GlucoseSourceExtraProperties = GlucoseSourceExtraProperties()
     @Published public var providerIssue: String?
     @Published public var lastFetch: Date = Date().addingTimeInterval(TimeInterval(-5*60))
     @Published public var isAuthenticating: Bool = false
+    @Published var auth: ProviderAuth?
 
-    @Published internal var auth: ProviderAuth?
-
-    // TODO: How to move this out of this file and keep it accessible for Settings UI?
-    @Published var connections: [LibreLinkUp.LibreLinkUpConnectionsResponse] = []
     @Published var connectionID: String = ""
 
     init() {
+        if self.isBaseProvider {
+            return
+        }
+
         Task {
             await self.fetch()
         }
         startTimer()
     }
-    
-    func verifyCredentials() async -> Bool {
-        return true
-    }
-    
-    func getCurrent() -> GlucoseEntry {
-        return GlucoseEntries.count > 0 ? GlucoseEntries[0] : GlucoseEntry(glucose: 1, date: Date(), changeRate: 0.0)
-    }
-    
-    func getData(completion: @escaping ([GlucoseEntry]) -> Void) {
-        completion(GlucoseEntries)
-    }
 
-    func isAuthValid() -> Bool {
-        return false
-    }
-
-    @ViewBuilder
-    func getConnectionView(s: SettingsStore) -> some View {
-        @ObservedObject var settings: SettingsStore = s
-
-        Picker("", selection: $settings.libreConnectionID) {
-            ForEach(self.connections, id: \.patientID) {
-                Text("\($0.firstName) \($0.lastName)").tag($0.patientID)
+    // Thread-safe getter for GlucoseEntries
+    var GlucoseEntries: [GlucoseEntry] {
+        get {
+            return glucoseEntriesQueue.sync {
+                return _glucoseEntries
             }
+        }
+    }
+
+    // Thread-safe setter for GlucoseEntries - must be called from main thread for UI updates
+    func setGlucoseEntries(_ entries: [GlucoseEntry]) {
+        glucoseEntriesQueue.async(flags: .barrier) { [weak self] in
+            guard let self = self else { return }
+            self._glucoseEntries = entries
+        }
+
+        // Update UI on main thread
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.objectWillChange.send()
+        }
+    }
+
+    // Thread-safe method to get a safe copy of entries for UI use
+    func getSafeGlucoseEntries() -> [GlucoseEntry] {
+        return glucoseEntriesQueue.sync {
+            return Array(_glucoseEntries) // Create a copy
         }
     }
 
     internal func startTimer() {
         let _ = Timer.publish(every: readingInterval, on: .main, in: .default)
     }
-    
+
+    func verifyCredentials() async -> Bool {
+        return true
+    }
+
+    func getCurrent() -> GlucoseEntry {
+        let entries = getSafeGlucoseEntries()
+        return entries.count > 0 ? entries[0] : GlucoseEntry(glucose: 1, date: Date(), changeRate: 0.0)
+    }
+
+    func getData(completion: @escaping ([GlucoseEntry]) -> Void) {
+        completion(getSafeGlucoseEntries())
+    }
+
+    func isAuthValid() -> Bool {
+        return false
+    }
+
     internal func fetch() async {
-        self.logger.error("Base fetch function called. This should only happen once. Multiple occurrences of this message means that your CGM provider implementation does not have it's own `fetch` implementation.")
+        self.logger.error("Base fetch function called. This should not happen. Occurrences of this message means that your CGM provider implementation does not have it's own `fetch` implementation, or that no provider is configured.")
         // Should be implemented in the discrete providers
     }
 }

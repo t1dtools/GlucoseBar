@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		830C4D062B0166F8000A0E87 /* DexcomShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = 830C4D052B0166F8000A0E87 /* DexcomShare.swift */; };
+		831CC8332DE269C800E04180 /* GlucoseSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 831CC8322DE269C500E04180 /* GlucoseSource.swift */; };
 		834621282ADDACB20024048E /* Simulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834621272ADDACB20024048E /* Simulator.swift */; };
 		8346212A2ADDACC20024048E /* Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834621292ADDACC20024048E /* Provider.swift */; };
 		8363136E2ABF8CAA0047C99D /* GlucoseEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8363136D2ABF8CAA0047C99D /* GlucoseEntry.swift */; };
@@ -16,20 +17,62 @@
 		836351842ABF6A9000BDAA96 /* GlucoseBarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836351832ABF6A9000BDAA96 /* GlucoseBarApp.swift */; };
 		836351882ABF6A9000BDAA96 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 836351872ABF6A9000BDAA96 /* Assets.xcassets */; };
 		8363518B2ABF6A9000BDAA96 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8363518A2ABF6A9000BDAA96 /* Preview Assets.xcassets */; };
+		836D26592DFF3D7C007A5D01 /* GlucoseViewBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836D26582DFF3D74007A5D01 /* GlucoseViewBuilder.swift */; };
 		8381599D2BE4257F00A228F3 /* MainAppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8381599C2BE4257F00A228F3 /* MainAppView.swift */; };
+		83849C052E5CF18200BFD090 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 83849C042E5CF18200BFD090 /* InfoPlist.xcstrings */; };
+		83849C072E5CF18200BFD090 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 83849C062E5CF18200BFD090 /* Localizable.xcstrings */; };
+		8384A3142E70B9E300C93DD8 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8384A3132E70B9DF00C93DD8 /* AboutView.swift */; };
+		8384A31A2E70CA8D00C93DD8 /* Awesome in Frameworks */ = {isa = PBXBuildFile; productRef = 8384A3192E70CA8D00C93DD8 /* Awesome */; };
 		838B25DF2BF0146F00D10DDA /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 838B25DE2BF0146F00D10DDA /* WelcomeView.swift */; };
+		83A105112E0DE77600C4B7BD /* GlucoseValueSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A105102E0DE77100C4B7BD /* GlucoseValueSettingsView.swift */; };
+		83A105132E0DF85900C4B7BD /* LoopStatusSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A105122E0DF85500C4B7BD /* LoopStatusSettingsView.swift */; };
+		83A105152E0F355900C4B7BD /* ReorderableForEach.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A105142E0F355500C4B7BD /* ReorderableForEach.swift */; };
 		83A172382BD6F905003C5C7E /* MenuBarExtraAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 83A172372BD6F905003C5C7E /* MenuBarExtraAccess */; };
 		83A3301A2AC9F69B00222445 /* GraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A330192AC9F69B00222445 /* GraphView.swift */; };
 		83A3301C2AC9F70100222445 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A3301B2AC9F70100222445 /* SettingsView.swift */; };
 		83B737A22BE9728F00B84A75 /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 83B737A12BE9728F00B84A75 /* LaunchAtLogin */; };
+		83CA4BBA2DE26ED3003E5A24 /* DeviceStatusResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CA4BB92DE26ECA003E5A24 /* DeviceStatusResponse.swift */; };
+		83CE1E872E5906D000630629 /* ZenModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CE1E862E5906CB00630629 /* ZenModeView.swift */; };
+		83CE1E8A2E5917E300630629 /* ZenModeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CE1E892E5917DD00630629 /* ZenModeSettingsView.swift */; };
+		83CE1E8C2E59239700630629 /* GlucoseAgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CE1E8B2E59238E00630629 /* GlucoseAgeView.swift */; };
+		83DB10DE2DFF3FC0001ADCE7 /* GlucoseValueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10DD2DFF3FB2001ADCE7 /* GlucoseValueView.swift */; };
+		83DB10E02DFF3FCC001ADCE7 /* GlucoseTrendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10DF2DFF3FC4001ADCE7 /* GlucoseTrendView.swift */; };
+		83DB10E22DFF3FD4001ADCE7 /* GlucoseDeltaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10E12DFF3FD0001ADCE7 /* GlucoseDeltaView.swift */; };
+		83DB10E42DFF3FDC001ADCE7 /* COBView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10E32DFF3FD8001ADCE7 /* COBView.swift */; };
+		83DB10E62DFF3FE2001ADCE7 /* IOBView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10E52DFF3FE0001ADCE7 /* IOBView.swift */; };
+		83DB10E82DFF3FEF001ADCE7 /* EventualGlucoseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10E72DFF3FEC001ADCE7 /* EventualGlucoseView.swift */; };
+		83DB10EA2DFF3FFA001ADCE7 /* LoopStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10E92DFF3FF7001ADCE7 /* LoopStatusView.swift */; };
+		83DB10ED2DFF40B3001ADCE7 /* RelativeTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10EC2DFF40AF001ADCE7 /* RelativeTime.swift */; };
+		83DB10EF2DFF411A001ADCE7 /* LoopColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10EE2DFF4118001ADCE7 /* LoopColor.swift */; };
+		83DB10F12DFF45B0001ADCE7 /* GlucoseOps.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10F02DFF45AC001ADCE7 /* GlucoseOps.swift */; };
+		83DB10F32E009734001ADCE7 /* MenuBarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10F22E009730001ADCE7 /* MenuBarItem.swift */; };
+		83DB10F52E00B083001ADCE7 /* SeparatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10F42E00B080001ADCE7 /* SeparatorView.swift */; };
 		83DF71B22AEDA9EB00FC0566 /* Nightscout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DF71B12AEDA9EB00FC0566 /* Nightscout.swift */; };
+		83E197FF2DEB579200B0F995 /* AidGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E197FE2DEB578E00B0F995 /* AidGridView.swift */; };
+		83E198012DEB58F200B0F995 /* DrawForecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E198002DEB58ED00B0F995 /* DrawForecast.swift */; };
+		83E198032DEB595700B0F995 /* DrawGlucose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E198022DEB595500B0F995 /* DrawGlucose.swift */; };
+		83E198062DEB59DA00B0F995 /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E198052DEB59D800B0F995 /* Data.swift */; };
+		83E198082DEB926600B0F995 /* DynamicGlucoseColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E198072DEB926200B0F995 /* DynamicGlucoseColor.swift */; };
+		83E1980A2DEB92C000B0F995 /* GlucoseColorScheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E198092DEB92B900B0F995 /* GlucoseColorScheme.swift */; };
+		83E1980F2DEE5E6800B0F995 /* CGMSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E1980E2DEE5E6400B0F995 /* CGMSettingsView.swift */; };
+		83E198112DEE5ECA00B0F995 /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E198102DEE5ECA00B0F995 /* GeneralSettingsView.swift */; };
+		83E198132DEEE23F00B0F995 /* MenuBarSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E198122DEEE23F00B0F995 /* MenuBarSettingsView.swift */; };
+		83E198152DEEE2A900B0F995 /* ChartSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E198142DEEE2A900B0F995 /* ChartSettingsView.swift */; };
+		83E198172DEF269F00B0F995 /* AidSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E198162DEF269F00B0F995 /* AidSettingsView.swift */; };
 		83E323812AC21DDD00CB5206 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E323802AC21DDD00CB5206 /* Settings.swift */; };
 		83EC4AC62BE972D9007285C7 /* NightscoutKit in Frameworks */ = {isa = PBXBuildFile; productRef = 83EC4AC52BE972D9007285C7 /* NightscoutKit */; };
+		83F850282E429F2A00F8699F /* GlucoseDeltaSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F850272E429F2400F8699F /* GlucoseDeltaSettingsView.swift */; };
+		83F8502A2E42A02400F8699F /* GlucoseTrendSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F850292E42A01F00F8699F /* GlucoseTrendSettingsView.swift */; };
+		83F8502C2E42A14700F8699F /* EventualGlucoseSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F8502B2E42A14600F8699F /* EventualGlucoseSettingsView.swift */; };
+		83F8502E2E42A18C00F8699F /* COBSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F8502D2E42A18A00F8699F /* COBSettingsView.swift */; };
+		83F850302E42A1C500F8699F /* IOBSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F8502F2E42A1C400F8699F /* IOBSettingsView.swift */; };
+		83F850322E42A27E00F8699F /* SeparatorSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F850312E42A27C00F8699F /* SeparatorSettingsView.swift */; };
 		83F888412B1A888000A50E74 /* LibreLinkUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F888402B1A888000A50E74 /* LibreLinkUp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		830C4D052B0166F8000A0E87 /* DexcomShare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DexcomShare.swift; sourceTree = "<group>"; };
+		831CC8322DE269C500E04180 /* GlucoseSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseSource.swift; sourceTree = "<group>"; };
 		834621272ADDACB20024048E /* Simulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Simulator.swift; sourceTree = "<group>"; };
 		834621292ADDACC20024048E /* Provider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Provider.swift; sourceTree = "<group>"; };
 		8363136D2ABF8CAA0047C99D /* GlucoseEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseEntry.swift; sourceTree = "<group>"; };
@@ -40,13 +83,53 @@
 		836351872ABF6A9000BDAA96 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8363518A2ABF6A9000BDAA96 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		8363518C2ABF6A9000BDAA96 /* GlucoseBar.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GlucoseBar.entitlements; sourceTree = "<group>"; };
+		836D26582DFF3D74007A5D01 /* GlucoseViewBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseViewBuilder.swift; sourceTree = "<group>"; };
 		8381599C2BE4257F00A228F3 /* MainAppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainAppView.swift; sourceTree = "<group>"; };
+		83849C042E5CF18200BFD090 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = InfoPlist.xcstrings; path = GlucoseBar/InfoPlist.xcstrings; sourceTree = SOURCE_ROOT; };
+		83849C062E5CF18200BFD090 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = Localizable.xcstrings; path = GlucoseBar/Localizable.xcstrings; sourceTree = SOURCE_ROOT; };
+		8384A3132E70B9DF00C93DD8 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		838B25DE2BF0146F00D10DDA /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
+		83A105102E0DE77100C4B7BD /* GlucoseValueSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseValueSettingsView.swift; sourceTree = "<group>"; };
+		83A105122E0DF85500C4B7BD /* LoopStatusSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopStatusSettingsView.swift; sourceTree = "<group>"; };
+		83A105142E0F355500C4B7BD /* ReorderableForEach.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReorderableForEach.swift; sourceTree = "<group>"; };
 		83A330192AC9F69B00222445 /* GraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphView.swift; sourceTree = "<group>"; };
 		83A3301B2AC9F70100222445 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		83CA4BB92DE26ECA003E5A24 /* DeviceStatusResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusResponse.swift; sourceTree = "<group>"; };
+		83CE1E862E5906CB00630629 /* ZenModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenModeView.swift; sourceTree = "<group>"; };
+		83CE1E892E5917DD00630629 /* ZenModeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenModeSettingsView.swift; sourceTree = "<group>"; };
+		83CE1E8B2E59238E00630629 /* GlucoseAgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseAgeView.swift; sourceTree = "<group>"; };
 		83D76EC62C4DB616006639EF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		83DB10DD2DFF3FB2001ADCE7 /* GlucoseValueView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseValueView.swift; sourceTree = "<group>"; };
+		83DB10DF2DFF3FC4001ADCE7 /* GlucoseTrendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseTrendView.swift; sourceTree = "<group>"; };
+		83DB10E12DFF3FD0001ADCE7 /* GlucoseDeltaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseDeltaView.swift; sourceTree = "<group>"; };
+		83DB10E32DFF3FD8001ADCE7 /* COBView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = COBView.swift; sourceTree = "<group>"; };
+		83DB10E52DFF3FE0001ADCE7 /* IOBView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOBView.swift; sourceTree = "<group>"; };
+		83DB10E72DFF3FEC001ADCE7 /* EventualGlucoseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventualGlucoseView.swift; sourceTree = "<group>"; };
+		83DB10E92DFF3FF7001ADCE7 /* LoopStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopStatusView.swift; sourceTree = "<group>"; };
+		83DB10EC2DFF40AF001ADCE7 /* RelativeTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelativeTime.swift; sourceTree = "<group>"; };
+		83DB10EE2DFF4118001ADCE7 /* LoopColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopColor.swift; sourceTree = "<group>"; };
+		83DB10F02DFF45AC001ADCE7 /* GlucoseOps.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseOps.swift; sourceTree = "<group>"; };
+		83DB10F22E009730001ADCE7 /* MenuBarItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarItem.swift; sourceTree = "<group>"; };
+		83DB10F42E00B080001ADCE7 /* SeparatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeparatorView.swift; sourceTree = "<group>"; };
 		83DF71B12AEDA9EB00FC0566 /* Nightscout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Nightscout.swift; sourceTree = "<group>"; };
+		83E197FE2DEB578E00B0F995 /* AidGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AidGridView.swift; sourceTree = "<group>"; };
+		83E198002DEB58ED00B0F995 /* DrawForecast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawForecast.swift; sourceTree = "<group>"; };
+		83E198022DEB595500B0F995 /* DrawGlucose.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawGlucose.swift; sourceTree = "<group>"; };
+		83E198052DEB59D800B0F995 /* Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Data.swift; sourceTree = "<group>"; };
+		83E198072DEB926200B0F995 /* DynamicGlucoseColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicGlucoseColor.swift; sourceTree = "<group>"; };
+		83E198092DEB92B900B0F995 /* GlucoseColorScheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseColorScheme.swift; sourceTree = "<group>"; };
+		83E1980E2DEE5E6400B0F995 /* CGMSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGMSettingsView.swift; sourceTree = "<group>"; };
+		83E198102DEE5ECA00B0F995 /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
+		83E198122DEEE23F00B0F995 /* MenuBarSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarSettingsView.swift; sourceTree = "<group>"; };
+		83E198142DEEE2A900B0F995 /* ChartSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartSettingsView.swift; sourceTree = "<group>"; };
+		83E198162DEF269F00B0F995 /* AidSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AidSettingsView.swift; sourceTree = "<group>"; };
 		83E323802AC21DDD00CB5206 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
+		83F850272E429F2400F8699F /* GlucoseDeltaSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseDeltaSettingsView.swift; sourceTree = "<group>"; };
+		83F850292E42A01F00F8699F /* GlucoseTrendSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseTrendSettingsView.swift; sourceTree = "<group>"; };
+		83F8502B2E42A14600F8699F /* EventualGlucoseSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventualGlucoseSettingsView.swift; sourceTree = "<group>"; };
+		83F8502D2E42A18A00F8699F /* COBSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = COBSettingsView.swift; sourceTree = "<group>"; };
+		83F8502F2E42A1C400F8699F /* IOBSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOBSettingsView.swift; sourceTree = "<group>"; };
+		83F850312E42A27C00F8699F /* SeparatorSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeparatorSettingsView.swift; sourceTree = "<group>"; };
 		83F888402B1A888000A50E74 /* LibreLinkUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibreLinkUp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -55,6 +138,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8384A31A2E70CA8D00C93DD8 /* Awesome in Frameworks */,
 				83EC4AC62BE972D9007285C7 /* NightscoutKit in Frameworks */,
 				83B737A22BE9728F00B84A75 /* LaunchAtLogin in Frameworks */,
 				83A172382BD6F905003C5C7E /* MenuBarExtraAccess in Frameworks */,
@@ -112,6 +196,12 @@
 		836351822ABF6A9000BDAA96 /* GlucoseBar */ = {
 			isa = PBXGroup;
 			children = (
+				83849C042E5CF18200BFD090 /* InfoPlist.xcstrings */,
+				83849C062E5CF18200BFD090 /* Localizable.xcstrings */,
+				83DB10EB2DFF40AA001ADCE7 /* Common */,
+				836D26572DFF3C34007A5D01 /* MenuBarItems */,
+				83E1980D2DEE5B9500B0F995 /* Settings */,
+				83E197FD2DEB575B00B0F995 /* Chart */,
 				83D76EC62C4DB616006639EF /* Info.plist */,
 				834621252ADDAC930024048E /* Providers */,
 				836351832ABF6A9000BDAA96 /* GlucoseBarApp.swift */,
@@ -121,9 +211,6 @@
 				8363136D2ABF8CAA0047C99D /* GlucoseEntry.swift */,
 				836313732ABF99210047C99D /* DispatchTimer.swift */,
 				836313752AC0808E0047C99D /* Glucose.swift */,
-				83E323802AC21DDD00CB5206 /* Settings.swift */,
-				83A330192AC9F69B00222445 /* GraphView.swift */,
-				83A3301B2AC9F70100222445 /* SettingsView.swift */,
 				8381599C2BE4257F00A228F3 /* MainAppView.swift */,
 				838B25DE2BF0146F00D10DDA /* WelcomeView.swift */,
 			);
@@ -138,6 +225,42 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
+		836D26572DFF3C34007A5D01 /* MenuBarItems */ = {
+			isa = PBXGroup;
+			children = (
+				83CE1E8B2E59238E00630629 /* GlucoseAgeView.swift */,
+				83A1050F2E0DE76300C4B7BD /* Settings */,
+				83DB10F42E00B080001ADCE7 /* SeparatorView.swift */,
+				83DB10F22E009730001ADCE7 /* MenuBarItem.swift */,
+				83DB10E92DFF3FF7001ADCE7 /* LoopStatusView.swift */,
+				83DB10E72DFF3FEC001ADCE7 /* EventualGlucoseView.swift */,
+				83DB10E52DFF3FE0001ADCE7 /* IOBView.swift */,
+				83DB10E32DFF3FD8001ADCE7 /* COBView.swift */,
+				83DB10E12DFF3FD0001ADCE7 /* GlucoseDeltaView.swift */,
+				83DB10DF2DFF3FC4001ADCE7 /* GlucoseTrendView.swift */,
+				83DB10DD2DFF3FB2001ADCE7 /* GlucoseValueView.swift */,
+				836D26582DFF3D74007A5D01 /* GlucoseViewBuilder.swift */,
+				83CE1E862E5906CB00630629 /* ZenModeView.swift */,
+			);
+			path = MenuBarItems;
+			sourceTree = "<group>";
+		};
+		83A1050F2E0DE76300C4B7BD /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				83CE1E892E5917DD00630629 /* ZenModeSettingsView.swift */,
+				83F850312E42A27C00F8699F /* SeparatorSettingsView.swift */,
+				83F8502F2E42A1C400F8699F /* IOBSettingsView.swift */,
+				83F8502D2E42A18A00F8699F /* COBSettingsView.swift */,
+				83F8502B2E42A14600F8699F /* EventualGlucoseSettingsView.swift */,
+				83F850292E42A01F00F8699F /* GlucoseTrendSettingsView.swift */,
+				83F850272E429F2400F8699F /* GlucoseDeltaSettingsView.swift */,
+				83A105122E0DF85500C4B7BD /* LoopStatusSettingsView.swift */,
+				83A105102E0DE77100C4B7BD /* GlucoseValueSettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
 		83B7379E2BE4420F00B84A75 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -145,12 +268,54 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		83DB10EB2DFF40AA001ADCE7 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				83A105142E0F355500C4B7BD /* ReorderableForEach.swift */,
+				83DB10F02DFF45AC001ADCE7 /* GlucoseOps.swift */,
+				83DB10EE2DFF4118001ADCE7 /* LoopColor.swift */,
+				83DB10EC2DFF40AF001ADCE7 /* RelativeTime.swift */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
 		83DF71B02AEDA9DD00FC0566 /* Nightscout */ = {
 			isa = PBXGroup;
 			children = (
+				83CA4BB92DE26ECA003E5A24 /* DeviceStatusResponse.swift */,
+				831CC8322DE269C500E04180 /* GlucoseSource.swift */,
 				83DF71B12AEDA9EB00FC0566 /* Nightscout.swift */,
 			);
 			path = Nightscout;
+			sourceTree = "<group>";
+		};
+		83E197FD2DEB575B00B0F995 /* Chart */ = {
+			isa = PBXGroup;
+			children = (
+				83E198092DEB92B900B0F995 /* GlucoseColorScheme.swift */,
+				83E198072DEB926200B0F995 /* DynamicGlucoseColor.swift */,
+				83E198052DEB59D800B0F995 /* Data.swift */,
+				83E198022DEB595500B0F995 /* DrawGlucose.swift */,
+				83E198002DEB58ED00B0F995 /* DrawForecast.swift */,
+				83E197FE2DEB578E00B0F995 /* AidGridView.swift */,
+				83A330192AC9F69B00222445 /* GraphView.swift */,
+			);
+			path = Chart;
+			sourceTree = "<group>";
+		};
+		83E1980D2DEE5B9500B0F995 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				8384A3132E70B9DF00C93DD8 /* AboutView.swift */,
+				83E198162DEF269F00B0F995 /* AidSettingsView.swift */,
+				83E1980E2DEE5E6400B0F995 /* CGMSettingsView.swift */,
+				83A3301B2AC9F70100222445 /* SettingsView.swift */,
+				83E198142DEEE2A900B0F995 /* ChartSettingsView.swift */,
+				83E198122DEEE23F00B0F995 /* MenuBarSettingsView.swift */,
+				83E198102DEE5ECA00B0F995 /* GeneralSettingsView.swift */,
+				83E323802AC21DDD00CB5206 /* Settings.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 		83F8883F2B1A86BA00A50E74 /* LibreLinkUp */ = {
@@ -181,6 +346,7 @@
 				83A172372BD6F905003C5C7E /* MenuBarExtraAccess */,
 				83B737A12BE9728F00B84A75 /* LaunchAtLogin */,
 				83EC4AC52BE972D9007285C7 /* NightscoutKit */,
+				8384A3192E70CA8D00C93DD8 /* Awesome */,
 			);
 			productName = GlucoseBar;
 			productReference = 836351802ABF6A9000BDAA96 /* GlucoseBar.app */;
@@ -194,7 +360,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
-				LastUpgradeCheck = 1530;
+				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					8363517F2ABF6A9000BDAA96 = {
 						CreatedOnToolsVersion = 15.0;
@@ -208,12 +374,16 @@
 			knownRegions = (
 				en,
 				Base,
+				da,
+				sv,
+				fr,
 			);
 			mainGroup = 836351772ABF6A9000BDAA96;
 			packageReferences = (
 				836313682ABF824C0047C99D /* XCLocalSwiftPackageReference "../swift-deps/NightscoutKit" */,
 				8312CEA72AC78C7900CD4FC9 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
 				83A172362BD6F905003C5C7E /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */,
+				8384A3182E70CA8D00C93DD8 /* XCRemoteSwiftPackageReference "Awesome" */,
 			);
 			productRefGroup = 836351812ABF6A9000BDAA96 /* Products */;
 			projectDirPath = "";
@@ -230,7 +400,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				8363518B2ABF6A9000BDAA96 /* Preview Assets.xcassets in Resources */,
+				83849C072E5CF18200BFD090 /* Localizable.xcstrings in Resources */,
 				836351882ABF6A9000BDAA96 /* Assets.xcassets in Resources */,
+				83849C052E5CF18200BFD090 /* InfoPlist.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -241,19 +413,58 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				83F8502E2E42A18C00F8699F /* COBSettingsView.swift in Sources */,
+				831CC8332DE269C800E04180 /* GlucoseSource.swift in Sources */,
+				83DB10E82DFF3FEF001ADCE7 /* EventualGlucoseView.swift in Sources */,
+				83E198152DEEE2A900B0F995 /* ChartSettingsView.swift in Sources */,
 				836313742ABF99210047C99D /* DispatchTimer.swift in Sources */,
+				83E1980A2DEB92C000B0F995 /* GlucoseColorScheme.swift in Sources */,
+				83F850302E42A1C500F8699F /* IOBSettingsView.swift in Sources */,
+				83E197FF2DEB579200B0F995 /* AidGridView.swift in Sources */,
+				83E198082DEB926600B0F995 /* DynamicGlucoseColor.swift in Sources */,
+				83A105132E0DF85900C4B7BD /* LoopStatusSettingsView.swift in Sources */,
 				83E323812AC21DDD00CB5206 /* Settings.swift in Sources */,
+				836D26592DFF3D7C007A5D01 /* GlucoseViewBuilder.swift in Sources */,
+				83DB10EF2DFF411A001ADCE7 /* LoopColor.swift in Sources */,
+				83DB10E62DFF3FE2001ADCE7 /* IOBView.swift in Sources */,
+				83DB10F32E009734001ADCE7 /* MenuBarItem.swift in Sources */,
+				83DB10EA2DFF3FFA001ADCE7 /* LoopStatusView.swift in Sources */,
 				8363136E2ABF8CAA0047C99D /* GlucoseEntry.swift in Sources */,
+				83A105152E0F355900C4B7BD /* ReorderableForEach.swift in Sources */,
 				830C4D062B0166F8000A0E87 /* DexcomShare.swift in Sources */,
+				83E198062DEB59DA00B0F995 /* Data.swift in Sources */,
+				83DB10E02DFF3FCC001ADCE7 /* GlucoseTrendView.swift in Sources */,
+				83F8502C2E42A14700F8699F /* EventualGlucoseSettingsView.swift in Sources */,
+				83CA4BBA2DE26ED3003E5A24 /* DeviceStatusResponse.swift in Sources */,
 				83A3301C2AC9F70100222445 /* SettingsView.swift in Sources */,
 				83F888412B1A888000A50E74 /* LibreLinkUp.swift in Sources */,
+				83CE1E8C2E59239700630629 /* GlucoseAgeView.swift in Sources */,
+				83CE1E872E5906D000630629 /* ZenModeView.swift in Sources */,
 				836313762AC0808E0047C99D /* Glucose.swift in Sources */,
 				834621282ADDACB20024048E /* Simulator.swift in Sources */,
+				83DB10ED2DFF40B3001ADCE7 /* RelativeTime.swift in Sources */,
+				83E198112DEE5ECA00B0F995 /* GeneralSettingsView.swift in Sources */,
+				83E198172DEF269F00B0F995 /* AidSettingsView.swift in Sources */,
+				83F850282E429F2A00F8699F /* GlucoseDeltaSettingsView.swift in Sources */,
+				83E198132DEEE23F00B0F995 /* MenuBarSettingsView.swift in Sources */,
 				8381599D2BE4257F00A228F3 /* MainAppView.swift in Sources */,
+				83DB10F52E00B083001ADCE7 /* SeparatorView.swift in Sources */,
+				83DB10E22DFF3FD4001ADCE7 /* GlucoseDeltaView.swift in Sources */,
+				8384A3142E70B9E300C93DD8 /* AboutView.swift in Sources */,
 				838B25DF2BF0146F00D10DDA /* WelcomeView.swift in Sources */,
+				83A105112E0DE77600C4B7BD /* GlucoseValueSettingsView.swift in Sources */,
+				83DB10E42DFF3FDC001ADCE7 /* COBView.swift in Sources */,
+				83F850322E42A27E00F8699F /* SeparatorSettingsView.swift in Sources */,
 				8346212A2ADDACC20024048E /* Provider.swift in Sources */,
 				836351842ABF6A9000BDAA96 /* GlucoseBarApp.swift in Sources */,
 				83A3301A2AC9F69B00222445 /* GraphView.swift in Sources */,
+				83E198012DEB58F200B0F995 /* DrawForecast.swift in Sources */,
+				83DB10DE2DFF3FC0001ADCE7 /* GlucoseValueView.swift in Sources */,
+				83E1980F2DEE5E6800B0F995 /* CGMSettingsView.swift in Sources */,
+				83F8502A2E42A02400F8699F /* GlucoseTrendSettingsView.swift in Sources */,
+				83CE1E8A2E5917E300630629 /* ZenModeSettingsView.swift in Sources */,
+				83E198032DEB595700B0F995 /* DrawGlucose.swift in Sources */,
+				83DB10F12DFF45B0001ADCE7 /* GlucoseOps.swift in Sources */,
 				83DF71B22AEDA9EB00FC0566 /* Nightscout.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -266,6 +477,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -297,6 +509,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = HAR373MZHM;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -321,7 +534,9 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -331,6 +546,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -362,6 +578,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = HAR373MZHM;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -379,7 +596,9 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Release;
 		};
@@ -393,12 +612,15 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 48;
+				CURRENT_PROJECT_VERSION = 83;
 				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"GlucoseBar/Preview Content\"";
-				DEVELOPMENT_TEAM = HAR373MZHM;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = GlucoseBar/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = GlucoseBar;
@@ -410,7 +632,8 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3.0;
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = t1d.tools.GlucoseBar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -429,12 +652,14 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 48;
+				CURRENT_PROJECT_VERSION = 83;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"GlucoseBar/Preview Content\"";
-				DEVELOPMENT_TEAM = HAR373MZHM;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = GlucoseBar/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = GlucoseBar;
@@ -446,7 +671,8 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3.0;
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = t1d.tools.GlucoseBar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -494,6 +720,14 @@
 				kind = branch;
 			};
 		};
+		8384A3182E70CA8D00C93DD8 /* XCRemoteSwiftPackageReference "Awesome" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/LiveUI/Awesome";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.4.0;
+			};
+		};
 		83A172362BD6F905003C5C7E /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/orchetect/MenuBarExtraAccess";
@@ -505,6 +739,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		8384A3192E70CA8D00C93DD8 /* Awesome */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8384A3182E70CA8D00C93DD8 /* XCRemoteSwiftPackageReference "Awesome" */;
+			productName = Awesome;
+		};
 		83A172372BD6F905003C5C7E /* MenuBarExtraAccess */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 83A172362BD6F905003C5C7E /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */;

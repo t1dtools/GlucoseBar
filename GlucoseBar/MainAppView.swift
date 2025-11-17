@@ -26,9 +26,28 @@ struct MainAppView: View {
                 Text("Quit")
             }.contentShape(Rectangle())
         }
+        .contentShape(Rectangle())
         .buttonStyle(.plain)
         .padding()
         .focusEffectDisabled()
+    }
+
+    func ZenModeButton() -> some View {
+        Button(action: {
+            s.zenMode = !s.zenMode
+            s.save()
+        }) {
+            HStack {
+                Image(systemName: s.zenMode ? "circle.fill" : "circle").foregroundColor(getDynamicGlucoseColor(glucoseValue: Decimal(g.glucose), highGlucoseColorValue: Decimal(s.highThreshold), lowGlucoseColorValue: Decimal(s.lowThreshold), targetGlucose: Decimal(s.glucoseTarget), glucoseColorScheme: .dynamicColor))
+                Text("Zen Mode")
+            }
+        }
+        .keyboardShortcut("z", modifiers: .command)
+        .buttonStyle(.plain)
+        .padding(4)
+        .focusEffectDisabled()
+        .padding()
+
     }
 
     func SettingsButton() -> some View {
@@ -51,12 +70,12 @@ struct MainAppView: View {
                 url.append(queryItems: [URLQueryItem(name: "token", value: s.nsSecret)])
             }
             if NSWorkspace.shared.open(url) {
-                self.logger.debug("opened ns from button action")
+                self.logger.notice("opened ns from button action")
             }
         }) {
             HStack {
                 Image(systemName: "link")
-                Text("Visit Nightscout")
+                Text("Nightscout")
             }.contentShape(Rectangle())
         }
         .contentShape(Rectangle())
@@ -71,8 +90,8 @@ struct MainAppView: View {
                 Text("Error").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 10).foregroundColor(.red)
                 Text("Check the settings and make sure your CGM source (\(s.cgmProvider.presentable)) is responding.").fixedSize(horizontal: false, vertical: true)
 
-                if g.provider.providerIssue != nil {
-                    Text("Additional Info: \(g.provider.providerIssue!)").fixedSize(horizontal: false, vertical: true).padding(.top)
+                if let providerIssue = g.provider.providerIssue {
+                    Text("Additional Info: \(providerIssue)").fixedSize(horizontal: false, vertical: true).padding(.top)
                 }
 
                 Spacer()
@@ -96,6 +115,8 @@ struct MainAppView: View {
                 VStack {
                     GraphView(glucose: g).environmentObject(s).environmentObject(vs)
                     HStack {
+                        ZenModeButton().help("Replaces your configured items in the menu bar with a circle that changes color based on glucose levels.")
+                        Spacer()
                         if s.cgmProvider == .nightscout {
                             NightscoutButton()
                         }
@@ -108,12 +129,22 @@ struct MainAppView: View {
                         HStack {
                             Spacer()
                             Label("Offline", systemImage: "bolt.horizontal").foregroundColor(.red).padding()
-                        }
+                            Spacer()
+                        }.offset(y: -10)
+                        Spacer()
+                    }
+                } else if g.glucoseTime.timeIntervalSinceNow < -360 {
+                    VStack {
+                        HStack {
+                            Spacer()
+                            Label("Stale Glucose: \(g.glucoseAge)", systemImage: "clock.badge.exclamationmark.fill").foregroundColor(.red).padding()
+                            Spacer()
+                        }.offset(y: -10)
                         Spacer()
                     }
                 }
             }
-            .frame(width: 500, height: s.hoverableGraph ? 500 : 400, alignment: .leading)
+            .frame(width: 500, height: 500, alignment: .leading)
             .focusable()
             .focusEffectDisabled()
 //            .onKeyPress(keys: [.escape]) { press in
@@ -124,12 +155,6 @@ struct MainAppView: View {
 //            }
         } else {
             WelcomeView().frame(width: 400, height: 390, alignment: .leading)
-//            VStack {
-//                Text("Welcome to GlucoseBar!\n\nUse this application to keep your glucose glanceable in your menu bar at all times.\n\nGet started by configuring GlucoseBar.")
-//
-//                SettingsButton()
-//                QuitButton()
-//            }
             .padding()
             .focusable()
             .focusEffectDisabled()
@@ -145,7 +170,7 @@ struct MainAppView: View {
 
 #Preview {
     MainAppView()
-        .environmentObject(Glucose())
+        .environmentObject(Glucose(SettingsStore()))
         .environmentObject(SettingsStore())
         .environmentObject(ViewState())
 }

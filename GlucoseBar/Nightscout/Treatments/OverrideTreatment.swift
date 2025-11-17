@@ -10,7 +10,7 @@ import Foundation
 
 
 public class OverrideTreatment: NightscoutTreatment {
-    
+
     public enum Duration {
         case finite(TimeInterval)
         case indefinite
@@ -47,7 +47,10 @@ public class OverrideTreatment: NightscoutTreatment {
         }
 
         self.reason = reason
-        if let correctionRange = entry["correctionRange"] as? [Double], correctionRange.count >= 2 {
+        if let correctionRange = entry["correctionRange"] as? [Double],
+           correctionRange.count >= 2,
+           correctionRange.indices.contains(0),
+           correctionRange.indices.contains(1) {
             self.correctionRange = ClosedRange(uncheckedBounds: (lower: correctionRange[0], upper: correctionRange[1]))
         } else {
             self.correctionRange = nil

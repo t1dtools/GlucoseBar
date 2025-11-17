@@ -7,7 +7,7 @@
 
 import Foundation
 
-class Simulator: Provider {
+class Simulator: Provider, @unchecked Sendable {
 
     init(_ input: String?) {
         super.init()
@@ -21,32 +21,29 @@ class Simulator: Provider {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
 
+            var currentEntries = self.getSafeGlucoseEntries()
             var previousEntry: GlucoseEntry? = nil
-            if !self.GlucoseEntries.isEmpty {
-                previousEntry = self.GlucoseEntries.first
+            if !currentEntries.isEmpty {
+                previousEntry = currentEntries.first
             }
 
-            if self.GlucoseEntries.isEmpty {
-                while self.GlucoseEntries.count < 288 {
+            if currentEntries.isEmpty {
+                while currentEntries.count < 288 {
 
-                    if !self.GlucoseEntries.isEmpty {
-                        previousEntry = self.GlucoseEntries.first
+                    if !currentEntries.isEmpty {
+                        previousEntry = currentEntries.first
                     }
-                    //                    DispatchQueue.main.async {
-                    self.GlucoseEntries.insert(self.generateGlucoseEntry(previousEntry: previousEntry), at: 0)
-                    //                    }
+                    currentEntries.insert(self.generateGlucoseEntry(previousEntry: previousEntry), at: 0)
                 }
             } else {
-                //                DispatchQueue.main.async {
-                self.GlucoseEntries.insert(self.generateGlucoseEntry(previousEntry: previousEntry), at: 0)
-                //                }
+                currentEntries.insert(self.generateGlucoseEntry(previousEntry: previousEntry), at: 0)
             }
 
-            if self.GlucoseEntries.count > 288 {
-                //                DispatchQueue.main.async {
-                self.GlucoseEntries.remove(at: self.GlucoseEntries.count - 1)
-                //                }
+            if currentEntries.count > 288 {
+                currentEntries.remove(at: currentEntries.count - 1)
             }
+
+            self.setGlucoseEntries(currentEntries)
         }
     }
 
@@ -56,10 +53,10 @@ class Simulator: Provider {
         var date = Date()
         var delta = 0.0
         var range = -20...20
-        if previousEntry != nil {
-            trend = previousEntry!.trend!
-            base = previousEntry!.glucose
-            date = previousEntry!.date.addingTimeInterval(300)
+        if let prevE = previousEntry {
+            trend = prevE.trend ?? .notComputable
+            base = prevE.glucose
+            date = prevE.date.addingTimeInterval(300)
 
             switch trend {
             case GlucoseEntry.GlucoseTrend.downDownDown:
@@ -82,7 +79,7 @@ class Simulator: Provider {
 
             trend = getValidTrend(trend)
 
-            self.logger.info("Range based on previousEntry: \(range) - \(trend.arrows)")
+//            self.logger.info("Range based on previousEntry: \(range) - \(trend.arrows)")
         }
 
 
@@ -97,9 +94,9 @@ class Simulator: Provider {
             glucose = base
             trend = .downDownDown
         }
-        
-        if previousEntry != nil {
-            delta = glucose - previousEntry!.glucose
+
+        if let prevE = previousEntry {
+            delta = glucose - prevE.glucose
         }
 
         return GlucoseEntry(glucose: glucose, date: date, trend: trend, changeRate: delta)
