@@ -8,6 +8,7 @@
 import Foundation
 import OSLog
 
+@MainActor
 class SettingsStore: ObservableObject, @unchecked Sendable {
 
     private let settingsQueue = DispatchQueue(label: "tools.t1d.GlucoseBar.settings", attributes: .concurrent)
@@ -166,17 +167,11 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         let gunit = defaults.string(forKey: "glucoseUnit") ?? GlucoseUnit.mmoll.presentable
         switch gunit {
         case GlucoseUnit.mmoll.presentable:
-            DispatchQueue.main.async {
-                self.glucoseUnit = .mmoll
-            }
+            self.glucoseUnit = .mmoll
         case GlucoseUnit.mgdl.presentable:
-            DispatchQueue.main.async {
-                self.glucoseUnit = .mgdl
-            }
+            self.glucoseUnit = .mgdl
         default:
-            DispatchQueue.main.async {
-                self.glucoseUnit = .mgdl
-            }
+            self.glucoseUnit = .mgdl
         }
 
         self.glucoseTarget = defaults.double(forKey: "glucoseTarget")
@@ -185,15 +180,13 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         }
 
         let colorScheme = defaults.string(forKey: "glucoseColorScheme") ?? GlucoseColorScheme.dynamicColor.displayName
-        DispatchQueue.main.async {
-            switch colorScheme {
-            case GlucoseColorScheme.staticColor.displayName:
-                self.glucoseColorScheme = .staticColor
-            case GlucoseColorScheme.dynamicColor.displayName:
-                self.glucoseColorScheme = .dynamicColor
-            default:
-                self.glucoseColorScheme = .dynamicColor
-            }
+        switch colorScheme {
+        case GlucoseColorScheme.staticColor.displayName:
+            self.glucoseColorScheme = .staticColor
+        case GlucoseColorScheme.dynamicColor.displayName:
+            self.glucoseColorScheme = .dynamicColor
+        default:
+            self.glucoseColorScheme = .dynamicColor
         }
 
         self.showHighThreshold = defaults.bool(forKey: "showHighThreshold")
@@ -210,17 +203,11 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         let forecastDisplay = defaults.string(forKey: "trioChartForecastDisplay") ?? ForecastDisplay.lines.presentable
         switch forecastDisplay {
         case ForecastDisplay.lines.presentable:
-            DispatchQueue.main.async {
-                self.aidChartForecastDisplay = .lines
-            }
+            self.aidChartForecastDisplay = .lines
         case ForecastDisplay.cone.presentable:
-            DispatchQueue.main.async {
-                self.aidChartForecastDisplay = .cone
-            }
+            self.aidChartForecastDisplay = .cone
         default:
-            DispatchQueue.main.async {
-                self.aidChartForecastDisplay = .lines
-            }
+            self.aidChartForecastDisplay = .lines
         }
 
         self.aidChartShowIOB = defaults.bool(forKey: "trioChartShowIOB")
@@ -231,8 +218,10 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 
     func save() {
         settingsQueue.async(flags: .barrier) { [weak self] in
-            guard let self = self else { return }
-            self.saveInternal()
+            Task { @MainActor in
+                guard let self = self else { return }
+                self.saveInternal()
+            }
         }
     }
 
@@ -297,15 +286,15 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         defaults.set(self.aidChartShowLoopStatus, forKey: "trioChartShowLoopStatus")
 
         defaults.synchronize()
-        DispatchQueue.main.async { [weak self] in
-            self?.loadInternal()
-        }
+        self.loadInternal()
     }
 
     func deleteCGMProvider() {
         settingsQueue.async(flags: .barrier) { [weak self] in
-            guard let self = self else { return }
-            self.deleteCGMProviderInternal()
+            Task { @MainActor in
+                guard let self = self else { return }
+                self.deleteCGMProviderInternal()
+            }
         }
     }
 

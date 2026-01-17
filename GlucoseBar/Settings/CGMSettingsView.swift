@@ -161,7 +161,7 @@ struct CGMSettingsView: View {
                         isPresented: $isDeletingCGMProvider
                     ) {
                         Button("Delete") {
-                            DispatchQueue.main.async {
+                            Task {
                                 s.deleteCGMProvider()
                             }
                             isDeletingCGMProvider = false

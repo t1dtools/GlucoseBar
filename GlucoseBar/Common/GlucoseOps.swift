@@ -7,7 +7,7 @@
 
 import Foundation
 
-func convertGlucose(_ settings: SettingsStore, glucose: Double) -> Double {
+@MainActor func convertGlucose(_ settings: SettingsStore, glucose: Double) -> Double {
     if settings.glucoseUnit == .mmoll {
         return glucose / 18
     }
@@ -42,7 +42,7 @@ func formatCOBForDisplay(cob: Double) -> String {
     return String(format: "%.0f", cob)
 }
 
-func printFormattedGlucose(settings: SettingsStore, glucose: Double) -> String {
+@MainActor func printFormattedGlucose(settings: SettingsStore, glucose: Double) -> String {
     if (settings.glucoseUnit == .mmoll) {
         return String(format: "%.1f mmol/L", glucose)
     }

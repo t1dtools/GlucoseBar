@@ -119,7 +119,7 @@ class Provider: ObservableObject, @unchecked Sendable {
         }
 
         // Update UI on main thread
-        DispatchQueue.main.async { [weak self] in
+        Task { [weak self] in
             guard let self = self else { return }
             self.objectWillChange.send()
         }
