@@ -18,7 +18,7 @@ class Simulator: Provider, @unchecked Sendable {
 
         self.lastFetch = Date()
 
-        DispatchQueue.main.async { [weak self] in
+        Task { [weak self] in
             guard let self = self else { return }
 
             var currentEntries = self.getSafeGlucoseEntries()

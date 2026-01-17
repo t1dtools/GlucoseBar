@@ -93,7 +93,7 @@ class Glucose: ObservableObject, Sendable {
             }
         }
 
-        DispatchQueue.main.async {
+        Task {
             self.getGlucose()
         }
     }
@@ -153,7 +153,7 @@ class Glucose: ObservableObject, Sendable {
         if self.provider.type != settings.cgmProvider {
             self.logger.debug("found provider \(self.provider.type.presentable) != \(settings.cgmProvider.presentable)")
 
-            DispatchQueue.main.async {
+            Task {
                 switch settings.cgmProvider {
                 case .nightscout:
                     self.provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.aidEnableIntegration)
@@ -167,7 +167,7 @@ class Glucose: ObservableObject, Sendable {
             }
         }
 
-        DispatchQueue.main.async {
+        Task {
             self.getGlucose()
         }
         self.logger.debug("Current provider after provider comparison and lookup: \(String(describing: self.provider))")
@@ -180,7 +180,7 @@ class Glucose: ObservableObject, Sendable {
     func getGlucose() {
         self.error = ""
         if let providerIssue = self.provider.providerIssue {
-            DispatchQueue.main.async { [weak self] in
+            Task { [weak self] in
                 guard let self = self else { return }
                 self.error = providerIssue
                 return
@@ -198,7 +198,7 @@ class Glucose: ObservableObject, Sendable {
         formatter.unitsStyle = .short
         formatter.formattingContext = .listItem
 
-        DispatchQueue.main.async { [weak self] in
+        Task { [weak self] in
             guard let self = self else { return }
 
             guard !glucoseEntries.isEmpty else {

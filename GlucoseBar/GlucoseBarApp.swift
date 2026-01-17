@@ -11,31 +11,15 @@ import Network
 class ViewState: ObservableObject, @unchecked Sendable {
     @Published var isPanePresented: Bool = false
     @Published var isOnline: Bool = false
+    private let networkMonitor = NWPathMonitor()
 
     private let queue = DispatchQueue(label: "tools.t1d.GlucoseBar.ViewState", attributes: .concurrent)
 
-    // This exists to filter out VPNs since they give false positives
-    // when network isn't available
-    func isOnlyOtherInterface(_ path: NWPath) -> Bool {
-        if path.usesInterfaceType(.other) {
-            if !path.usesInterfaceType(.cellular) && !path.usesInterfaceType(.wifi) && !path.usesInterfaceType(.wiredEthernet) && !path.usesInterfaceType(.loopback) {
-                return true
-            }
-        }
-
-        return false
-    }
-
     init() {
-        let networkMonitor = NWPathMonitor()
         networkMonitor.pathUpdateHandler = { [weak self] path in
             guard let self = self else { return }
-            DispatchQueue.main.async {
-                if path.status == .satisfied && !self.isOnlyOtherInterface(path) {
-                    self.isOnline = true
-                } else {
-                    self.isOnline = false
-                }
+            Task { @MainActor in
+                self.isOnline = path.status == .satisfied
             }
         }
 
@@ -109,7 +93,7 @@ struct GlucoseBarApp: App {
 
         Settings {
             SettingsView().onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeMainNotification)) { newValue in
-                DispatchQueue.main.async {
+                Task {
                     vs.isPanePresented = false
                 }
                 NSApp.setActivationPolicy(.regular)

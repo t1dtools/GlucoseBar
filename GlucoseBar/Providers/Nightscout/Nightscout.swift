@@ -130,7 +130,7 @@ class Nightscout: Provider, @unchecked Sendable {
             let res = response as? HTTPURLResponse
             if res == nil {
                 self.logger.error("Unable to cast response to HTTPURLResponse")
-                DispatchQueue.main.async {
+                Task {
                     self.providerIssue = "Unable to get glucose data: Empty response from server."
                 }
                 return
@@ -172,36 +172,38 @@ class Nightscout: Provider, @unchecked Sendable {
                     }
 
                     if aidEnabled && RemoteGlucoseSource != .null {
-                        let gs = GlucoseSource(baseURL: self.baseURL, token: self.auth?.token ?? "invalid", aidEnabled: aidEnabled)
-                        let gse = await gs.getGlucoseSourceExtras()
-                        DispatchQueue.main.async { [weak self] in
+                        Task { [weak self] in
                             guard let self = self else { return }
+
+                            let gs = GlucoseSource(baseURL: self.baseURL, token: self.auth?.token ?? "invalid", aidEnabled: self.aidEnabled)
+                            let gse = await gs.getGlucoseSourceExtras()
+
                             self.GlucoseSourceExtras = gse
                         }
                     }
                 } catch DecodingError.dataCorrupted(_) {
-                    DispatchQueue.main.async { [weak self] in
+                    Task { [weak self] in
                         guard let self = self else { return }
                         self.providerIssue = "Unable to read data from Nightscout: Data corrupted."
                     }
                 } catch let DecodingError.keyNotFound(key, _) {
-                    DispatchQueue.main.async { [weak self] in
+                    Task { [weak self] in
                         guard let self = self else { return }
                         self.providerIssue = "Unable to read data from Nightscout: Missing key \(key)"
                     }
                 } catch DecodingError.valueNotFound(_, _) {
-                    DispatchQueue.main.async { [weak self] in
+                    Task { [weak self] in
                         guard let self = self else { return }
                         self.providerIssue = "Unable to read data from Nightscout: Missing required value"
                     }
                 } catch DecodingError.typeMismatch(_, _) {
-                    DispatchQueue.main.async { [weak self] in
+                    Task { [weak self] in
                         guard let self = self else { return }
                         self.providerIssue = "Unable to read data from Nightscout: Value type mismatch. Is this a new version of Nightscout?"
                     }
                 } catch {
                     self.logger.error("Error parsing NS response: \(String(describing: error), privacy: .public)")
-                    DispatchQueue.main.async { [weak self] in
+                    Task { [weak self] in
                         guard let self = self else { return }
                         self.providerIssue = "Unable to parse glucose data from nightscout: Error unknown."
                     }
@@ -213,7 +215,7 @@ class Nightscout: Provider, @unchecked Sendable {
             } else {
                 do {
                     let result = try JSONDecoder().decode(NightscoutEntriesErrorResponse.self, from: data)
-                    DispatchQueue.main.async { [weak self] in
+                    Task { [weak self] in
                         guard let self = self else { return }
                         self.providerIssue = "Error from Nightscout: \(result.message)"
                     }
@@ -222,7 +224,7 @@ class Nightscout: Provider, @unchecked Sendable {
                 }
             }
         } catch {
-            DispatchQueue.main.async { [weak self] in
+            Task { [weak self] in
                 guard let self = self else { return }
 
                 var err = String(describing: error)
@@ -316,7 +318,7 @@ class Nightscout: Provider, @unchecked Sendable {
             return
         }
 
-        DispatchQueue.main.async {
+        Task {
             self.providerIssue = nil
             self.isAuthenticating = true
         }
@@ -329,7 +331,7 @@ class Nightscout: Provider, @unchecked Sendable {
             let (data, response) = try await URLSession.shared.data(for: request)
 
             guard let res = response as? HTTPURLResponse else {
-                DispatchQueue.main.async { [weak self] in
+                Task { [weak self] in
                     guard let self = self else { return }
                     self.providerIssue = "Invalid response from Nightscout"
                 }
@@ -338,7 +340,7 @@ class Nightscout: Provider, @unchecked Sendable {
             if res.statusCode > 299 {
                 unsuccessfulAuthAttempts += 1
                 self.logger.debug("status code over 299: \(res.statusCode). Body: \(data)")
-                DispatchQueue.main.async { [weak self] in
+                Task { [weak self] in
                     guard let self = self else { return }
 
                     var providerError = ""
@@ -356,7 +358,7 @@ class Nightscout: Provider, @unchecked Sendable {
                 do {
                     let result = try JSONDecoder().decode(NightscoutAuthResponse.self, from: data)
 
-                    DispatchQueue.main.async {
+                    Task {
                         self.auth = ProviderAuth(token: result.token, expiry: result.exp)
                     }
 
