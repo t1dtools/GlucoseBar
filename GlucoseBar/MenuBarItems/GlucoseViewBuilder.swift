@@ -24,6 +24,7 @@ struct MenuBarView: View {
     private func loadMenuBarItems() {
         if s.menuBarItems.isEmpty {
             self.menuBarItems = [
+                MenuBarItemContainer(type: .glucosedot),
                 MenuBarItemContainer(type: .glucosevalue),
                 MenuBarItemContainer(type: .glucosetrend),
                 MenuBarItemContainer(type: .glucosedelta)
