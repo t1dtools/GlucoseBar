@@ -84,8 +84,6 @@ struct DrawLineForecast: ChartContent {
 struct DrawConeForecast: ChartContent {
     let data: [GraphEntry]
 
-
-
     func timeForIndex(_ index: Int, latestEntryDate: Date) -> Date {
         return Calendar.current.date(byAdding: .minute, value: (index + 1) * 5, to: latestEntryDate)!
     }

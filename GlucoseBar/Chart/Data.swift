@@ -24,6 +24,7 @@ public enum ForecastType: String, CaseIterable, Identifiable {
     case uam
     case iob
     case cob
+    case loop
     public var id: String { self.rawValue }
     public var presentable: String {
         switch self {
@@ -37,6 +38,8 @@ public enum ForecastType: String, CaseIterable, Identifiable {
             return String(localized: "Insulin On Board", comment: "Insulin on board from the oref algorithmic output, used for the legend when choosing forecast lines (not necessarily translated in Trio)")
         case .cob:
             return String(localized: "Carbs On Board", comment: "Carbohydrates on board from the oref algorithmic output, used for the legend when choosing forecast lines (not necessarily translated in Trio)")
+        case .loop:
+            return String(localized: "Loop forecast information", comment: "The singular line that the Loop algorithm outputs for forecasts")
         }
     }
     public var int: Int {
@@ -51,6 +54,8 @@ public enum ForecastType: String, CaseIterable, Identifiable {
             return 3
         case .cob:
             return 4
+        case .loop:
+            return 5
         }
     }
 }

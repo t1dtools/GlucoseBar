@@ -108,6 +108,17 @@ struct GraphView: View {
             }
         }
 
+        if let loop = gse.forecasts.loop {
+            for i in 0..<loop.count {
+                let entry = loop[i]
+                let glu = convertGlucose(s, glucose: Double(entry))
+
+                let date = Calendar.current.date(byAdding: .minute, value: i * 5, to: forecastStartDate)!
+
+                data.append(GraphEntry(date: date, value: glu, trend: .notComputable, delta: 0.0, color: .blue, forecastType: .iob))
+            }
+        }
+
         return data
     }
 
@@ -185,6 +196,9 @@ struct GraphView: View {
         let headlineTrend = isHovering ? hoveredTrend ?? latestTrend : latestTrend
 
         let graphDataDuration = (-1 * (g.entries?.last?.date.timeIntervalSinceNow ?? 1) / 60 / 60).rounded()
+
+        // Loop only has one forecast, so a cone doesn't make sense
+        let forecastDisplay = g.provider.GlucoseSourceExtras.aid == .loop ? .lines : s.aidChartForecastDisplay
 
         VStack {
             HStack {
@@ -274,7 +288,7 @@ struct GraphView: View {
                         data: data,
                         yMin: minY <= defaultMinGlucose ? minY : defaultMinGlucose,
                         yMax: maxY >= defaultMaxGlucose ? (maxY + maxYMargin) : defaultMaxGlucose,
-                        forecastType: s.aidChartForecastDisplay
+                        forecastType: forecastDisplay
                     )
                 }
                 DrawGlucose(data: data)

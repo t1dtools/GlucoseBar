@@ -9,20 +9,26 @@ import Foundation
 
 public enum GlucoseSourceDevice: String, CaseIterable, Identifiable, Sendable {
     case null
+    case unknown
     case trio
     case openaps
     case aaps
+    case loop
     public var id: String { self.rawValue }
     public var presentable: String {
         switch self {
         case .null:
             return String(localized: "No extras")
+        case .unknown:
+            return String(localized: "Unknown or no AID detected")
         case .trio:
             return "Trio"
         case .openaps:
             return "OpenAPS"
         case .aaps:
             return "AAPS"
+        case .loop:
+            return "Loop"
         }
     }
     
@@ -35,8 +41,10 @@ public enum GlucoseSourceDevice: String, CaseIterable, Identifiable, Sendable {
             } else {
                 return .openaps
             }
+        } else if status.device?.starts(with: "loop://") == true {
+            return .loop
         } else {
-            return .null
+            return .unknown
         }
         
     }
@@ -96,43 +104,76 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
             let res = response as? HTTPURLResponse
             if res == nil {
                 self.logger.error("Unable to cast response to HTTPURLResponse")
-                return .null
+                return .unknown
             }
 
             if res!.statusCode != 200 {
-                return .null
+                return .unknown
             }
             
             do {
                 let result = try JSONDecoder().decode(DeviceStatusResponse.self, from: data)
                 if result.result.first == nil {
-                    return .null
+                    return .unknown
                 }
 
                 let device = GlucoseSourceDevice.fromDS(status: result.result.first!)
                 if device != GlucoseSourceDevice.null {
-                    let enacted = result.result.first!.openaps?.enacted ?? result.result.first!.openaps?.suggested
-                    if enacted == nil {
-                        self.logger.error("No enacted/suggested found in DeviceStatus")
-                        return .null
-                    }
-                    
+
                     var gsep = GlucoseSourceExtraProperties()
-                    gsep.cob = enacted!.cob ?? 0
-                    gsep.iob = enacted!.iob ?? 0
-                    gsep.eventualGlucose = enacted!.eventualBG
-                    gsep.reason = enacted!.reason
-                    gsep.forecasts = OpenAPSForecasts.fromPredBGs(predBGs: enacted!.predBGs)
-                    gsep.glucoseTarget = enacted!.currentTarget
-                    
-                    await MainActor.run {
-                        self.GlucoseSourceExtras = gsep
+                    switch device {
+                    case .loop:
+                        let loop = result.result.first!.loop
+                        if loop == nil {
+                            self.logger.error("unable to get loop from DeviceStatus")
+                            return .unknown
+                        }
+
+                        gsep.cob = loop!.cob?.cob ?? 0
+                        gsep.iob = loop!.iob?.iob ?? 0
+                        gsep.forecasts = AIDForecasts.fromLoopPredicted(loop?.predicted)
+                        gsep.aid = device
+
+                        await MainActor.run {
+                            self.GlucoseSourceExtras = gsep
+                        }
+                        break
+                    case .trio, .aaps, .openaps:
+                        let enacted = result.result.first!.openaps?.enacted ?? result.result.first!.openaps?.suggested
+                        if enacted == nil {
+                            self.logger.error("No enacted/suggested found in DeviceStatus")
+                            return .unknown
+                        }
+
+                        let dateFormatter = DateFormatter()
+                        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+                        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+                        dateFormatter.timeZone = TimeZone.init(secondsFromGMT: 0)
+
+                        let ts = dateFormatter.date(from: enacted?.deliverAt ?? " ") // " " because that causes nil instead of now
+
+                        gsep.cob = enacted!.cob ?? 0
+                        gsep.iob = enacted!.iob ?? 0
+                        gsep.eventualGlucose = enacted!.eventualBG
+                        gsep.reason = enacted!.reason
+                        gsep.forecasts = AIDForecasts.fromPredBGs(predBGs: enacted!.predBGs)
+                        gsep.glucoseTarget = enacted!.currentTarget
+                        gsep.enactedAt = ts
+                        gsep.aid = device
+
+                        await MainActor.run {
+                            self.GlucoseSourceExtras = gsep
+                        }
+                        break
+                    default:
+                        self.logger.error("Invalid or unknown device: \(device.presentable, privacy: .public)")
+                        return .unknown
                     }
                 }
                 return device
             } catch {
                 self.logger.error("Unable to decode NS response when checking for GSE: \(String(describing: error), privacy: .public)")
-                return .null
+                return .unknown
             }
 
         } catch {
@@ -149,13 +190,13 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
             }
 
             self.logger.error("Error parsing NS response: \(err, privacy: .public)")
-            return .null
+            return .unknown
         }
     }
 
     @MainActor
     public func getGlucoseSourceExtras() async -> GlucoseSourceExtraProperties {
-        let empty = GlucoseSourceExtraProperties()
+        let empty = GlucoseSourceExtraProperties(aid: .unknown)
 
         logger.debug("Nightscout.GlucoseSource.getGlucoseSourceExtras")
 
@@ -201,28 +242,51 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
 
                 let device = GlucoseSourceDevice.fromDS(status: result.result.first!)
                 if device != GlucoseSourceDevice.null {
-                    let enacted = result.result.first!.openaps?.enacted ?? result.result.first!.openaps?.suggested
-                    if enacted == nil {
-                        self.logger.error("No enacted/suggested found in DeviceStatus")
+
+                    var gsep = GlucoseSourceExtraProperties()
+                    switch device {
+                    case .loop:
+                        let loop = result.result.first!.loop
+                        if loop == nil {
+                            self.logger.error("unable to get loop from DeviceStatus")
+                            return empty
+                        }
+
+                        gsep.cob = loop!.cob?.cob ?? 0
+                        gsep.iob = loop!.iob?.iob ?? 0
+                        gsep.forecasts = AIDForecasts.fromLoopPredicted(loop!.predicted)
+                        gsep.aid = device
+
+                        return gsep
+                    case .trio, .aaps, .openaps:
+                        let enacted = result.result.first!.openaps?.enacted ?? result.result.first!.openaps?.suggested
+                        if enacted == nil {
+                            self.logger.error("No enacted/suggested found in DeviceStatus")
+                            return empty
+                        }
+
+                        let dateFormatter = DateFormatter()
+                        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+                        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+                        dateFormatter.timeZone = TimeZone.init(secondsFromGMT: 0)
+
+                        let ts = dateFormatter.date(from: enacted?.deliverAt ?? " ") // " " because that causes nil instead of now
+
+                        gsep.cob = enacted!.cob ?? 0
+                        gsep.iob = enacted!.iob ?? 0
+                        gsep.eventualGlucose = enacted!.eventualBG
+                        gsep.reason = enacted!.reason
+                        gsep.forecasts = AIDForecasts.fromPredBGs(predBGs: enacted!.predBGs)
+                        gsep.glucoseTarget = enacted!.currentTarget
+                        gsep.enactedAt = ts
+                        gsep.aid = device
+
+                        return gsep
+
+                    default:
+                        self.logger.error("Invalid or unknown device: \(device.presentable, privacy: .public)")
                         return empty
                     }
-
-                    let dateFormatter = DateFormatter()
-                    dateFormatter.locale = Locale(identifier: "en_US_POSIX")
-                    dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-                    dateFormatter.timeZone = TimeZone.init(secondsFromGMT: 0)
-
-                    let ts = dateFormatter.date(from: enacted?.deliverAt ?? " ") // " " because that causes nil instead of now
-
-                    return GlucoseSourceExtraProperties(
-                        iob: enacted!.iob,
-                        cob: enacted!.cob,
-                        eventualGlucose: enacted!.eventualBG,
-                        reason: enacted!.reason,
-                        enactedAt: ts,
-                        forecasts: OpenAPSForecasts.fromPredBGs(predBGs: enacted!.predBGs),
-                        glucoseTarget: enacted!.currentTarget
-                    )
                 }
             } catch {
                 self.logger.error("Unable to decode NS response when checking for GSE: \(String(describing: error), privacy: .public)")
