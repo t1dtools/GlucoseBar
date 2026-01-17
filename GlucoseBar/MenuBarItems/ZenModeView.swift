@@ -30,11 +30,16 @@ struct ZenModeView: View {
             strikeColor = .red
         }
 
-        return Image(systemName: icon)
-            .foregroundStyle(strikeColor, glucoseColor)
-            .font(.system(size: 26))
-            .fontWeight(.heavy)
-            .offset(y: 1)
+        return ZStack {
+            Image(systemName: icon)
+                .foregroundStyle(strikeColor, glucoseColor)
+                .font(.system(size: 26))
+                .fontWeight(.heavy)
+                .offset(y: 1)
+        }
     }
 }
 
+#Preview {
+    ZenModeView().environmentObject(SettingsStore()).environmentObject(Glucose(SettingsStore()))
+}
