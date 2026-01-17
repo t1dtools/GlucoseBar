@@ -40,7 +40,7 @@ struct AidGridView: View {
                     if s.aidChartShowEventualGlucose, let eventualGlucose = g.provider.GlucoseSourceExtras.eventualGlucose {
                         HStack {
                             Image(systemName: "arrow.right.circle")
-                            Text(formatGlucoseForDisplay(settings: s, glucose: convertGlucose(s, glucose: eventualGlucose)))
+                            Text(formatGlucoseForDisplay(settings: s, glucose: eventualGlucose))
                         }.help("Eventual Glucose")
                     }
                 }

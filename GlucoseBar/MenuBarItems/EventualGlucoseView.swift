@@ -24,7 +24,7 @@ struct EventualGlucoseView: View {
             }
 
             if let eventualGlucose = g.provider.GlucoseSourceExtras.eventualGlucose {
-                Text(formatGlucoseForDisplay(settings: s, glucose: convertGlucose(s, glucose: eventualGlucose)))
+                Text(formatGlucoseForDisplay(settings: s, glucose: eventualGlucose))
                     .foregroundStyle(getForegroundStyle())
                     .fontWeight(getFontWeight())
                     .strikethrough(g.glucoseTime.timeIntervalSinceNow < -360, color: .red)
