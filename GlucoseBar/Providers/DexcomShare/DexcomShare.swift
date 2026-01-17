@@ -36,6 +36,7 @@ class DexcomShare: Provider, @unchecked Sendable {
     private var sessionID: String = ""
     public var validSettings: Bool = true
     public var settingsError: String = ""
+    private var unsuccessfulAuthAttempts = 0
 
     @MainActor
     func setProviderIssue(_ value: String?) {
@@ -102,6 +103,11 @@ class DexcomShare: Provider, @unchecked Sendable {
 
     override internal func fetch() async {
         logger.debug("DexcomShare.fetch")
+        if unsuccessfulAuthAttempts > 5 {
+            self.providerIssue = "Unable to connect to Dexcom Share after 5 attempts. Please check your credentials and if Dexcom is asking to send a code to your email or phone, please go through that flow on your device."
+            return
+        }
+
         if !isAuthValid() {
             logger.debug("calling authenticate from fetch")
             await authenticate()
@@ -171,6 +177,9 @@ class DexcomShare: Provider, @unchecked Sendable {
                     }
 
                     let newEntries = self.dexcomEntriesToGlucoseEntries(input: result, previous: previous)
+                    if newEntries.isEmpty {
+                        await self.setProviderIssue("Dexcom: No Data")
+                    }
                     self.setGlucoseEntries(newEntries)
                     self.lastFetch = Date()
                 } catch DecodingError.dataCorrupted(_) {
@@ -264,6 +273,7 @@ class DexcomShare: Provider, @unchecked Sendable {
                 return
             }
             if res.statusCode > 299 {
+                unsuccessfulAuthAttempts += 1
                 var providerError: String? = nil
                 let responseString = String(data: data, encoding: .utf8) ?? "Unable to decode response"
                 self.logger.error("\(responseString, privacy: .public)")
@@ -335,6 +345,7 @@ class DexcomShare: Provider, @unchecked Sendable {
                 return
             }
             if res.statusCode > 299 {
+                unsuccessfulAuthAttempts += 1
                 var providerError = ""
                 let responseString = String(data: data, encoding: .utf8) ?? "Unable to decode response"
                 self.logger.error("\(responseString)")
@@ -377,6 +388,10 @@ class DexcomShare: Provider, @unchecked Sendable {
     private func authenticate() async {
         self.logger.debug("DexcomShare.authenticate")
 
+        if unsuccessfulAuthAttempts > 5 {
+            return
+        }
+
         isAuthenticating = true
 
         await self.setProviderIssue(nil)
@@ -392,6 +407,10 @@ class DexcomShare: Provider, @unchecked Sendable {
 
         if self.sessionID == "" {
             await getSessionID()
+        }
+
+        if self.accountID != "" && self.sessionID != "" {
+            unsuccessfulAuthAttempts = 0
         }
 
         isAuthenticating = false
