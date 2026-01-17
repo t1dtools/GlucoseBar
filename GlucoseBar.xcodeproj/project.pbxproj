@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		830C4D062B0166F8000A0E87 /* DexcomShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = 830C4D052B0166F8000A0E87 /* DexcomShare.swift */; };
 		831CC8332DE269C800E04180 /* GlucoseSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 831CC8322DE269C500E04180 /* GlucoseSource.swift */; };
+		834156CC2EDCD41F004D9260 /* KeepAliveManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834156CB2EDCD41A004D9260 /* KeepAliveManager.swift */; };
 		834621282ADDACB20024048E /* Simulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834621272ADDACB20024048E /* Simulator.swift */; };
 		8346212A2ADDACC20024048E /* Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834621292ADDACC20024048E /* Provider.swift */; };
 		8363136E2ABF8CAA0047C99D /* GlucoseEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8363136D2ABF8CAA0047C99D /* GlucoseEntry.swift */; };
@@ -73,6 +74,7 @@
 /* Begin PBXFileReference section */
 		830C4D052B0166F8000A0E87 /* DexcomShare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DexcomShare.swift; sourceTree = "<group>"; };
 		831CC8322DE269C500E04180 /* GlucoseSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseSource.swift; sourceTree = "<group>"; };
+		834156CB2EDCD41A004D9260 /* KeepAliveManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeepAliveManager.swift; sourceTree = "<group>"; };
 		834621272ADDACB20024048E /* Simulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Simulator.swift; sourceTree = "<group>"; };
 		834621292ADDACC20024048E /* Provider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Provider.swift; sourceTree = "<group>"; };
 		8363136D2ABF8CAA0047C99D /* GlucoseEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseEntry.swift; sourceTree = "<group>"; };
@@ -196,6 +198,7 @@
 		836351822ABF6A9000BDAA96 /* GlucoseBar */ = {
 			isa = PBXGroup;
 			children = (
+				834156CB2EDCD41A004D9260 /* KeepAliveManager.swift */,
 				83849C042E5CF18200BFD090 /* InfoPlist.xcstrings */,
 				83849C062E5CF18200BFD090 /* Localizable.xcstrings */,
 				83DB10EB2DFF40AA001ADCE7 /* Common */,
@@ -461,6 +464,7 @@
 				83E198012DEB58F200B0F995 /* DrawForecast.swift in Sources */,
 				83DB10DE2DFF3FC0001ADCE7 /* GlucoseValueView.swift in Sources */,
 				83E1980F2DEE5E6800B0F995 /* CGMSettingsView.swift in Sources */,
+				834156CC2EDCD41F004D9260 /* KeepAliveManager.swift in Sources */,
 				83F8502A2E42A02400F8699F /* GlucoseTrendSettingsView.swift in Sources */,
 				83CE1E8A2E5917E300630629 /* ZenModeSettingsView.swift in Sources */,
 				83E198032DEB595700B0F995 /* DrawGlucose.swift in Sources */,
