@@ -52,10 +52,15 @@ struct GlucoseBarApp: App {
     @State private var title: Text = Text("GlucoseBar")
     @State private var hasSettings: Bool = true
     @State private var mainViewPresented: Bool = false
+    @State private var keepAliveActivity: NSObjectProtocol?
 
     @StateObject var s: SettingsStore = SettingsStore()
     @StateObject var g: Glucose = Glucose(SettingsStore())
     @StateObject var vs: ViewState = ViewState()
+
+    init() {
+        _ = KeepAliveManager.shared
+    }
 
     var body: some Scene {
         MenuBarExtra {
@@ -125,20 +130,46 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     let notificationCenter = NotificationCenter.default
     private var workspaceObserver: NSObjectProtocol?
+    private var keepAliveWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        workspaceObserver = NSWorkspace.shared.notificationCenter.addObserver(
-            forName: NSWorkspace.didWakeNotification,
-            object: nil,
-            queue: nil) { _ in
-                AppDelegate.sleepListener()
-        }
+        createHiddenWindow()
+        installWakeObserver()
+
     }
 
     deinit {
         if let observer = workspaceObserver {
             NSWorkspace.shared.notificationCenter.removeObserver(observer)
             workspaceObserver = nil
+        }
+    }
+
+    @MainActor
+    private func createHiddenWindow() {
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 1, height: 1),
+            styleMask: [],
+            backing: .buffered,
+            defer: false
+        )
+        window.isOpaque = false
+        window.backgroundColor = .clear
+        window.level = .statusBar
+        window.orderOut(nil)
+        window.collectionBehavior = [.stationary, .ignoresCycle]
+        self.keepAliveWindow = window
+    }
+
+    private func installWakeObserver() {
+        workspaceObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didWakeNotification,
+            object: nil,
+            queue: nil
+        ) { _ in
+            NotificationCenter.default.post(
+                .makeComputerSleepEventNotification(forName: .computerDidWakeUp)
+            )
         }
     }
 
