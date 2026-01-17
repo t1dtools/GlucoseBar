@@ -71,10 +71,17 @@ struct GlucoseBarApp: App {
                     }
                 }
             } else if g.error != "" && s.validSettings && vs.isOnline {
-                Label(
-                    title: { Text("Error") },
-                    icon: { Image(systemName: "exclamationmark.octagon.fill") }
-                ).labelStyle(.titleAndIcon)
+                if g.provider.providerIssue == "Dexcom: No Data" {
+                    Label(
+                        title: { Text(" No data") },
+                        icon: { Image(systemName: "bolt.trianglebadge.exclamationmark")}
+                    ).labelStyle(.titleAndIcon)
+                } else {
+                    Label(
+                        title: { Text("Error") },
+                        icon: { Image(systemName: "exclamationmark.octagon.fill") }
+                    ).labelStyle(.titleAndIcon)
+                }
             } else if g.fetchedGlucose {
                 MenuBarView().environmentObject(s).environmentObject(g)
             } else {

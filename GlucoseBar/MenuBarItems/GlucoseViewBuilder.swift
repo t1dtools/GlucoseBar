@@ -72,10 +72,13 @@ struct MenuBarView: View {
     }
 
     var menuStack: any View {
-        HStack {
+        return HStack {
             ForEach(menuBarItems, id: \.id) { item in
-                // trio integration only works with nightscout, so don't draw it's views for other providers
+                // aid integration only works with nightscout, so don't draw it's views for other providers
                 if (s.cgmProvider != .nightscout || !s.aidEnableIntegration) && [.loopstatus, .eventualglucose, .cob, .iob].contains(item.type) {
+                    EmptyView()
+                // loop doesn't have quite as many bells and whistles as oref, so filter out the things we can't render
+                } else if (s.cgmProvider == .nightscout && s.aidEnableIntegration && g.provider.GlucoseSourceExtras.aid == .loop && [.loopstatus, .eventualglucose].contains(item.type)) {
                     EmptyView()
                 } else {
                     drawMenuBarItem(item)
