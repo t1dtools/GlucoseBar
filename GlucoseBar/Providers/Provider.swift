@@ -35,29 +35,42 @@ struct ProviderAuth: Decodable {
 }
 
 struct GlucoseSourceExtraProperties {
+    var aid: GlucoseSourceDevice = .null
     var iob: Double? = nil
     var cob: Double? = nil
     var eventualGlucose: Double? = nil
     var reason: String? = nil
     var enactedAt: Date? = nil
-    var forecasts: OpenAPSForecasts = OpenAPSForecasts(iob: nil, cob: nil, zt: nil, uam: nil)
+    var forecasts: AIDForecasts = AIDForecasts(iob: nil, cob: nil, zt: nil, uam: nil)
     var glucoseTarget: Double? = nil
     var error: String? = nil
 }
 
-struct OpenAPSForecasts: Decodable {
+struct AIDForecasts: Decodable {
     var iob: [Int]?
     var cob: [Int]?
     var zt: [Int]?
     var uam: [Int]?
-    
-    static func fromPredBGs(predBGs: PredBGs?) -> OpenAPSForecasts {
-        return OpenAPSForecasts(
+    var loop: [Int]?
+
+    static func fromPredBGs(predBGs: PredBGs?) -> AIDForecasts {
+        return AIDForecasts(
             iob: predBGs?.iob,
             cob: predBGs?.cob,
             zt: predBGs?.zt,
             uam: predBGs?.uam
         )
+    }
+
+    static func fromLoopPredicted(_ loopPredicted: LoopPredicted?) -> AIDForecasts {
+        let loopValues: [Int]? = {
+            guard var values = loopPredicted?.values else { return nil }
+            values.removeFirst()
+            return values.map {
+                Int(($0).rounded())
+            }
+        }()
+        return AIDForecasts(loop: loopValues)
     }
 }
 

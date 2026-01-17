@@ -86,7 +86,7 @@ struct CGMSettingsView: View {
                         Spacer()
                     }
                     HStack {
-                        Text("Supported AIDs are Trio, OpenAPS, AAPS.").font(.footnote)
+                        Text("Supported AIDs are AAPS, Loop, OpenAPS, and Trio.").font(.footnote)
                         Spacer()
                     }
                     HStack {

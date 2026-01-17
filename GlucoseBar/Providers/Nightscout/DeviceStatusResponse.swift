@@ -15,28 +15,42 @@ struct DeviceStatusResponse: Codable {
 
 // MARK: - Result
 struct DeviceStatusResult: Codable {
-//    let pump: Pump
-//    let uploader: Uploader
     let app: String?
     let device: String?
     let openaps: Openaps?
-//    let createdAt: String
-//    let utcOffset: Int
-//    let identifier: String
-//    let srvModified, srvCreated: Int
+    let loop: Loop?
 
     enum CodingKeys: String, CodingKey {
-//        case pump, uploader, device, openaps
-        case app, device, openaps
-//        case createdAt = "created_at"
-//        case utcOffset, identifier, srvModified, srvCreated
+        case app, device, openaps, loop
     }
+}
+
+// MARK: - Loop
+struct Loop: Codable {
+    let predicted: LoopPredicted?
+    let cob: LoopCOB?
+    let iob: LoopIOB?
+    let timestamp: String?
+}
+
+struct LoopPredicted: Codable {
+    let startDate: String?
+    let values: [Double]?
+}
+
+struct LoopCOB: Codable {
+    let timestamp: String?
+    let cob: Double?
+}
+
+struct LoopIOB: Codable {
+    let timestamp: String?
+    let iob: Double?
 }
 
 // MARK: - Openaps
 struct Openaps: Codable {
     let iob: Iob?
-    //let version: String
     let suggested: Ted?
     let enacted: Ted?
 }
