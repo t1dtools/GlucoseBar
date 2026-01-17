@@ -15,17 +15,17 @@ func convertGlucose(_ settings: SettingsStore, glucose: Double) -> Double {
     return glucose
 }
 
-func formatGlucoseForDisplay(settings: SettingsStore, glucose: Double) -> String {
+@MainActor func formatGlucoseForDisplay(settings: SettingsStore, glucose: Double) -> String {
     if (settings.glucoseUnit == .mmoll) {
-        return String(format: "%.1f", glucose/18)
+        return String(format: "%.1f", glucose/18.0)
     }
 
     return String(format: "%.0f", glucose)
 }
 
-func formatDeltaForDisplay(settings: SettingsStore, delta: Double) -> String {
+@MainActor func formatDeltaForDisplay(settings: SettingsStore, delta: Double) -> String {
     if (settings.glucoseUnit == .mmoll) {
-        return delta > 0 ? String(format: "+%.1f", delta/18) : String(format: "%.1f", delta/18)
+        return delta > 0 ? String(format: "+%.1f", delta/18.0) : String(format: "%.1f", delta/18.0)
     }
 
     return delta > 0 ? String(format: "+%.0f", delta) : String(format: "%.0f", delta)
