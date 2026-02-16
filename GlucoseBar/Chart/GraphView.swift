@@ -37,28 +37,28 @@ struct GraphView: View {
 
         var data: [GraphEntry] = [];
         if let entries = g.entries {
+            let earliestToInclude = Date(timeIntervalSinceNow: TimeInterval(-s.graphMinutes*60))
 
-            let entryCount = s.graphMinutes/5-1
-
-            for i in 0..<entryCount {
-                if (entries.count > i) {
-                    let entry = entries[i]
-                    let glu = convertGlucose(s, glucose: entry.glucose)
-
-                    var delta = 0.0
-                    if let changeRate = entry.changeRate {
-                        delta = changeRate
-                    }
-
-                    var glucoseTarget = s.glucoseTarget
-                    if let fetchedGlucoseTarget = g.provider.GlucoseSourceExtras.glucoseTarget {
-                        glucoseTarget = fetchedGlucoseTarget
-                    }
-
-                    let color = getDynamicGlucoseColor(glucoseValue: Decimal(convertGlucose(s, glucose: entry.glucose)), highGlucoseColorValue: highThresholdRuleMark, lowGlucoseColorValue: lowThresholdRuleMark, targetGlucose: Decimal(convertGlucose(s, glucose: glucoseTarget)), glucoseColorScheme: s.glucoseColorScheme)
-
-                    data.append(GraphEntry(date: entry.date, value: glu, trend: entry.trend ?? .notComputable, delta: delta, color: color, forecastType: .none, glucoseType: entry.glucoseType))
+            for entry in entries {
+                if entry.date.timeIntervalSince(earliestToInclude) < 0 {
+                    continue
                 }
+
+                let glu = convertGlucose(s, glucose: entry.glucose)
+
+                var delta = 0.0
+                if let changeRate = entry.changeRate {
+                    delta = changeRate
+                }
+
+                var glucoseTarget = s.glucoseTarget
+                if let fetchedGlucoseTarget = g.provider.GlucoseSourceExtras.glucoseTarget {
+                    glucoseTarget = fetchedGlucoseTarget
+                }
+
+                let color = getDynamicGlucoseColor(glucoseValue: Decimal(convertGlucose(s, glucose: entry.glucose)), highGlucoseColorValue: highThresholdRuleMark, lowGlucoseColorValue: lowThresholdRuleMark, targetGlucose: Decimal(convertGlucose(s, glucose: glucoseTarget)), glucoseColorScheme: s.glucoseColorScheme)
+
+                data.append(GraphEntry(date: entry.date, value: glu, trend: entry.trend ?? .notComputable, delta: delta, color: color, forecastType: .none, glucoseType: entry.glucoseType))
             }
         }
 
