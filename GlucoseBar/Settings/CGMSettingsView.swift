@@ -68,6 +68,16 @@ struct CGMSettingsView: View {
                     Spacer()
                 }
 
+                HStack {
+                    Text("API Limit").frame(width: 130, alignment: .leading)
+                    Spacer()
+                    TextField("", value: $s.nsAPILimit, format: .number).textFieldStyle(RoundedBorderTextFieldStyle()).frame(width: 80)
+                }
+                HStack {
+                    Text("Maximum entries per request. Default is 1000, which is the standard Nightscout server limit (API3_MAX_LIMIT). Increase only if your server admin has raised this limit. Useful for longer time ranges (12h, 24h) on CGMs with frequent readings. The value is validated when you save or test the connection.").font(.footnote)
+                    Spacer()
+                }
+
                 VStack {
                     HStack {
                         Text("Enable AID Integration")
@@ -142,12 +152,13 @@ struct CGMSettingsView: View {
         @State var cgmCredentialsError: Bool = false
         @State var cgmCredentialsSuccess: Bool = false
         @State var validatedProvider: CGMProvider = .null
+        @State var validationError: String?
 
         @FocusState var nsSecretFailedValidationFocus: Bool
         @State var nsSecretFailedValidation: Bool = false
 
         var body: some View {
-            if let providerIssue = g.provider.providerIssue {
+            if let providerIssue = g.provider.providerIssue, !cgmCredentialsError {
                 Text("Provider issue: \(providerIssue)")
             }
             HStack {
@@ -181,20 +192,26 @@ struct CGMSettingsView: View {
                         isValidating = true
                         Task {
                             validatedProvider = s.cgmProvider
-                            g.reset(s)
                             let providerTest = await s.testCGMProvider()
 
-                            cgmCredentialsError = !providerTest
-                            cgmCredentialsSuccess = providerTest
+                            cgmCredentialsError = !providerTest.success
+                            cgmCredentialsSuccess = providerTest.success
+                            validationError = providerTest.error
                             isValidating = false
-                            s.validSettings = providerTest
+                            if providerTest.success {
+                                s.validSettings = true
+                            }
                         }
                     }) {
                         Text("Test Connection")
                     }.disabled(isValidating)
                 }
                 if !isValidating && cgmCredentialsError && s.cgmProvider == validatedProvider {
-                    Text("Invalid credentials or service unreachable").foregroundColor(.orange)
+                    if let error = validationError {
+                        Text(error).foregroundColor(.orange)
+                    } else {
+                        Text("Invalid credentials or service unreachable").foregroundColor(.orange)
+                    }
                     Image(systemName: "exclamationmark.triangle").foregroundColor(.orange)
                 }
                 if !isValidating && cgmCredentialsSuccess && s.cgmProvider == validatedProvider {
@@ -216,8 +233,26 @@ struct CGMSettingsView: View {
                         nsSecretFailedValidation = true
                         return
                     }
-                    s.save()
-                    g.reset(s)
+
+                    isValidating = true
+                    Task {
+                        validatedProvider = s.cgmProvider
+                        let providerTest = await s.testCGMProvider()
+
+                        if providerTest.success {
+                            cgmCredentialsError = false
+                            cgmCredentialsSuccess = true
+                            validationError = nil
+                            s.save()
+                            g.reset(s)
+                            s.validSettings = true
+                        } else {
+                            cgmCredentialsError = true
+                            cgmCredentialsSuccess = false
+                            validationError = providerTest.error
+                        }
+                        isValidating = false
+                    }
                 }.disabled(isValidating)
             }
         }

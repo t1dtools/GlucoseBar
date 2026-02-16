@@ -21,8 +21,9 @@ class Nightscout: Provider, @unchecked Sendable {
     var baseURL: String
     var token: String
     var aidEnabled: Bool
+    var apiLimit: Int
 
-    init(baseURL: String, token: String, aidEnabled: Bool) {
+    init(baseURL: String, token: String, aidEnabled: Bool, apiLimit: Int = 1000) {
 
         // Do some basic validation
         if baseURL.isEmpty {
@@ -38,6 +39,7 @@ class Nightscout: Provider, @unchecked Sendable {
         self.baseURL = baseURL
         self.token = token
         self.aidEnabled = aidEnabled
+        self.apiLimit = apiLimit
 
         if baseURL.hasSuffix("/") {
             self.baseURL = String(self.baseURL.dropLast())
@@ -89,21 +91,25 @@ class Nightscout: Provider, @unchecked Sendable {
 
         self.providerIssue = nil
 
-        var url = "\(baseURL)/api/v3/entries?sort%24desc=date&fields=sgv%2Ctrend%2Cdirection%2Cdate%2Cidentifier"
+        // Fetch entries from the last 24 hours using a date filter so the chart can display up to 24h.
+        // The Nightscout API v3 default max limit is 1000 (API3_MAX_LIMIT). Users can configure this
+        // in Settings if their server admin has raised the limit.
+        let dateCutoff = Int(Date(timeIntervalSinceNow: -86400).timeIntervalSince1970 * 1000)
+        var url = "\(baseURL)/api/v3/entries?sort%24desc=date&fields=sgv%2Ctrend%2Cdirection%2Cdate%2Cidentifier&date%24gte=\(dateCutoff)"
 
-        var limit = 288
+        var limit = self.apiLimit
         if self.GlucoseEntries.count > 1 {
             limit = 1
             logger.info("Time since last fetch: \(self.lastFetch.timeIntervalSinceNow * -1, privacy: .public) seconds")
             if self.lastFetch.timeIntervalSinceNow < -400 {
                 logger.info("re-setting limit to full fetch because last fetch was more than 400 seconds ago")
-                limit = 288
+                limit = self.apiLimit
             }
 
             // This is a workaround for avoiding gaps in the graph. A better solution should be found so we don't tax the NS server unnecessarily every 15 minutes.
             if self.lastFullFetch.timeIntervalSinceNow < -900 {
                 logger.info("full fetch because it's been over 15 minutes since we got all data")
-                limit = 288
+                limit = self.apiLimit
                 self.lastFullFetch = Date()
             }
 
@@ -162,7 +168,7 @@ class Nightscout: Provider, @unchecked Sendable {
                             var updatedEntries = currentEntries
                             updatedEntries.insert(contentsOf: newEntries, at: 0)
 
-                            if updatedEntries.count > 288 {
+                            if updatedEntries.count > self.apiLimit {
                                 self.logger.debug("removing entry from glucoseentries: \(updatedEntries.last!.glucose, privacy: .private)")
                                 updatedEntries.removeLast()
                             }
@@ -211,11 +217,17 @@ class Nightscout: Provider, @unchecked Sendable {
                 await self.fetch()
                 return
             } else {
+                self.logger.error("Nightscout entries request failed with status \(res!.statusCode, privacy: .public)")
                 do {
                     let result = try JSONDecoder().decode(NightscoutEntriesErrorResponse.self, from: data)
+                    self.logger.error("Nightscout error message: \(result.message, privacy: .public)")
                     DispatchQueue.main.async { [weak self] in
                         guard let self = self else { return }
-                        self.providerIssue = "Error from Nightscout: \(result.message)"
+                        if result.message.lowercased().contains("limit") || result.message.lowercased().contains("tolerance") {
+                            self.providerIssue = String(localized: "The API Limit (\(self.apiLimit)) exceeds your server's maximum. Try a lower value.", comment: "Error when Nightscout rejects the configured API entry limit")
+                        } else {
+                            self.providerIssue = String(localized: "Error from Nightscout: \(result.message)", comment: "Generic error from Nightscout server")
+                        }
                     }
                 } catch {
                     self.logger.error("Error parsing NS error response: \(String(describing: error), privacy: .public)")
@@ -395,6 +407,49 @@ class Nightscout: Provider, @unchecked Sendable {
         self.logger.debug("nightscout.verifyCredentials")
         await self.authenticate()
 
-        return self.isAuthenticated
+        if !self.isAuthenticated {
+            return false
+        }
+
+        // Test that the configured API limit is accepted by the server
+        let limitOK = await testAPILimit()
+        if !limitOK {
+            return false
+        }
+
+        return true
+    }
+
+    private func testAPILimit() async -> Bool {
+        let dateCutoff = Int(Date(timeIntervalSinceNow: -300).timeIntervalSince1970 * 1000)
+        let urlString = "\(baseURL)/api/v3/entries?sort%24desc=date&fields=identifier&date%24gte=\(dateCutoff)&limit=\(apiLimit)"
+
+        guard let url = URL(string: urlString) else { return false }
+
+        do {
+            var request = URLRequest(url: url, timeoutInterval: httpTimeout)
+            request.addValue("application/json", forHTTPHeaderField: "Accept")
+            if let token = self.auth?.token, !token.isEmpty {
+                request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            }
+            request.httpMethod = "GET"
+
+            let (data, response) = try await URLSession.shared.data(for: request)
+
+            if let res = response as? HTTPURLResponse, res.statusCode == 200 {
+                return true
+            }
+
+            if let errorResult = try? JSONDecoder().decode(NightscoutEntriesErrorResponse.self, from: data) {
+                self.logger.error("API limit test failed: \(errorResult.message, privacy: .public)")
+                await MainActor.run {
+                    self.providerIssue = String(localized: "The API Limit (\(self.apiLimit)) exceeds your server's maximum. Try a lower value.", comment: "Error when Nightscout rejects the configured API entry limit")
+                }
+            }
+            return false
+        } catch {
+            self.logger.error("API limit test error: \(String(describing: error), privacy: .public)")
+            return false
+        }
     }
 }

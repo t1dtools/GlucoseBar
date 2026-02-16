@@ -23,6 +23,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     // Nightscout
     @Published var nsURL: String = "https://my.nightscout.site"
     @Published var nsSecret: String = "my-secret"
+    @Published var nsAPILimit: Int = 1000
 
     // Dexcom Share
     @Published var dxServer: DexcomServer = .ous
@@ -90,6 +91,10 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         // Nightscout
         self.nsURL = defaults.string(forKey: "nsURL") ?? "https://my.nightscout.site"
         self.nsSecret = defaults.string(forKey: "nsSecret") ?? ""
+        self.nsAPILimit = defaults.integer(forKey: "nsAPILimit")
+        if self.nsAPILimit == 0 {
+            self.nsAPILimit = 1000
+        }
 
         // Dexcom Share
         self.dxEmail = defaults.string(forKey: "dxEmail") ?? "your@email.com"
@@ -267,6 +272,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         // Nightscout
         defaults.set(self.nsURL, forKey: "nsURL")
         defaults.set(self.nsSecret, forKey: "nsSecret")
+        defaults.set(self.nsAPILimit, forKey: "nsAPILimit")
 
         // Dexcom Share
         defaults.set(self.dxServer.url, forKey: "dxServer")
@@ -331,14 +337,14 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         }
     }
 
-    func testCGMProvider() async -> Bool {
+    func testCGMProvider() async -> (success: Bool, error: String?) {
         var provider: Provider
         self.logger.notice("testCGMProvider: \(self.cgmProvider.presentable, privacy: .public)")
         switch self.cgmProvider {
         case .simulator:
             provider = Simulator("test auth")
         case .nightscout:
-            provider = Nightscout(baseURL: self.nsURL, token: self.nsSecret, aidEnabled: false)
+            provider = Nightscout(baseURL: self.nsURL, token: self.nsSecret, aidEnabled: false, apiLimit: self.nsAPILimit)
         case .dexcomshare:
             provider = DexcomShare(username: self.dxEmail, password: self.dxPassword, server: self.dxServer)
         default:
@@ -346,7 +352,8 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         }
 
         self.logger.notice("testCGMProvider calling verifyCredentials with provider: \(provider.type.presentable, privacy: .public)")
-        return await provider.verifyCredentials()
+        let result = await provider.verifyCredentials()
+        return (result, provider.providerIssue)
     }
 }
 

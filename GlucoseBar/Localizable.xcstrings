@@ -711,6 +711,28 @@
         }
       }
     },
+    "API Limit" : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "API-grænse"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API Limit"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Limite API"
+          }
+        }
+      }
+    },
     "Are you sure you want to remove data for %@?" : {
       "localizations" : {
         "da" : {
@@ -1486,6 +1508,29 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Erreur"
+          }
+        }
+      }
+    },
+    "Error from Nightscout: %@" : {
+      "comment" : "Generic error from Nightscout server",
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Fejl fra Nightscout: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Error from Nightscout: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Erreur de Nightscout : %@"
           }
         }
       }
@@ -2421,6 +2466,28 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Valeur max."
+          }
+        }
+      }
+    },
+    "Maximum entries per request. Default is 1000, which is the standard Nightscout server limit (API3_MAX_LIMIT). Increase only if your server admin has raised this limit. Useful for longer time ranges (12h, 24h) on CGMs with frequent readings. The value is validated when you save or test the connection." : {
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Maksimalt antal poster per forespørgsel. Standard er 1000, som er den normale Nightscout-servergrænse (API3_MAX_LIMIT). Øg kun hvis din serveradministrator har hævet denne grænse. Nyttigt for længere tidsintervaller (12t, 24t) på CGM'er med hyppige aflæsninger. Værdien valideres når du gemmer eller tester forbindelsen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maximum entries per request. Default is 1000, which is the standard Nightscout server limit (API3_MAX_LIMIT). Increase only if your server admin has raised this limit. Useful for longer time ranges (12h, 24h) on CGMs with frequent readings. The value is validated when you save or test the connection."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Nombre maximum d'entrées par requête. La valeur par défaut est 1000, qui est la limite standard du serveur Nightscout (API3_MAX_LIMIT). N'augmentez que si l'administrateur de votre serveur a relevé cette limite. Utile pour des plages horaires plus longues (12h, 24h) sur les CGM avec des lectures fréquentes. La valeur est validée lorsque vous enregistrez ou testez la connexion."
           }
         }
       }
@@ -3554,6 +3621,29 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "La cible est utilisée pour colorier correctement les valeurs de glycémie dans le graphique lorsque vous l'avez configuré pour utiliser des couleurs dynamiques."
+          }
+        }
+      }
+    },
+    "The API Limit (%lld) exceeds your server's maximum. Try a lower value." : {
+      "comment" : "Error when Nightscout rejects the configured API entry limit",
+      "localizations" : {
+        "da" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "API-grænsen (%lld) overstiger din servers maksimum. Prøv en lavere værdi."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The API Limit (%lld) exceeds your server's maximum. Try a lower value."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "La limite API (%lld) dépasse le maximum de votre serveur. Essayez une valeur inférieure."
           }
         }
       }

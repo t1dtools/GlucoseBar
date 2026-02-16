@@ -114,7 +114,7 @@ class Glucose: ObservableObject, Sendable {
             case .dexcomshare:
             provider = DexcomShare(username: settings.dxEmail, password: settings.dxPassword, server: settings.dxServer)
         case .nightscout:
-            provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.aidEnableIntegration)
+            provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.aidEnableIntegration, apiLimit: settings.nsAPILimit)
         default:
             provider = Simulator("defaulted")
         }
@@ -129,6 +129,14 @@ class Glucose: ObservableObject, Sendable {
             notificationCenter.removeObserver(observer)
         }
         registerForNotifications()
+
+        // Trigger immediate fetch for quick feedback after settings change
+        Task {
+            self.isFetching = true
+            await self.provider.fetch()
+            self.isFetching = false
+            self.getGlucose()
+        }
 
         self.logger.notice("Reset glucose object")
     }
@@ -156,7 +164,7 @@ class Glucose: ObservableObject, Sendable {
             DispatchQueue.main.async {
                 switch settings.cgmProvider {
                 case .nightscout:
-                    self.provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.aidEnableIntegration)
+                    self.provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.aidEnableIntegration, apiLimit: settings.nsAPILimit)
                 case .dexcomshare:
                     self.provider = DexcomShare(username: settings.dxEmail, password: settings.dxPassword, server: settings.dxServer)
                 case .simulator:
