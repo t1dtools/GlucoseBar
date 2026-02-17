@@ -259,12 +259,7 @@ class Nightscout: Provider, @unchecked Sendable {
                     changeRate = prevGe.glucose - sgv
                 }
 
-                var glucoseType = GlucoseEntry.GlucoseType.sensor
-                if nsEntry.direction == nil {
-                    glucoseType = GlucoseEntry.GlucoseType.meter
-                }
-
-                let entry = GlucoseEntry(glucose: sgv, date: date, glucoseType: glucoseType, trend: trend, changeRate: changeRate, id: nsEntry.identifier)
+                let entry = GlucoseEntry(glucose: sgv, date: date, glucoseType: .sensor, trend: trend, changeRate: changeRate, id: nsEntry.identifier)
                 previousGe = entry
                 ge.append(entry)
             }
