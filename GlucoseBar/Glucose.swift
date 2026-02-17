@@ -38,7 +38,7 @@ class Glucose: ObservableObject, Sendable {
         provider = Provider()
         settings = SettingsStore()
 
-        timer = DispatchTimer(timeInterval: 5, queue: DispatchQueue(label: "tools.t1d.GlucoseBar.CGMQueue"))
+        timer = DispatchTimer(timeInterval: 15, queue: DispatchQueue(label: "tools.t1d.GlucoseBar.CGMQueue"))
         timer.suspend()
         timer.eventHandler = timerEventHandler
         timer.resume()
@@ -119,7 +119,7 @@ class Glucose: ObservableObject, Sendable {
             provider = Simulator("defaulted")
         }
 
-        timer = DispatchTimer(timeInterval: 5, queue: DispatchQueue(label: "tools.t1d.GlucoseBar.CGMQueue"))
+        timer = DispatchTimer(timeInterval: 15, queue: DispatchQueue(label: "tools.t1d.GlucoseBar.CGMQueue"))
         timer.suspend()
         timer.eventHandler = timerEventHandler
         timer.resume()
