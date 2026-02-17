@@ -206,19 +206,33 @@ class Glucose: ObservableObject, Sendable {
                 return
             }
 
-            self.glucose = glucoseEntries[0].glucose
-            self.glucoseTime = glucoseEntries[0].date
-            self.trend = glucoseEntries[0].trend?.arrows ?? ""
-            self.entries = glucoseEntries
+            let ge = glucoseEntries[0]
+            if self.glucose != ge.glucose {
+                self.glucose = ge.glucose
+            }
 
-            if glucoseEntries.count > 1 {
-                self.delta = glucoseEntries[0].glucose - glucoseEntries[1].glucose
-            } else {
-                self.delta = 0.0
+            if self.glucoseTime != ge.date {
+                self.glucoseTime = ge.date
+            }
+
+            if self.trend != ge.trend?.arrows ?? "" {
+                self.trend = ge.trend?.arrows ?? ""
+            }
+
+            if self.entries != glucoseEntries {
+                self.entries = glucoseEntries
+            }
+
+            let newDelta = glucoseEntries.count > 1 ? ge.glucose - glucoseEntries[1].glucose : 0.0
+            if self.delta != newDelta {
+                self.delta = newDelta
             }
 
             self.glucoseAge = formatter.localizedString(for: glucoseEntries[0].date, relativeTo: Date())
-            self.fetchedGlucose = true
+
+            if !self.fetchedGlucose {
+                self.fetchedGlucose = true
+            }
         }
     }
 }
