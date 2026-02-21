@@ -186,6 +186,7 @@ struct GraphView: View {
 
         let highThresholdRuleMark = convertGlucose(s, glucose: s.highThreshold)
         let lowThresholdRuleMark = convertGlucose(s, glucose: s.lowThreshold)
+        let targetRuleMark = convertGlucose(s, glucose: s.glucoseTarget)
 
         let latestGlucoseTime = g.glucoseTime
         let latestGlucose = convertGlucose(s, glucose: g.glucose)
@@ -279,7 +280,7 @@ struct GraphView: View {
                 }
 
                 if s.showTarget {
-                    RuleMark(y: .value("Target", 90)).foregroundStyle(.green).lineStyle(StrokeStyle(lineWidth: 1))
+                    RuleMark(y: .value("Target", targetRuleMark)).foregroundStyle(.green).lineStyle(StrokeStyle(lineWidth: 1))
                 }
 
 
