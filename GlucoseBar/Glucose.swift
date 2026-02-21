@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import CryptoKit
 import OSLog
+import Combine
 
 @MainActor
 class Glucose: ObservableObject, Sendable {
@@ -26,6 +27,7 @@ class Glucose: ObservableObject, Sendable {
     @ObservedObject var settings: SettingsStore
     @ObservedObject var vs: ViewState = ViewState()
 
+    private var providerCancellable: AnyCancellable?
     private var timer: DispatchTimer
     private var isFetching: Bool = false
     private let fetchQueue = DispatchQueue(label: "tools.t1d.GlucoseBar.fetchQueue")
@@ -42,6 +44,8 @@ class Glucose: ObservableObject, Sendable {
         timer.suspend()
         timer.eventHandler = timerEventHandler
         timer.resume()
+
+        setSettings(settingsStore)
 
         registerForNotifications()
     }
@@ -164,6 +168,13 @@ class Glucose: ObservableObject, Sendable {
                 default:
                     self.logger.error("Unknown provider. Please add in setSettings in Glucose.swift")
                 }
+
+                // Subscribe to the newly assigned provider's changes
+                self.providerCancellable = self.provider.objectWillChange
+                    .receive(on: DispatchQueue.main)
+                    .sink { [weak self] _ in
+                        self?.getGlucose()
+                    }
             }
         }
 
