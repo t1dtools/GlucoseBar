@@ -13,15 +13,24 @@ struct DeviceStatusResponse: Codable {
     let result: [DeviceStatusResult]
 }
 
+struct SocketDeviceStatus: Codable {
+    let devicestatus: DeviceStatusResult
+
+    enum CodingKeys: String, CodingKey {
+        case devicestatus
+    }
+}
+
 // MARK: - Result
 struct DeviceStatusResult: Codable {
     let app: String?
     let device: String?
     let openaps: Openaps?
     let loop: Loop?
+    let mills: Int?
 
     enum CodingKeys: String, CodingKey {
-        case app, device, openaps, loop
+        case app, device, openaps, loop, mills
     }
 }
 

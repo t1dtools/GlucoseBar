@@ -20,6 +20,7 @@
 		8363518B2ABF6A9000BDAA96 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8363518A2ABF6A9000BDAA96 /* Preview Assets.xcassets */; };
 		836D26592DFF3D7C007A5D01 /* GlucoseViewBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836D26582DFF3D74007A5D01 /* GlucoseViewBuilder.swift */; };
 		8381599D2BE4257F00A228F3 /* MainAppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8381599C2BE4257F00A228F3 /* MainAppView.swift */; };
+		8381E1942F1C349800002B77 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = 8381E1932F1C349800002B77 /* SocketIO */; };
 		83849C052E5CF18200BFD090 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 83849C042E5CF18200BFD090 /* InfoPlist.xcstrings */; };
 		83849C072E5CF18200BFD090 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 83849C062E5CF18200BFD090 /* Localizable.xcstrings */; };
 		8384A3142E70B9E300C93DD8 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8384A3132E70B9DF00C93DD8 /* AboutView.swift */; };
@@ -143,6 +144,7 @@
 				8384A31A2E70CA8D00C93DD8 /* Awesome in Frameworks */,
 				83EC4AC62BE972D9007285C7 /* NightscoutKit in Frameworks */,
 				83B737A22BE9728F00B84A75 /* LaunchAtLogin in Frameworks */,
+				8381E1942F1C349800002B77 /* SocketIO in Frameworks */,
 				83A172382BD6F905003C5C7E /* MenuBarExtraAccess in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -350,6 +352,7 @@
 				83B737A12BE9728F00B84A75 /* LaunchAtLogin */,
 				83EC4AC52BE972D9007285C7 /* NightscoutKit */,
 				8384A3192E70CA8D00C93DD8 /* Awesome */,
+				8381E1932F1C349800002B77 /* SocketIO */,
 			);
 			productName = GlucoseBar;
 			productReference = 836351802ABF6A9000BDAA96 /* GlucoseBar.app */;
@@ -387,6 +390,7 @@
 				8312CEA72AC78C7900CD4FC9 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
 				83A172362BD6F905003C5C7E /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */,
 				8384A3182E70CA8D00C93DD8 /* XCRemoteSwiftPackageReference "Awesome" */,
+				8381E1922F1C349800002B77 /* XCRemoteSwiftPackageReference "socket" */,
 			);
 			productRefGroup = 836351812ABF6A9000BDAA96 /* Products */;
 			projectDirPath = "";
@@ -726,6 +730,14 @@
 				kind = branch;
 			};
 		};
+		8381E1922F1C349800002B77 /* XCRemoteSwiftPackageReference "socket" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/socketio/socket.io-client-swift";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		8384A3182E70CA8D00C93DD8 /* XCRemoteSwiftPackageReference "Awesome" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/LiveUI/Awesome";
@@ -745,6 +757,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		8381E1932F1C349800002B77 /* SocketIO */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8381E1922F1C349800002B77 /* XCRemoteSwiftPackageReference "socket" */;
+			productName = SocketIO;
+		};
 		8384A3192E70CA8D00C93DD8 /* Awesome */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 8384A3182E70CA8D00C93DD8 /* XCRemoteSwiftPackageReference "Awesome" */;

@@ -6,6 +6,42 @@
 //
 
 import Foundation
+import SocketIO
+
+struct SocketSGV: Codable {
+    let id: String
+    let direction: String?
+    let mgdl: Double?
+    let date: TimeInterval
+}
+
+extension SocketSGV {
+    init?(dict: [String: Any]) {
+        guard
+            let id = dict["_id"] as? String,
+            let mgdl = dict["mgdl"] as? Double
+        else {
+            return nil
+        }
+
+        // mills is sometimes String, sometimes Number
+        let millsValue: TimeInterval?
+        if let m = dict["mills"] as? Double {
+            millsValue = m
+        } else if let m = dict["mills"] as? String {
+            millsValue = Double(m)
+        } else {
+            millsValue = nil
+        }
+
+        guard let mills = millsValue else { return nil }
+
+        self.id = id
+        self.mgdl = mgdl
+        self.date = mills
+        self.direction = dict["direction"] as? String
+    }
+}
 
 class Nightscout: Provider, @unchecked Sendable {
 
@@ -13,6 +49,9 @@ class Nightscout: Provider, @unchecked Sendable {
     private var unsuccessfulAuthAttempts = 0
     public var validSettings: Bool = true
     public var settingsError: String = ""
+
+    private let manager: SocketManager
+    private let socket: SocketIOClient
 
     private let httpTimeout = 120.0
 
@@ -30,9 +69,9 @@ class Nightscout: Provider, @unchecked Sendable {
             settingsError = "Host can not be empty"
         }
 
-        if !baseURL.hasPrefix("https://") && !baseURL.hasPrefix("http://") {
+        if !baseURL.hasPrefix("https://") && !baseURL.hasPrefix("http://") && !baseURL.hasPrefix("wss://") && !baseURL.hasPrefix("ws://") {
             validSettings = false
-            settingsError = "Host must start with http:// or https://"
+            settingsError = "Host must start with http://, https://, ws:// or wss://"
         }
 
         self.baseURL = baseURL
@@ -43,10 +82,202 @@ class Nightscout: Provider, @unchecked Sendable {
             self.baseURL = String(self.baseURL.dropLast())
         }
 
+        manager = SocketManager(
+            socketURL: URL(string: self.baseURL)!,
+            config: [
+                .log(false),
+                .compress,
+                .reconnects(true),
+                .reconnectAttempts(-1), // infinite
+                .reconnectWait(5),
+                .forcePolling(true),
+            ]
+        )
+
+        socket = manager.defaultSocket
+
         super.init()
+
+        registerHandlers()
+        if socket.status != .connected {
+            connect()
+        }
+
         self.isBaseProvider = false
+        Task {
+            await self.fetch()
+        }
+        self.startTimer()
+
         self.type = .nightscout
     }
+
+    func connect() {
+        socket.connect(withPayload: nil, timeoutAfter: 60.0, withHandler: nil) // TODO: With handler is called when connection fails. Should probs do something with that.
+    }
+
+    func disconnect() {
+        socket.disconnect()
+    }
+
+    private func registerHandlers() {
+        socket.on(clientEvent: .connect) { _, _ in
+            self.logger.debug("Nightscout socket connected")
+            self.socket.emit("authorize", ["client": "web", "secret": self.token])
+        }
+
+        socket.on(clientEvent: .disconnect) { _, _ in
+            self.logger.debug("Nightscout socket disconnected")
+        }
+
+        socket.on(clientEvent: .error) { _, _ in
+            self.logger.debug("Nightscout socket error")
+        }
+
+        socket.on("dataUpdate") { data, _ in
+            self.logger.debug("Nightscout socket got: dataUpdate")
+
+            // Create a deep, Sendable-safe snapshot of the payload by round-tripping through JSON
+            let snapshot: [Any]
+            do {
+                let jsonData = try JSONSerialization.data(withJSONObject: data, options: [])
+                let jsonObject = try JSONSerialization.jsonObject(with: jsonData, options: [])
+                if let arr = jsonObject as? [Any] {
+                    snapshot = arr
+                } else if let dict = jsonObject as? [String: Any] {
+                    snapshot = [dict]
+                } else {
+                    snapshot = []
+                }
+            } catch {
+                self.logger.error("Failed to snapshot socket payload: \(String(describing: error))")
+                snapshot = []
+            }
+
+            Task { @MainActor in
+                await self.handleDataUpdate(snapshot)
+            }
+        }
+
+        // For debugging the socket
+//        socket.onAny { event in
+//            if event.event != "dataUpdate" {
+//                print("Event:", event.event, "Items:", event.items ?? [])
+//            }
+//        }
+    }
+
+    // Socket update handler
+    @MainActor
+    func handleDataUpdate(_ data: [Any]) async {
+        guard let dict = data.first as? [String: Any] else {
+            print("Unexpected format:", data)
+            return
+        }
+
+
+        if let deviceStatuses = dict["devicestatus"] as? [[String: Any]] {
+            self.logger.debug("Got device statuses as string: any array")
+            do {
+                let data = try JSONSerialization.data(withJSONObject: deviceStatuses)
+                let statuses = try JSONDecoder().decode([DeviceStatusResult].self, from: data)
+
+                let sortedStatuses = statuses.filter { $0.mills ?? 0 > 0 }.sorted { $0.mills ?? 0 > $1.mills ?? 0 }
+
+                if sortedStatuses.count > 0 {
+                    let gse = await handleGSE(sortedStatuses.first!)
+
+                    await MainActor.run {
+                        self.GlucoseSourceExtras = gse.gse
+                    }
+                }
+            } catch {
+                self.logger.error("Failed to decode devicestatus: \(error)")
+            }
+        }
+
+        if let sgvDicts = dict["sgvs"] as? [[String: Any]] {
+            var previous: GlucoseEntry? = nil
+            let currentEntries = self.getSafeGlucoseEntries()
+            if currentEntries.count > 0 {
+                previous = currentEntries[0]
+            }
+
+            let sgvs = sgvDicts.compactMap(SocketSGV.init).sorted { $0.date > $1.date }
+
+            // 24 hours is enough for our needs
+            let cutOff = Date().addingTimeInterval(-24 * 60 * 60)
+            let recentSGVs = sgvs.filter { sgv in
+                let d = Date(timeIntervalSince1970: TimeInterval(sgv.date) / 1000)
+                return d >= cutOff
+            }
+
+            let newEntries = nsSocketSGVsToGlucoseEntries(input: recentSGVs, previous: previous)
+            let uniqueNewEntries = newEntries.filter { newEntry in
+                !currentEntries.contains(where: {
+                    $0.id == newEntry.id
+                })
+            }
+
+            if uniqueNewEntries.count > 0 {
+                self.logger.debug("Fetched \(uniqueNewEntries.count, privacy: .public) new entries")
+                var updatedEntries = currentEntries
+                updatedEntries.insert(contentsOf: newEntries, at: 0)
+
+                if updatedEntries.count > 288 {
+                    self.logger.debug("removing entry from glucoseentries: \(updatedEntries.last!.glucose, privacy: .private)")
+                    updatedEntries.removeLast()
+                }
+                self.logger.debug("Latest glucose entry: \(String(describing: updatedEntries.first?.glucose), privacy: .private)")
+                self.setGlucoseEntries(updatedEntries)
+            }
+        }
+    }
+
+    private func nsSocketSGVsToGlucoseEntries(input: [SocketSGV], previous: GlucoseEntry?) -> [GlucoseEntry] {
+        var ge: [GlucoseEntry] = []
+        var previousGe: GlucoseEntry?
+
+        input.forEach { nsSGV in
+            let date = Date(timeIntervalSince1970: nsSGV.date / 1000)
+
+            if let sgv = nsSGV.mgdl {
+                var trend = GlucoseEntry.GlucoseTrend(direction: "invalid")
+                if let direction = nsSGV.direction {
+                    trend = GlucoseEntry.GlucoseTrend(direction: direction)
+                }
+
+                var changeRate = 0.0
+                if let prev = previous {
+                    changeRate = prev.glucose - sgv
+                }
+
+                if let prevGe = previousGe {
+                    changeRate = prevGe.glucose - sgv
+                }
+
+                let entry = GlucoseEntry(glucose: sgv, date: date, glucoseType: .sensor, trend: trend, changeRate: changeRate, id: nsSGV.id)
+                previousGe = entry
+                ge.append(entry)
+            }
+        }
+
+        return ge
+    }
+
+    private func handleSGV(_ payload: [String: Any]) {
+        guard
+            let mgdl = payload["mgdl"] as? Int,
+            let timestamp = payload["datetime"] as? TimeInterval
+        else {
+            return
+        }
+
+        let date = Date(timeIntervalSince1970: timestamp / 1000)
+
+        self.logger.debug("SGV: \(mgdl) at \(date)")
+    }
+
 
     struct NightscoutEntriesErrorResponse: Codable {
         let status: Int
@@ -68,6 +299,14 @@ class Nightscout: Provider, @unchecked Sendable {
 
     override internal func fetch() async {
         logger.debug("Nightscout.fetch")
+
+        if self.socket.status == .connected {
+            // We're on a socket connection, so the rest of this function is not needed
+            lastFetch = Date()
+            logger.debug("Nightscout.fetch exiting early due to socket being connected")
+            return
+        }
+
         if !baseURL.hasPrefix("http://") && !baseURL.hasPrefix("https://") {
             self.providerIssue = "Invalid Nightscout URL. It must start with http:// or https://"
             return
