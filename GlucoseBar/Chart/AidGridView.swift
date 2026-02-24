@@ -32,14 +32,14 @@ struct AidGridView: View {
                 GridRow {
                     if s.aidChartShowLoopStatus, let enactedAt = g.provider.GlucoseSourceExtras.enactedAt {
                         HStack {
-                            Image(systemName: "circle").foregroundColor(getLoopColor(enactedAt))
+                            Image(systemName: "circle").foregroundColor(getLoopColor(enactedAt)).fontWeight(.heavy)
                             Text("\(relativeTime(time: enactedAt))")
                         }.frame(alignment: .leading).padding(.bottom, 5).padding(.top, 3)
                             .help("Loop Status and time since last loop")
                     }
                     if s.aidChartShowEventualGlucose, let eventualGlucose = g.provider.GlucoseSourceExtras.eventualGlucose {
                         HStack {
-                            Image(systemName: "arrow.right.circle")
+                            Image(systemName: "arrow.right.circle").fontWeight(.heavy)
                             Text(formatGlucoseForDisplay(settings: s, glucose: eventualGlucose))
                         }.help("Eventual Glucose")
                     }
