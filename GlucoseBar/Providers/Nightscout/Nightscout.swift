@@ -177,7 +177,6 @@ class Nightscout: Provider, @unchecked Sendable {
 
 
         if let deviceStatuses = dict["devicestatus"] as? [[String: Any]] {
-            self.logger.debug("Got device statuses as string: any array")
             do {
                 let data = try JSONSerialization.data(withJSONObject: deviceStatuses)
                 let statuses = try JSONDecoder().decode([DeviceStatusResult].self, from: data)
@@ -449,7 +448,7 @@ class Nightscout: Provider, @unchecked Sendable {
                 }
             } else if res!.statusCode == 401 {
                 self.auth = nil
-                await self.fetch()
+
                 return
             } else {
                 do {
@@ -608,7 +607,10 @@ class Nightscout: Provider, @unchecked Sendable {
 
                     // Check glucose source device to see if we support extra features
                     let gs = GlucoseSource(baseURL: self.baseURL, token: result.token, aidEnabled: aidEnabled)
-                    let source = await gs.checkDeviceStatusForGSE()
+                    let (source, err) = try await gs.checkDeviceStatusForGSE()
+                    if err != nil {
+                        self.GlucoseSourceExtras.error = err!
+                    }
                     if source != GlucoseSourceDevice.null {
                         RemoteGlucoseSource = source
                     }
