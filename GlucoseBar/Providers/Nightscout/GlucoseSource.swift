@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import OSLog
 
 public enum GlucoseSourceDevice: String, CaseIterable, Identifiable, Sendable {
     case null
@@ -64,29 +65,19 @@ public enum ForecastDisplay: String, CaseIterable, Identifiable {
     }
 }
 
-class GlucoseSource: Nightscout, @unchecked Sendable {
-
+struct GlucoseSource {
+    let baseURL: String
+    let token: String
+    let aidEnabled: Bool
+    private let logger = Logger(subsystem: "tools.t1d.GlucoseBarChart", category: "GlucoseSource")
     private let httpTimeout = 120.0
 
-    @MainActor
-    public func checkDeviceStatusForGSE() async -> GlucoseSourceDevice {
+    func checkDeviceStatusForGSE() async throws -> (device: GlucoseSourceDevice, error: String?) {
         logger.debug("Nightscout.GlucoseSource.checkDeviceStatusForGSE")
 
         if !aidEnabled {
             logger.debug("AID integration not enabled, bailing out.")
-            return .null
-        }
-
-        // Wait for authentication to complete using proper async pattern
-        var retryCount = 0
-        while isAuthenticating && retryCount < 30 { // Max 30 seconds wait
-            try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
-            retryCount += 1
-        }
-
-        if isAuthenticating {
-            logger.warning("Timeout waiting for authentication to complete")
-            return .null
+            return (.null, nil)
         }
 
         let url = "\(baseURL)/api/v3/devicestatus?sort%24desc=created_at&limit=1&skip=0&fields=_all"
@@ -104,24 +95,24 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
             let res = response as? HTTPURLResponse
             if res == nil {
                 self.logger.error("Unable to cast response to HTTPURLResponse")
-                return .unknown
+                return (.unknown, nil)
             }
 
             if res!.statusCode != 200 {
-                return .unknown
+                return (.unknown, nil)
             }
-            
+
             do {
                 let result = try JSONDecoder().decode(DeviceStatusResponse.self, from: data)
                 if result.result.first == nil {
-                    return .unknown
+                    return (.unknown, nil)
                 }
 
                 let handled = await handleGSE(result.result.first!)
-                return handled.device
+                return (handled.device, nil)
             } catch {
                 self.logger.error("Unable to decode NS response when checking for GSE: \(String(describing: error), privacy: .public)")
-                return .unknown
+                return (.unknown, String(describing: error))
             }
 
         } catch {
@@ -131,34 +122,15 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
                 err = String(localized: "Unable to get Trio data: Request timed out")
             }
 
-            await MainActor.run {
-                var gsep = GlucoseSourceExtraProperties()
-                gsep.error = err
-                self.GlucoseSourceExtras = gsep
-            }
-
             self.logger.error("Error parsing NS response: \(err, privacy: .public)")
-            return .unknown
+            return (.unknown, err)
         }
     }
 
-    @MainActor
-    public func getGlucoseSourceExtras() async -> GlucoseSourceExtraProperties {
+    func getGlucoseSourceExtras() async -> GlucoseSourceExtraProperties {
         let empty = GlucoseSourceExtraProperties(aid: .unknown)
 
         logger.debug("Nightscout.GlucoseSource.getGlucoseSourceExtras")
-
-        // Wait for authentication to complete using proper async pattern
-        var retryCount = 0
-        while isAuthenticating && retryCount < 30 { // Max 30 seconds wait
-            try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
-            retryCount += 1
-        }
-
-        if isAuthenticating {
-            logger.warning("Timeout waiting for authentication to complete")
-            return empty
-        }
 
         let url = "\(baseURL)/api/v3/devicestatus?sort%24desc=created_at&limit=1&skip=0&fields=_all"
 
@@ -189,9 +161,9 @@ class GlucoseSource: Nightscout, @unchecked Sendable {
                 }
 
                 let gse = await handleGSE(result.result.first!)
-                await MainActor.run {
-                    self.GlucoseSourceExtras = gse.gse
-                }
+//                await MainActor.run {
+//                    self.GlucoseSourceExtras = gse.gse
+//                }
                 return gse.gse
             } catch {
                 self.logger.error("Unable to decode NS response when checking for GSE: \(String(describing: error), privacy: .public)")
