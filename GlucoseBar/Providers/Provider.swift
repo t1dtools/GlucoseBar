@@ -96,9 +96,6 @@ class Provider: ObservableObject, @unchecked Sendable {
             return
         }
 
-        Task {
-            await self.fetch()
-        }
         startTimer()
     }
 
