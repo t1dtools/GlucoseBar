@@ -200,6 +200,7 @@ struct GraphView: View {
 
         // Loop only has one forecast, so a cone doesn't make sense
         let forecastDisplay = g.provider.GlucoseSourceExtras.aid == .loop ? .lines : s.aidChartForecastDisplay
+        let legendList: KeyValuePairs<String, Color> = g.provider.GlucoseSourceExtras.aid == .loop ? ["Forecast": Color.blue] : ["UAM": Color.orange, "ZT": Color.purple, "IOB": Color.blue, "COB": Color.yellow]
 
         VStack {
             HStack {
@@ -352,7 +353,7 @@ struct GraphView: View {
                             isHovering = false
                         }
                     }
-            }.chartForegroundStyleScale(["UAM": .orange, "ZT": .purple, "IOB": .blue, "COB": .yellow]
+            }.chartForegroundStyleScale(legendList
             ).chartLegend(s.aidChartShowForecast && s.aidChartForecastDisplay == .lines ? .visible : .hidden)
             .padding()
         }
