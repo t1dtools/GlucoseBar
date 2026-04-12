@@ -151,31 +151,33 @@ class Glucose: ObservableObject, Sendable {
     }
 
     public func setSettings(_ settings: SettingsStore) {
+
+        guard self.settings !== settings else { return }
+
         self.settings = settings
 
         self.logger.debug("Current provider before provider comparison: \(String(describing: self.provider))")
         if self.provider.type != settings.cgmProvider {
             self.logger.debug("found provider \(self.provider.type.presentable) != \(settings.cgmProvider.presentable)")
 
-            Task {
-                switch settings.cgmProvider {
-                case .nightscout:
-                    self.provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.aidEnableIntegration)
-                case .dexcomshare:
-                    self.provider = DexcomShare(username: settings.dxEmail, password: settings.dxPassword, server: settings.dxServer)
-                case .simulator:
-                    self.provider = Simulator("simulate")
-                default:
-                    self.logger.error("Unknown provider. Please add in setSettings in Glucose.swift")
+            switch settings.cgmProvider {
+            case .nightscout:
+                self.provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.aidEnableIntegration)
+            case .dexcomshare:
+                self.provider = DexcomShare(username: settings.dxEmail, password: settings.dxPassword, server: settings.dxServer)
+            case .simulator:
+                self.provider = Simulator("simulate")
+            default:
+                self.logger.error("Unknown provider. Please add in setSettings in Glucose.swift")
+            }
+
+            // Subscribe to the newly assigned provider's changes
+            self.providerCancellable = self.provider.objectWillChange
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] _ in
+                    self?.getGlucose()
                 }
 
-                // Subscribe to the newly assigned provider's changes
-                self.providerCancellable = self.provider.objectWillChange
-                    .receive(on: DispatchQueue.main)
-                    .sink { [weak self] _ in
-                        self?.getGlucose()
-                    }
-            }
         }
 
         Task {
