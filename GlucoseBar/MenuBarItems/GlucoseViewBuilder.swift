@@ -118,6 +118,16 @@ struct MenuBarView: View {
                         self.cachedZenImage = generateZenModeImage()
                     }
                 }
+            }.onReceive(g.provider.objectWillChange) { _ in
+                let now = Date()
+                if now.timeIntervalSince(lastUpdateTime) > 1.0 {
+                    lastUpdateTime = now
+                    Task {
+                        await MainActor.run {
+                            self.cachedMenuImage = generateMenuBarImage()
+                        }
+                    }
+                }
             }
         } else {
             Group {
