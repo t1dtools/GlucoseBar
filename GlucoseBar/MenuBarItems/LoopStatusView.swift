@@ -17,7 +17,7 @@ struct LoopStatusView: View {
 
     @MainActor @ViewBuilder
     var body: some View {
-        HStack {
+        HStack(spacing: s.menuBarItemSpacing) {
 
             if viewSettings.get(.displayTextAndIcon) != .displayText && viewSettings.get(.iconPlacement) == .iconPlacementLeading {
                 drawIcon()

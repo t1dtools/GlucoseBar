@@ -73,7 +73,7 @@ struct MenuBarView: View {
     }
 
     var menuStack: any View {
-        return HStack {
+        return HStack(spacing: s.menuBarItemSpacing) {
             ForEach(menuBarItems, id: \.id) { item in
                 // aid integration only works with nightscout, so don't draw it's views for other providers
                 if (s.cgmProvider != .nightscout || !s.aidEnableIntegration) && [.loopstatus, .eventualglucose, .cob, .iob].contains(item.type) {
@@ -126,6 +126,12 @@ struct MenuBarView: View {
                         await MainActor.run {
                             self.cachedMenuImage = generateMenuBarImage()
                         }
+                    }
+                }
+            }.onReceive(s.$menuBarItemSpacing) { _ in
+                Task {
+                    await MainActor.run {
+                        self.cachedMenuImage = generateMenuBarImage()
                     }
                 }
             }

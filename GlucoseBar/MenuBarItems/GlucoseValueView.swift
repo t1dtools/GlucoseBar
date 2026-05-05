@@ -18,7 +18,7 @@ struct GlucoseValueView: View {
     @ViewBuilder
     var body: some View {
 
-        HStack {
+        HStack(spacing: s.menuBarItemSpacing) {
             if viewSettings.get(.icon) != .iconColorHidden && viewSettings.get(.iconPlacement) == .iconPlacementLeading {
                 drawIcon()
             }
