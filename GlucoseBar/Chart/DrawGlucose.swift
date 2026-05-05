@@ -15,16 +15,7 @@ struct DrawGlucose: ChartContent {
     var body: some ChartContent {
         ForEach(data, id: \.date) { point in
             if point.forecastType == .none {
-                if point.glucoseType == .sensor {
-                    PointMark(
-                        x: .value("Time", point.date),
-                        y: .value("Glucose", point.value)
-                    ).lineStyle(StrokeStyle(lineWidth: 2.0))
-                        .foregroundStyle(point.color)
-                        .interpolationMethod(.cardinal)
-                        .symbolSize(30)
-                        .interpolationMethod(.catmullRom)
-                } else {
+                if point.glucoseType == .meter {
                     PointMark(
                         x: .value("Time", point.date),
                         y: .value("Glucose", point.value)
@@ -37,6 +28,15 @@ struct DrawGlucose: ChartContent {
                             Image(systemName: "drop.fill")
                                 .foregroundStyle(.red)
                         }
+                } else {
+                    PointMark(
+                        x: .value("Time", point.date),
+                        y: .value("Glucose", point.value)
+                    ).lineStyle(StrokeStyle(lineWidth: 2.0))
+                        .foregroundStyle(point.color)
+                        .interpolationMethod(.cardinal)
+                        .symbolSize(30)
+                        .interpolationMethod(.catmullRom)
                 }
             }
         }
