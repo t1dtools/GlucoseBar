@@ -42,6 +42,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     // MenuBar layout options
     @Published var showMenuBarIcon: Bool = false
     @Published var menuBarItems: [MenuBarItemContainer] = []
+    @Published var menuBarItemSpacing: CGFloat = 8.0
     @Published var zenMode: Bool = false
 
     // Chart settings
@@ -146,6 +147,12 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
             }
         }
 
+        var storedMenuBarItemSpacing = defaults.float(forKey: "menuBarItemSpacing")
+        if storedMenuBarItemSpacing == 0.0 {
+            storedMenuBarItemSpacing = 8.0
+        }
+        self.menuBarItemSpacing = CGFloat(storedMenuBarItemSpacing)
+
         self.zenMode = defaults.bool(forKey: "zenMode")
 
         let cgmProv = defaults.string(forKey: "cgmProvider") ?? ""
@@ -245,6 +252,8 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         } catch {
             logger.error("failed to encode menuBarItems object: \(String(describing: error), privacy: .public)")
         }
+
+        defaults.set(self.menuBarItemSpacing, forKey: "menuBarItemSpacing")
 
         defaults.set(self.zenMode, forKey: "zenMode")
 

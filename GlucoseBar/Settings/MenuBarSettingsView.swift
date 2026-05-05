@@ -17,8 +17,11 @@ struct MenuBarSettingsView: View {
     @State private var focusedMenuBarItemID: MenuBarItemContainer.ID? = nil
     @State private var menuBarItems: [MenuBarItemContainer] = []
     @State private var menuBarItemsInverse: [MenuBarItemContainer] = []
+    @State private var menuBarItemSpacing: CGFloat = 8
 
     private func loadMenuBarItems() {
+        menuBarItemSpacing = s.menuBarItemSpacing
+
         if s.menuBarItems.count > 0 {
             var seen: Set<MenuBarItem> = []
             self.menuBarItems = []
@@ -175,7 +178,7 @@ struct MenuBarSettingsView: View {
 
     var menubarPreview: some View {
         Group {
-            HStack {
+            HStack(spacing: menuBarItemSpacing) {
                 Spacer()
                 ReorderableForEach($menuBarItems) { item, isDragged in
                     let viewImageRenderer = ImageRenderer(content: drawMenuBarItem(item)
@@ -212,6 +215,7 @@ struct MenuBarSettingsView: View {
 
                     Button("Save") {
                         s.menuBarItems = menuBarItems
+                        s.menuBarItemSpacing = menuBarItemSpacing
                         s.save()
                     }
                 }.padding(.top, 5).padding(.trailing)
@@ -246,7 +250,22 @@ struct MenuBarSettingsView: View {
                 } else {
                     Text("Click to edit, or drag to reorder items.").font(.footnote).frame(alignment: .trailing)
                 }
+
             }.padding(.horizontal)
+            GroupBox {
+                Text("Global Settings").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal).padding(.top)
+                HStack {
+                    Text("Item Spacing")
+                    Spacer()
+                    Picker("", selection: $menuBarItemSpacing) {
+                        Text("Very Narrow").tag(CGFloat(-2))
+                        Text("Narrow").tag(CGFloat(3))
+                        Text("Default").tag(CGFloat(8))
+                        Text("Wide").tag(CGFloat(13))
+                        Text("Very Wide").tag(CGFloat(18))
+                    }.frame(width: 200, alignment: .trailing)
+                }.padding(.horizontal).padding(.vertical, 10)
+            }.padding(.horizontal).padding(.vertical, 10)
         }.onAppear {
             loadMenuBarItems()
         }

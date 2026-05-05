@@ -19,7 +19,7 @@ struct COBView: View {
     @MainActor @ViewBuilder
     var body: some View {
         if isSettings || (viewSettings.get(.hideZero) == .hideZeroFalse || (viewSettings.get(.hideZero) == .hideZeroTrue && g.provider.GlucoseSourceExtras.cob ?? 0 > 0)) {
-            HStack {
+            HStack(spacing: s.menuBarItemSpacing) {
 
                 if viewSettings.get(.icon) != .iconColorHidden && viewSettings.get(.iconPlacement) == .iconPlacementLeading {
                     drawIcon()
