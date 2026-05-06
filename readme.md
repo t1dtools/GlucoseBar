@@ -21,6 +21,7 @@ GlucoseBar is available in the following languages currently:
 - English
 - French
 - Danish
+- Turkish
 
 [![Crowdin](https://badges.crowdin.net/glucosebar/localized.svg)](https://crowdin.com/project/glucosebar)
 
@@ -34,6 +35,7 @@ Name | Languages |  |
 ----|----|----
 Corentin Cras-Méneur | French | [cortig.net](https://www.cortig.net/localisations), Mastodon: @cortig@mastodon.social, BlueSky: @cortig
 Andreas Stokholm | Danish, English | [@AndreasStokholm](https://github.com/AndreasStokholm)
+Fethi Aymaz | Turkish | [@faymaz](https://github.com/faymaz)
 
 ## Readings from  Nightscout
 

@@ -1,60 +1,78 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "CFBundleDisplayName" : {
-      "comment" : "Bundle display name",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GlucoseBar"
+  "sourceLanguage": "en",
+  "strings": {
+    "CFBundleDisplayName": {
+      "comment": "Bundle display name",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GlucoseBar"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "GlucoseBar"
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "GlucoseBar"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GlucoseBar"
           }
         }
       }
     },
-    "CFBundleName" : {
-      "comment" : "Bundle name",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GlucoseBar"
+    "CFBundleName": {
+      "comment": "Bundle name",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GlucoseBar"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "GlucoseBar"
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "GlucoseBar"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GlucoseBar"
           }
         }
       }
     },
-    "NSHumanReadableCopyright" : {
-      "comment" : "Copyright (human-readable)",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ""
+    "NSHumanReadableCopyright": {
+      "comment": "Copyright (human-readable)",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ""
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : ""
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": ""
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ""
           }
         }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }
