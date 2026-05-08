@@ -236,7 +236,16 @@ class Glucose: ObservableObject, Sendable {
                 self.entries = glucoseEntries
             }
 
-            let newDelta = glucoseEntries.count > 1 ? ge.glucose - glucoseEntries[1].glucose : 0.0
+            // In cases where users have duplicate entries in their glucose source
+            // this will correctly find the delta based on time.
+            let newDelta: Double = {
+                let current = glucoseEntries[0]
+                let reference = glucoseEntries.dropFirst().first(where: {
+                    current.date.timeIntervalSince($0.date) > 30
+                })
+                return reference.map { current.glucose - $0.glucose } ?? 0.0
+            }()
+
             if self.delta != newDelta {
                 self.delta = newDelta
             }
