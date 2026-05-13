@@ -354,6 +354,7 @@ class Nightscout: Provider, @unchecked Sendable {
         let lim = limit // Needs to be a constant to not be "Reference to captured var 'limit' in concurrently-executing code"
         do {
             var request = URLRequest(url: URL(string: url)!, timeoutInterval: httpTimeout)
+            request.cachePolicy = .reloadIgnoringLocalCacheData
             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
             request.addValue("application/json", forHTTPHeaderField: "Accept")
 
@@ -564,6 +565,7 @@ class Nightscout: Provider, @unchecked Sendable {
         self.logger.debug("Nightscout.authenticate")
         var request = URLRequest(url: URL(string: "\(baseURL)/api/v2/authorization/request/\(token)")!, timeoutInterval: httpTimeout)
         request.httpMethod = "GET"
+        request.cachePolicy = .reloadIgnoringLocalCacheData
 
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
