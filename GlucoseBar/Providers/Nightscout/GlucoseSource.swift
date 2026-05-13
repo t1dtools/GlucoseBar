@@ -89,6 +89,7 @@ struct GlucoseSource {
             request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
             request.httpMethod = "GET"
+            request.cachePolicy = .reloadIgnoringLocalCacheData
 
             let (data, response) = try await URLSession.shared.data(for: request)
 
@@ -141,6 +142,7 @@ struct GlucoseSource {
             request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
             request.httpMethod = "GET"
+            request.cachePolicy = .reloadIgnoringLocalCacheData
 
             let (data, response) = try await URLSession.shared.data(for: request)
 

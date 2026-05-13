@@ -124,6 +124,7 @@ class DexcomShare: Provider, @unchecked Sendable {
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
         request.httpMethod = "POST"
+        request.cachePolicy = .reloadIgnoringLocalCacheData
         do {
             let jsonData = try JSONEncoder().encode(requestBody)
             request.httpBody = jsonData
@@ -257,6 +258,7 @@ class DexcomShare: Provider, @unchecked Sendable {
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
         request.httpMethod = "POST"
+        request.cachePolicy = .reloadIgnoringLocalCacheData
         do {
             let jsonData = try JSONEncoder().encode(requestBody)
             request.httpBody = jsonData
@@ -329,6 +331,7 @@ class DexcomShare: Provider, @unchecked Sendable {
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
         request.httpMethod = "POST"
+        request.cachePolicy = .reloadIgnoringLocalCacheData
         do {
             let jsonData = try JSONEncoder().encode(requestBody)
             request.httpBody = jsonData

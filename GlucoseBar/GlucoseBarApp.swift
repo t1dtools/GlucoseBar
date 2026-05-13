@@ -12,19 +12,49 @@ class ViewState: ObservableObject, @unchecked Sendable {
     @Published var isPanePresented: Bool = false
     @Published var isOnline: Bool = false
     private let networkMonitor = NWPathMonitor()
-
-    private let queue = DispatchQueue(label: "tools.t1d.GlucoseBar.ViewState", attributes: .concurrent)
-
+    private var probe: NWConnection?
+    private let probeQueue = DispatchQueue(label: "tools.t1d.GlucoseBar.probe")
     init() {
         networkMonitor.pathUpdateHandler = { [weak self] path in
             guard let self = self else { return }
-            Task { @MainActor in
-                self.isOnline = path.status == .satisfied
+            if path.status == .satisfied {
+                self.startProbe()
+            } else {
+                self.cancelProbe()
+                Task { @MainActor in self.isOnline = false }
             }
         }
-
-        let queue = DispatchQueue(label: "NetworkMonitor")
-        networkMonitor.start(queue: queue)
+        networkMonitor.start(queue: DispatchQueue(label: "NetworkMonitor"))
+    }
+    private func startProbe() {
+        cancelProbe()
+        let host = NWEndpoint.Host("1.1.1.1")
+        let port = NWEndpoint.Port(rawValue: 443)!
+        let conn = NWConnection(host: host, port: port, using: .tcp)
+        probe = conn
+        conn.stateUpdateHandler = { [weak self] state in
+            guard let self = self else { return }
+            switch state {
+            case .ready:
+                Task { @MainActor in self.isOnline = true }
+                self.cancelProbe()
+            case .failed:
+                // retry after 3 seconds if path is still satisfied
+                probeQueue.asyncAfter(deadline: .now() + 3) { [weak self] in
+                    guard let self = self else { return }
+                    if self.networkMonitor.currentPath.status == .satisfied {
+                        self.startProbe()
+                    }
+                }
+            default:
+                break
+            }
+        }
+        conn.start(queue: probeQueue)
+    }
+    private func cancelProbe() {
+        probe?.cancel()
+        probe = nil
     }
 }
 
