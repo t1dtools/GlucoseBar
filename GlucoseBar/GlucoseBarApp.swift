@@ -71,6 +71,7 @@ struct GlucoseBarApp: App {
     @StateObject var s: SettingsStore = SettingsStore()
     @StateObject var g: Glucose = Glucose(SettingsStore())
     @StateObject var vs: ViewState = ViewState()
+    @StateObject var uc: UpdateChecker = UpdateChecker()
 
     init() {
         _ = KeepAliveManager.shared
@@ -82,8 +83,10 @@ struct GlucoseBarApp: App {
                 .environmentObject(g)
                 .environmentObject(s)
                 .environmentObject(vs)
+                .environmentObject(uc)
                 .onAppear {
                     mainViewPresented = true
+                    Task { await uc.checkIfNeeded() }
                 }.onDisappear {
                     mainViewPresented = false
                 }
@@ -140,7 +143,7 @@ struct GlucoseBarApp: App {
             .onDisappear {
                 NSApp.setActivationPolicy(.accessory)
                 NSApp.deactivate()
-              }.environmentObject(s).environmentObject(g)
+              }.environmentObject(s).environmentObject(g).environmentObject(uc)
 
         }.handlesExternalEvents(matching: Set(arrayLiteral: "SettingsView"))
     }

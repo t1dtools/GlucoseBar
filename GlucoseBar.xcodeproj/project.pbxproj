@@ -24,6 +24,7 @@
 		83849C052E5CF18200BFD090 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 83849C042E5CF18200BFD090 /* InfoPlist.xcstrings */; };
 		83849C072E5CF18200BFD090 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 83849C062E5CF18200BFD090 /* Localizable.xcstrings */; };
 		8384A3142E70B9E300C93DD8 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8384A3132E70B9DF00C93DD8 /* AboutView.swift */; };
+		1C9D32E50F0A4B5188710489 /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FD07E1B22AA4C509A1D6887 /* UpdateChecker.swift */; };
 		8384A31A2E70CA8D00C93DD8 /* Awesome in Frameworks */ = {isa = PBXBuildFile; productRef = 8384A3192E70CA8D00C93DD8 /* Awesome */; };
 		838B25DF2BF0146F00D10DDA /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 838B25DE2BF0146F00D10DDA /* WelcomeView.swift */; };
 		83A105112E0DE77600C4B7BD /* GlucoseValueSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A105102E0DE77100C4B7BD /* GlucoseValueSettingsView.swift */; };
@@ -91,6 +92,7 @@
 		83849C042E5CF18200BFD090 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = InfoPlist.xcstrings; path = GlucoseBar/InfoPlist.xcstrings; sourceTree = SOURCE_ROOT; };
 		83849C062E5CF18200BFD090 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = Localizable.xcstrings; path = GlucoseBar/Localizable.xcstrings; sourceTree = SOURCE_ROOT; };
 		8384A3132E70B9DF00C93DD8 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
+		0FD07E1B22AA4C509A1D6887 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		838B25DE2BF0146F00D10DDA /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		83A105102E0DE77100C4B7BD /* GlucoseValueSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseValueSettingsView.swift; sourceTree = "<group>"; };
 		83A105122E0DF85500C4B7BD /* LoopStatusSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopStatusSettingsView.swift; sourceTree = "<group>"; };
@@ -206,6 +208,7 @@
 				83DB10EB2DFF40AA001ADCE7 /* Common */,
 				836D26572DFF3C34007A5D01 /* MenuBarItems */,
 				83E1980D2DEE5B9500B0F995 /* Settings */,
+				9CA29E5CA3DB4D97A62431E0 /* Updates */,
 				83E197FD2DEB575B00B0F995 /* Chart */,
 				83D76EC62C4DB616006639EF /* Info.plist */,
 				834621252ADDAC930024048E /* Providers */,
@@ -323,8 +326,15 @@
 			path = Settings;
 			sourceTree = "<group>";
 		};
-		83F8883F2B1A86BA00A50E74 /* LibreLinkUp */ = {
+		9CA29E5CA3DB4D97A62431E0 /* Updates */ = {
 			isa = PBXGroup;
+			children = (
+				0FD07E1B22AA4C509A1D6887 /* UpdateChecker.swift */,
+			);
+			path = Updates;
+			sourceTree = "<group>";
+		};
+		83F8883F2B1A86BA00A50E74 /* LibreLinkUp */ = {			isa = PBXGroup;
 			children = (
 				83F888402B1A888000A50E74 /* LibreLinkUp.swift */,
 			);
@@ -458,6 +468,7 @@
 				83DB10F52E00B083001ADCE7 /* SeparatorView.swift in Sources */,
 				83DB10E22DFF3FD4001ADCE7 /* GlucoseDeltaView.swift in Sources */,
 				8384A3142E70B9E300C93DD8 /* AboutView.swift in Sources */,
+				1C9D32E50F0A4B5188710489 /* UpdateChecker.swift in Sources */,
 				838B25DF2BF0146F00D10DDA /* WelcomeView.swift in Sources */,
 				83A105112E0DE77600C4B7BD /* GlucoseValueSettingsView.swift in Sources */,
 				83DB10E42DFF3FDC001ADCE7 /* COBView.swift in Sources */,

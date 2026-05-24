@@ -14,6 +14,7 @@ struct MainAppView: View {
     @EnvironmentObject var g: Glucose
     @EnvironmentObject var s: SettingsStore
     @EnvironmentObject var vs: ViewState
+    @EnvironmentObject var uc: UpdateChecker
 
     let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "main")
 
@@ -142,7 +143,7 @@ struct MainAppView: View {
 //            }
         } else if (s.validSettings) {
             ZStack {
-                VStack {
+                VStack(spacing: 0) {
                     GraphView(glucose: g).environmentObject(s).environmentObject(vs)
                     HStack {
                         ZenModeButton().help("Replaces your configured items in the menu bar with a circle that changes color based on glucose levels.")
@@ -154,7 +155,24 @@ struct MainAppView: View {
                         QuitButton()
                     }
                 }
-                if !vs.isOnline {
+                if case .outdated(let latestVersion) = uc.status {
+                    VStack {
+                        HStack {
+                            Spacer()
+                            Button(action: {
+                                NSWorkspace.shared.open(uc.downloadURL)
+                            }) {
+                                Label("v\(latestVersion) available", systemImage: "arrow.up.circle.fill")
+                                    .foregroundColor(.orange)
+                            }
+                            .buttonStyle(.plain)
+                            .focusEffectDisabled()
+                            .padding()
+                            .help("A new version of GlucoseBar is available.")
+                        }.offset(y: -10)
+                        Spacer()
+                    }
+                } else if !vs.isOnline {
                     VStack {
                         HStack {
                             Spacer()
@@ -203,4 +221,5 @@ struct MainAppView: View {
         .environmentObject(Glucose(SettingsStore()))
         .environmentObject(SettingsStore())
         .environmentObject(ViewState())
+        .environmentObject(UpdateChecker())
 }
