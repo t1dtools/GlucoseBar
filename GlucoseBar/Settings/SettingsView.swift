@@ -13,6 +13,7 @@ struct SettingsView: View {
     
     @EnvironmentObject var s: SettingsStore
     @EnvironmentObject var g: Glucose
+    @EnvironmentObject var uc: UpdateChecker
 
     @State var selectedItem: String = "General"
 
@@ -52,7 +53,7 @@ struct SettingsView: View {
                         }
                     }
 
-                    NavigationLink(destination: AboutView().environmentObject(s)) {
+                    NavigationLink(destination: AboutView().environmentObject(s).environmentObject(uc)) {
                         Label("About", systemImage: "info.circle")
                     }.tag("About").onTapGesture {
                         selectedItem = "About"
@@ -67,6 +68,21 @@ struct SettingsView: View {
 //                    HStack {
 //                        ShareLink(item: URL(string: "https://apps.apple.com/app/glucosebar/id6468110131")!, subject: Text(""), message: Text(""))
 //                        Spacer()
+                        if case .outdated(let latestVersion) = uc.status {
+                            Button(action: {
+                                NSWorkspace.shared.open(uc.downloadURL)
+                            }) {
+                                Label("v\(latestVersion) available", systemImage: "arrow.up.circle.fill")
+                                    .font(.footnote)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 6)
+                                    .background(Capsule().fill(.orange))
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.bottom, 8)
+                        }
                         Button("Quit") {
                             NSApplication.shared.terminate(nil)
                         }.padding(.bottom, 10)

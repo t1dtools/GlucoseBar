@@ -10,6 +10,7 @@ import Awesome
 
 struct AboutView: View {
     @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject var uc: UpdateChecker
 
     @ViewBuilder
     var body: some View {
@@ -26,6 +27,7 @@ struct AboutView: View {
                         VStack {
                             Text("Hi,\nI'm GlucoseBar.").font(.title).multilineTextAlignment(.center)
                             Text(verbatim: "Version: \(Bundle.main.appVersionLong) (\(Bundle.main.appBuild)) ").font(.footnote)
+                            Text(verbatim: uc.channel == .appStore ? "Mac App Store" : uc.channel == .testFlight ? "TestFlight" : "Direct Download").font(.footnote).foregroundStyle(.secondary)
                             Button(action: {
                                 NSWorkspace.shared.open(URL(string: "https://glucosebar.t1d.tools")!)
                             }) {
