@@ -1,15 +1,5 @@
 {
-  "originHash" : "4b0d6789a093a05cc1c45eb57a835d97f47a44f0563eb6d3fc69bac93211c108",
   "pins" : [
-    {
-      "identity" : "awesome",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/LiveUI/Awesome",
-      "state" : {
-        "revision" : "40c68d0ca2b143c1118e636518706a4b8332777b",
-        "version" : "2.4.0"
-      }
-    },
     {
       "identity" : "launchatlogin-modern",
       "kind" : "remoteSourceControl",
@@ -17,24 +7,6 @@
       "state" : {
         "branch" : "main",
         "revision" : "9c41991631605c8ccfe0347bbcb5c659169f2ec5"
-      }
-    },
-    {
-      "identity" : "menubarextraaccess",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/orchetect/MenuBarExtraAccess",
-      "state" : {
-        "revision" : "f5896b47e15e114975897354c7e1082c51a2bffd",
-        "version" : "1.0.5"
-      }
-    },
-    {
-      "identity" : "oxygen",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/mpangburn/Oxygen",
-      "state" : {
-        "branch" : "master",
-        "revision" : "b3c7a6ead1400e4799b16755d23c9905040d4acc"
       }
     },
     {

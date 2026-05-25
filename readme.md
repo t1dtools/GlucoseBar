@@ -41,13 +41,26 @@ To configure nightscout, input your Nightscout instance URL with no path. Eg. `h
 
 For the Token field, you need to create a token (referred to as `subjects` in the Nightscout admin console) in nightscout with the `readable` permission.
 
-### Trio integration
+### Trio & AAPS integration
 
-The 1.3.0 release of GlucoseBar adds support for the algorithmic output from the [Trio project](https://github.com/nightscout/trio). If you are using Trio as the AID system for your insulin delivery, you can now see some of the Trio algorithmic output in GlucoseBar, presented in a familiar way by enabling the integration in the Nightscout CGM settings screen.
+The 1.3.0 release of GlucoseBar adds support for the algorithmic output from the [Trio project](https://github.com/nightscout/trio). If you are using Trio or AAPS as the AID system for your insulin delivery, you can now see some of the algorithmic output in GlucoseBar, presented in a familiar way by enabling the integration in the Nightscout CGM settings screen.
+
+### Loop Integration
+
+The 1.3.1 release of GlucoseBar adds support for the looping data produced by [Loop](https://github.com/LoopKit/Loop). Similarly to how Trio and AAPS expose algorithmic data through Nightscout, Loop is now also supported. Enable it in the Nightscout CGM settings screen.
 
 ## Readings from Dexcom Share
 
 To get up and running with Dexcom Share, please ensure you already have a follower set up using the normal Dexcom Share flow. Once that prerequisite is met, please continue using your normal Dexcom credentials. Remember to select the correct region.
+
+## Building from Source
+
+**Requirements:** Xcode 15 or later, macOS 14 or later.
+
+```
+git clone https://github.com/t1dtools/GlucoseBar.git
+open GlucoseBar/GlucoseBar.xcodeproj
+```
 
 ## Disclaimer
 

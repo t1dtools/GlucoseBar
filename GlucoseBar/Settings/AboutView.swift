@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Awesome
 
 struct AboutView: View {
     @Environment(\.colorScheme) private var colorScheme
