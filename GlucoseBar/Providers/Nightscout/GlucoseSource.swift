@@ -91,7 +91,7 @@ struct GlucoseSource {
             request.httpMethod = "GET"
             request.cachePolicy = .reloadIgnoringLocalCacheData
 
-            let (data, response) = try await URLSession.shared.data(for: request)
+            let (data, response) = try await URLSession.appDefault.data(for: request)
 
             let res = response as? HTTPURLResponse
             if res == nil {
@@ -144,7 +144,7 @@ struct GlucoseSource {
             request.httpMethod = "GET"
             request.cachePolicy = .reloadIgnoringLocalCacheData
 
-            let (data, response) = try await URLSession.shared.data(for: request)
+            let (data, response) = try await URLSession.appDefault.data(for: request)
 
             let res = response as? HTTPURLResponse
             if res == nil {

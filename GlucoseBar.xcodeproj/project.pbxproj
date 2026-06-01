@@ -36,6 +36,7 @@
 		83CE1E872E5906D000630629 /* ZenModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CE1E862E5906CB00630629 /* ZenModeView.swift */; };
 		83CE1E8A2E5917E300630629 /* ZenModeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CE1E892E5917DD00630629 /* ZenModeSettingsView.swift */; };
 		83CE1E8C2E59239700630629 /* GlucoseAgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CE1E8B2E59238E00630629 /* GlucoseAgeView.swift */; };
+		83D83E6A2FCBA54500F0F823 /* NetworkSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83D83E682FCBA54500F0F823 /* NetworkSession.swift */; };
 		83DB10DE2DFF3FC0001ADCE7 /* GlucoseValueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10DD2DFF3FB2001ADCE7 /* GlucoseValueView.swift */; };
 		83DB10E02DFF3FCC001ADCE7 /* GlucoseTrendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10DF2DFF3FC4001ADCE7 /* GlucoseTrendView.swift */; };
 		83DB10E22DFF3FD4001ADCE7 /* GlucoseDeltaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10E12DFF3FD0001ADCE7 /* GlucoseDeltaView.swift */; };
@@ -101,6 +102,7 @@
 		83CE1E892E5917DD00630629 /* ZenModeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenModeSettingsView.swift; sourceTree = "<group>"; };
 		83CE1E8B2E59238E00630629 /* GlucoseAgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseAgeView.swift; sourceTree = "<group>"; };
 		83D76EC62C4DB616006639EF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		83D83E682FCBA54500F0F823 /* NetworkSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSession.swift; sourceTree = "<group>"; };
 		83DB10DD2DFF3FB2001ADCE7 /* GlucoseValueView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseValueView.swift; sourceTree = "<group>"; };
 		83DB10DF2DFF3FC4001ADCE7 /* GlucoseTrendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseTrendView.swift; sourceTree = "<group>"; };
 		83DB10E12DFF3FD0001ADCE7 /* GlucoseDeltaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseDeltaView.swift; sourceTree = "<group>"; };
@@ -205,6 +207,7 @@
 				9CA29E5CA3DB4D97A62431E0 /* Updates */,
 				83E197FD2DEB575B00B0F995 /* Chart */,
 				83D76EC62C4DB616006639EF /* Info.plist */,
+				83D83E692FCBA54500F0F823 /* Network */,
 				834621252ADDAC930024048E /* Providers */,
 				836351832ABF6A9000BDAA96 /* GlucoseBarApp.swift */,
 				836351872ABF6A9000BDAA96 /* Assets.xcassets */,
@@ -268,6 +271,14 @@
 			children = (
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		83D83E692FCBA54500F0F823 /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				83D83E682FCBA54500F0F823 /* NetworkSession.swift */,
+			);
+			path = Network;
 			sourceTree = "<group>";
 		};
 		83DB10EB2DFF40AA001ADCE7 /* Common */ = {
@@ -440,6 +451,7 @@
 				830C4D062B0166F8000A0E87 /* DexcomShare.swift in Sources */,
 				83E198062DEB59DA00B0F995 /* Data.swift in Sources */,
 				83DB10E02DFF3FCC001ADCE7 /* GlucoseTrendView.swift in Sources */,
+				83D83E6A2FCBA54500F0F823 /* NetworkSession.swift in Sources */,
 				83F8502C2E42A14700F8699F /* EventualGlucoseSettingsView.swift in Sources */,
 				83CA4BBA2DE26ED3003E5A24 /* DeviceStatusResponse.swift in Sources */,
 				83A3301C2AC9F70100222445 /* SettingsView.swift in Sources */,
@@ -622,7 +634,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 102;
+				CURRENT_PROJECT_VERSION = 105;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"GlucoseBar/Preview Content\"";
@@ -662,7 +674,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 102;
+				CURRENT_PROJECT_VERSION = 105;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"GlucoseBar/Preview Content\"";
 				ENABLE_APP_SANDBOX = YES;

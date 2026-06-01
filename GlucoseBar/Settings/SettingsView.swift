@@ -67,11 +67,11 @@ struct SettingsView: View {
 //                    HStack {
 //                        ShareLink(item: URL(string: "https://apps.apple.com/app/glucosebar/id6468110131")!, subject: Text(""), message: Text(""))
 //                        Spacer()
-                        if case .outdated(let latestVersion) = uc.status {
+                        if case .outdated(let latestVersion, let latestBuild) = uc.status {
                             Button(action: {
                                 NSWorkspace.shared.open(uc.downloadURL)
                             }) {
-                                Label("v\(latestVersion) available", systemImage: "arrow.up.circle.fill")
+                                Label("Update available: v\(latestVersion)\(uc.channel == .appStore ? "" : " (\(latestBuild))")", systemImage: "arrow.up.circle.fill")
                                     .font(.footnote)
                                     .fontWeight(.medium)
                                     .foregroundColor(.white)

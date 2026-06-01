@@ -91,6 +91,7 @@ struct GlucoseBarApp: App {
                     mainViewPresented = false
                 }
         } label: {
+            Group {
             if !s.validSettings {
                 Label(
                     title: { Text("Configure") },
@@ -116,7 +117,7 @@ struct GlucoseBarApp: App {
                     ).labelStyle(.titleAndIcon)
                 }
             } else if g.fetchedGlucose {
-                MenuBarView().environmentObject(s).environmentObject(g)
+                MenuBarView().environmentObject(s).environmentObject(g).environmentObject(uc)
             } else {
                 if !vs.isOnline {
                     Image(
@@ -125,6 +126,8 @@ struct GlucoseBarApp: App {
                     Image(nsImage: NSImage(systemSymbolName: "drop.halffull", accessibilityDescription: "Starting GlucoseBar")!)
                 }
             }
+            }
+            .task { await uc.checkIfNeeded() }
         }
         .menuBarExtraStyle(.window)
 
@@ -219,7 +222,7 @@ extension Bundle {
     public var identifier: String        { getInfo("CFBundleIdentifier") }
     public var copyright: String         { getInfo("NSHumanReadableCopyright").replacingOccurrences(of: "\\\\n", with: "\n") }
 
-    public var appBuild: String          { getInfo("CFBundleVersion") }
+    public var appBuild: Int             { Int(getInfo("CFBundleVersion")) ?? 0 }
     public var appVersionLong: String    { getInfo("CFBundleShortVersionString") }
 
     fileprivate func getInfo(_ str: String) -> String { infoDictionary?[str] as? String ?? "⚠️" }

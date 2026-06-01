@@ -135,7 +135,7 @@ class DexcomShare: Provider, @unchecked Sendable {
         }
 
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
+            let (data, response) = try await URLSession.appDefault.data(for: request)
             guard let res = response as? HTTPURLResponse else {
                 await self.setProviderIssue(String(localized: "Invalid response from Dexcom Share"))
                 return
@@ -268,7 +268,7 @@ class DexcomShare: Provider, @unchecked Sendable {
         }
 
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
+            let (data, response) = try await URLSession.appDefault.data(for: request)
 
             guard let res = response as? HTTPURLResponse else {
                 await self.setProviderIssue(String(localized: "Invalid response from Dexcom Share"))
@@ -341,7 +341,7 @@ class DexcomShare: Provider, @unchecked Sendable {
         }
 
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
+            let (data, response) = try await URLSession.appDefault.data(for: request)
 
             guard let res = response as? HTTPURLResponse else {
                 await self.setProviderIssue(String(localized: "Invalid response from Dexcom Share"))

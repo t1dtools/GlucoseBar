@@ -364,7 +364,7 @@ class Nightscout: Provider, @unchecked Sendable {
 
             request.httpMethod = "GET"
 
-            let (data, response) = try await URLSession.shared.data(for: request)
+            let (data, response) = try await URLSession.appDefault.data(for: request)
 
             let res = response as? HTTPURLResponse
             if res == nil {
@@ -568,7 +568,7 @@ class Nightscout: Provider, @unchecked Sendable {
         request.cachePolicy = .reloadIgnoringLocalCacheData
 
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
+            let (data, response) = try await URLSession.appDefault.data(for: request)
 
             guard let res = response as? HTTPURLResponse else {
                 Task { [weak self] in

@@ -5620,6 +5620,16 @@
         }
       }
     },
+    "Update available: v%@%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Update available: v%1$@%2$@"
+          }
+        }
+      }
+    },
     "USA" : {
       "comment" : "The USA Dexcom Share region",
       "localizations" : {
@@ -5679,6 +5689,7 @@
     },
     "v%@ available" : {
       "comment" : "A button that appears in the main view, next to the quit button, that lets the user download a new version of the app. The text inside the button changes to show the version",
+      "extractionState" : "stale",
       "localizations" : {
         "da" : {
           "stringUnit" : {

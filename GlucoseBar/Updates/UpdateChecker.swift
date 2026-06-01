@@ -16,13 +16,37 @@ enum DistributionChannel {
     case direct
 
     static func detect() -> DistributionChannel {
-        guard let receiptURL = Bundle.main.appStoreReceiptURL else {
+        let bundlePath = Bundle.main.bundlePath
+
+        // Check for TestFlight via extended attribute metadata
+        let attrName = "com.apple.appstore.metadata"
+        let bufSize = getxattr(bundlePath, attrName, nil, 0, 0, 0)
+        if bufSize > 0 {
+            var buffer = [UInt8](repeating: 0, count: bufSize)
+            if getxattr(bundlePath, attrName, &buffer, bufSize, 0, 0) > 0 {
+                let data = Data(buffer)
+                if let plist = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any],
+                   let metadata = plist["iTunesMetadata"] as? [String: Any],
+                   metadata["betaExternalVersionIdentifier"] != nil {
+                    return .testFlight
+                }
+            }
+        }
+
+        // Fall back to receipt-based App Store vs direct detection
+        guard let receiptURL = Bundle.main.appStoreReceiptURL,
+              FileManager.default.fileExists(atPath: receiptURL.path) else {
             return .direct
         }
-        guard FileManager.default.fileExists(atPath: receiptURL.path) else {
-            return .direct
+        return .appStore
+    }
+
+    var displayName: String {
+        switch self {
+        case .appStore: return "App Store"
+        case .testFlight: return "TestFlight"
+        case .direct: return "Direct"
         }
-        return receiptURL.path.contains("sandboxReceipts") ? .testFlight : .appStore
     }
 }
 
@@ -30,7 +54,7 @@ enum UpdateStatus: Equatable {
     case unknown
     case checking
     case upToDate
-    case outdated(latestVersion: String)
+    case outdated(latestVersion: String, latestBuild: Int)
     case error(message: String)
 }
 
@@ -38,19 +62,34 @@ enum UpdateStatus: Equatable {
 class UpdateChecker: ObservableObject {
     @Published var status: UpdateStatus = .unknown
     @Published var channel: DistributionChannel = .direct
+    @Published var downloadURL: URL = URL(string: "https://github.com/t1dtools/GlucoseBar/releases/latest")!
 
     private let lastCheckKey = "UpdateChecker.lastCheckDate"
     private let checkInterval: TimeInterval = 60 * 60 * 24 // 24 hours
+    private let timerInterval: TimeInterval = 60 * 60      // check every hour (throttle still applies)
+    private let manifestURL = URL(string: "https://glucosebar.t1d.tools/version.json")!
+    private var timer: Timer?
 
     init() {
         channel = DistributionChannel.detect()
-        logger.info("Distribution channel: \(self.channel == .appStore ? "App Store" : "Direct")")
+        logger.info("Distribution channel: \(self.channel.displayName)")
+        startTimer()
     }
 
-    /// Checks for updates if 24 hours have elapsed since the last check.
+    deinit {
+        timer?.invalidate()
+    }
+
+    private func startTimer() {
+        timer = Timer.scheduledTimer(withTimeInterval: timerInterval, repeats: true) { [weak self] _ in
+            guard let self else { return }
+            Task { await self.checkIfNeeded() }
+        }
+    }
+
     func checkIfNeeded() async {
         #if DEBUG
-        if ProcessInfo.processInfo.environment["FAKE_APP_VERSION"] != nil {
+        if ProcessInfo.processInfo.environment["FAKE_APP_BUILD"] != nil {
             await check()
             return
         }
@@ -65,29 +104,30 @@ class UpdateChecker: ObservableObject {
 
     /// Forces an immediate update check regardless of last check time.
     func check() async {
-        guard channel != .testFlight else {
-            logger.info("TestFlight build — skipping update check")
-            status = .upToDate
-            return
-        }
         status = .checking
         do {
-            let latest = try await fetchLatestVersion()
+            let entry = try await fetchManifest()
             UserDefaults.standard.set(Date(), forKey: lastCheckKey)
+
             #if DEBUG
-            let current = ProcessInfo.processInfo.environment["FAKE_APP_VERSION"] ?? Bundle.main.appVersionLong
+            let currentBuild = Int(ProcessInfo.processInfo.environment["FAKE_APP_BUILD"] ?? "") ?? Bundle.main.appBuild
             #else
-            let current = Bundle.main.appVersionLong
+            let currentBuild = Bundle.main.appBuild
             #endif
-            if isNewer(latest, than: current) {
-                status = .outdated(latestVersion: latest)
-                logger.info("Update available: \(latest) (current: \(current))")
+
+            if entry.build > currentBuild {
+                if let url = URL(string: entry.downloadURL) {
+                    downloadURL = url
+                }
+                status = .outdated(latestVersion: entry.version, latestBuild: entry.build)
+                logger.info("Update available: \(entry.version) build \(entry.build) (current build: \(currentBuild))")
             } else {
                 status = .upToDate
-                logger.info("Up to date: \(current)")
+                logger.info("Up to date: build \(currentBuild)")
             }
         } catch {
-            status = .error(message: error.localizedDescription)
+            // Silently do nothing on failure
+            status = .unknown
             logger.error("Update check failed: \(error.localizedDescription)")
         }
     }
@@ -97,82 +137,29 @@ class UpdateChecker: ObservableObject {
         return false
     }
 
-    var downloadURL: URL {
-        switch channel {
-        case .appStore, .testFlight:
-            return URL(string: "https://apps.apple.com/app/glucosebar/id6468110131")!
-        case .direct:
-            return URL(string: "https://github.com/t1dtools/GlucoseBar/releases/latest")!
-        }
-    }
-
     // MARK: - Private
 
-    private func fetchLatestVersion() async throws -> String {
+    private func fetchManifest() async throws -> VersionManifestEntry {
+        let (data, _) = try await URLSession.appDefault.data(from: manifestURL)
+        let manifest = try JSONDecoder().decode(VersionManifest.self, from: data)
         switch channel {
-        case .appStore, .testFlight:
-            return try await fetchAppStoreVersion()
-        case .direct:
-            return try await fetchGitHubVersion()
+        case .appStore:   return manifest.appStore
+        case .testFlight: return manifest.testFlight
+        case .direct:     return manifest.direct
         }
-    }
-
-    private func fetchGitHubVersion() async throws -> String {
-        let url = URL(string: "https://api.github.com/repos/t1dtools/GlucoseBar/releases/latest")!
-        var request = URLRequest(url: url)
-        request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
-        request.setValue("2022-11-28", forHTTPHeaderField: "X-GitHub-Api-Version")
-
-        let (data, _) = try await URLSession.shared.data(for: request)
-        let json = try JSONDecoder().decode(GitHubRelease.self, from: data)
-        // Strip leading "v" prefix if present (e.g. "v1.4.0" → "1.4.0")
-        return json.tagName.hasPrefix("v") ? String(json.tagName.dropFirst()) : json.tagName
-    }
-
-    private func fetchAppStoreVersion() async throws -> String {
-        let url = URL(string: "https://itunes.apple.com/lookup?id=6468110131&country=us")!
-        let (data, _) = try await URLSession.shared.data(from: url)
-        let json = try JSONDecoder().decode(AppStoreLookup.self, from: data)
-        guard let result = json.results.first else {
-            throw UpdateError.noVersionFound
-        }
-        return result.version
-    }
-
-    /// Returns true if `candidate` is a higher semantic version than `current`.
-    private func isNewer(_ candidate: String, than current: String) -> Bool {
-        let c = parseVersion(candidate)
-        let v = parseVersion(current)
-        return c.lexicographicallyPrecedes(v) == false && c != v
-    }
-
-    private func parseVersion(_ string: String) -> [Int] {
-        string.split(separator: ".").map { Int($0) ?? 0 }
     }
 }
 
 // MARK: - Decodable helpers
 
-private struct GitHubRelease: Decodable {
-    let tagName: String
-    enum CodingKeys: String, CodingKey {
-        case tagName = "tag_name"
-    }
-}
-
-private struct AppStoreLookup: Decodable {
-    let results: [AppStoreResult]
-}
-
-private struct AppStoreResult: Decodable {
+private struct VersionManifestEntry: Decodable {
     let version: String
+    let build: Int
+    let downloadURL: String
 }
 
-private enum UpdateError: LocalizedError {
-    case noVersionFound
-    var errorDescription: String? {
-        switch self {
-        case .noVersionFound: return "No version information found."
-        }
-    }
+private struct VersionManifest: Decodable {
+    let appStore: VersionManifestEntry
+    let testFlight: VersionManifestEntry
+    let direct: VersionManifestEntry
 }
