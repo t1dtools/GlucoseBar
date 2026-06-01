@@ -155,14 +155,14 @@ struct MainAppView: View {
                         QuitButton()
                     }
                 }
-                if case .outdated(let latestVersion) = uc.status {
+                if case .outdated(let latestVersion, let latestBuild) = uc.status {
                     VStack {
                         HStack {
                             Spacer()
                             Button(action: {
                                 NSWorkspace.shared.open(uc.downloadURL)
                             }) {
-                                Label("v\(latestVersion) available", systemImage: "arrow.up.circle.fill")
+                                Label("Update available: v\(latestVersion)\(uc.channel == .appStore ? "" : " (\(latestBuild))")", systemImage: "arrow.up.circle.fill")
                                     .foregroundColor(.orange)
                             }
                             .buttonStyle(.plain)

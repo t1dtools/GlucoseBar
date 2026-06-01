@@ -11,6 +11,7 @@ struct MenuBarView: View {
 
     @EnvironmentObject var s: SettingsStore
     @EnvironmentObject var g: Glucose
+    @EnvironmentObject var uc: UpdateChecker
 
     @Environment(\.colorScheme) private var colorScheme
 
@@ -74,6 +75,7 @@ struct MenuBarView: View {
 
     var menuStack: any View {
         return HStack(spacing: s.menuBarItemSpacing) {
+            updateNotice()
             ForEach(menuBarItems, id: \.id) { item in
                 // aid integration only works with nightscout, so don't draw it's views for other providers
                 if (s.cgmProvider != .nightscout || !s.aidEnableIntegration) && [.loopstatus, .eventualglucose, .cob, .iob].contains(item.type) {
@@ -91,8 +93,21 @@ struct MenuBarView: View {
         }
     }
 
+    func updateNotice() -> some View {
+        Group {
+            if uc.isOutdated {
+                Image(systemName: "arrow.up.circle.fill")
+                    .font(.system(size: 24))
+                    .foregroundStyle(.yellow)
+            }
+        }
+    }
+
     var zenMode: any View {
-        ZenModeView().environmentObject(s).environmentObject(g)
+        HStack(spacing: s.menuBarItemSpacing) {
+            updateNotice()
+            ZenModeView().environmentObject(s).environmentObject(g)
+        }
     }
 
     var body: some View {

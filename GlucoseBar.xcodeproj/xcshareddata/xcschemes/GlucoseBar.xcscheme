@@ -52,8 +52,8 @@
       </BuildableProductRunnable>
       <EnvironmentVariables>
          <EnvironmentVariable
-            key = "FAKE_APP_VERSION"
-            value = "0.0.1"
+            key = "FAKE_APP_BUILD"
+            value = "100"
             isEnabled = "NO">
          </EnvironmentVariable>
       </EnvironmentVariables>
