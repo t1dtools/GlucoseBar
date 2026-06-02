@@ -7,6 +7,7 @@
 
 import Foundation
 import OSLog
+import Combine
 
 private let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "UpdateChecker")
 
@@ -68,7 +69,7 @@ class UpdateChecker: ObservableObject {
     private let checkInterval: TimeInterval = 60 * 60 * 24 // 24 hours
     private let timerInterval: TimeInterval = 60 * 60      // check every hour (throttle still applies)
     private let manifestURL = URL(string: "https://glucosebar.t1d.tools/version.json")!
-    private var timer: Timer?
+    private var timerCancellable: AnyCancellable?
 
     init() {
         channel = DistributionChannel.detect()
@@ -76,15 +77,13 @@ class UpdateChecker: ObservableObject {
         startTimer()
     }
 
-    deinit {
-        timer?.invalidate()
-    }
-
     private func startTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: timerInterval, repeats: true) { [weak self] _ in
-            guard let self else { return }
-            Task { await self.checkIfNeeded() }
-        }
+        timerCancellable = Timer.publish(every: timerInterval, tolerance: 60, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] _ in
+                guard let self else { return }
+                Task { await self.checkIfNeeded() }
+            }
     }
 
     func checkIfNeeded() async {
