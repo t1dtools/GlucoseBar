@@ -32,6 +32,8 @@ struct WelcomeView: View {
             Spacer()
             Text("Since this is the first time we meet, you need to help me access your Glucose data. Head over to \(Image(systemName:"gear")) Settings to get started.").multilineTextAlignment(.center)
 
+            Text("Once your first source is set up, you can add more sources from the Sources section in Settings.").multilineTextAlignment(.center).foregroundStyle(.secondary).font(.footnote).padding(.top, 4)
+
             HStack {
                 SettingsLink{
                     HStack {
