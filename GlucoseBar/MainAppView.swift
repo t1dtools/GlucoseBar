@@ -144,6 +144,12 @@ struct MainAppView: View {
         } else if (s.validSettings) {
             ZStack {
                 VStack(spacing: 0) {
+                    HStack {
+                        Image(systemName: s.iconSymbol).foregroundStyle(s.iconColor.color)
+                        Text(s.sourceName).font(.headline)
+                        Spacer()
+                    }
+                    .padding(.horizontal).padding(.top, 8)
                     GraphView(glucose: g).environmentObject(s).environmentObject(vs)
                     HStack {
                         ZenModeButton().help("Replaces your configured items in the menu bar with a circle that changes color based on glucose levels.")

@@ -7,7 +7,6 @@
 
 import Foundation
 import SwiftUI
-import LaunchAtLogin
 
 
 struct GeneralSettingsView: View {
@@ -110,15 +109,6 @@ struct GeneralSettingsView: View {
                     }.padding()
                 }
 
-                Text("Launch Behavior").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 10)
-                GroupBox {
-                    HStack {
-                        Text("Launch at Login").frame(width: 260, alignment: .leading)
-                        Spacer()
-                        LaunchAtLogin.Toggle("").toggleStyle(.switch).tint(.blue).fixedSize()
-                            .scaleEffect(0.7, anchor: .trailing)
-                    }.padding()
-                }
             }.padding()
         }
     }
