@@ -13,6 +13,18 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 
     private let settingsQueue = DispatchQueue(label: "tools.t1d.GlucoseBar.settings", attributes: .concurrent)
 
+    // MARK: - Source identity
+
+    /// The UUID that namespaces all UserDefaults keys for this source.
+    let sourceId: UUID
+
+    @Published var sourceName: String = "My CGM"
+    @Published var iconSymbol: String = "person.fill"
+    @Published var iconColor: CodableColor = .white
+    @Published var showSourceIcon: Bool = false
+
+    // MARK: - CGM settings
+
     @Published var glucoseUnit: GlucoseUnit = .mgdl
     @Published var highThreshold: Double = 180
     @Published var lowThreshold: Double = 70
@@ -51,7 +63,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     @Published var showLowThreshold: Bool = true
     @Published var showTarget: Bool = true
 
-    // Trio Specifics
+    // Trio / AID Specifics
     @Published var aidEnableIntegration: Bool = false
 
     @Published var trioBarShowIOB: Bool = false
@@ -70,7 +82,12 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 
     let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "settingsstore")
 
-    public init() {
+    // MARK: - Init
+
+    /// Designated initialiser. All UserDefaults keys are namespaced to `sourceId`
+    /// so that multiple sources never collide.
+    public init(sourceId: UUID) {
+        self.sourceId = sourceId
         load()
         // Re-open the log file if debug mode was already enabled before this launch.
         // This is where file rotation happens: the previous session's debug.log gets
@@ -91,6 +108,22 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         }
     }
 
+    /// Convenience initialiser that generates a fresh UUID.
+    /// Use for previews, one-off tests, and the throwaway instance inside
+    /// `Glucose.init` (which is immediately replaced by `setSettings`).
+    public convenience init() {
+        self.init(sourceId: UUID())
+    }
+
+    // MARK: - Key namespacing
+
+    /// Returns a UserDefaults key namespaced to this source's UUID.
+    private func key(_ base: String) -> String {
+        "\(sourceId.uuidString).\(base)"
+    }
+
+    // MARK: - Load / Save
+
     func load() {
         settingsQueue.sync {
             loadInternal()
@@ -105,17 +138,29 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 //        defaults.removePersistentDomain(forName: domain)
 //        UserDefaults.standard.synchronize()
 
-        self.validSettings = defaults.bool(forKey: "validSettings")
+        self.validSettings = defaults.bool(forKey: key("validSettings"))
         self.debugMode = defaults.bool(forKey: "debugMode")
 
+        // Identity
+        self.sourceName = defaults.string(forKey: key("sourceName")) ?? "My CGM"
+        self.iconSymbol = defaults.string(forKey: key("iconSymbol")) ?? "person.fill"
+        self.showSourceIcon = defaults.bool(forKey: key("showSourceIcon"))
+        if let data = defaults.data(forKey: key("iconColor")),
+           let color = try? JSONDecoder().decode(CodableColor.self, from: data) {
+            self.iconColor = color
+        } else {
+            self.iconColor = .white
+        }
+
+
         // Nightscout
-        self.nsURL = defaults.string(forKey: "nsURL") ?? "https://my.nightscout.site"
-        self.nsSecret = defaults.string(forKey: "nsSecret") ?? ""
+        self.nsURL = defaults.string(forKey: key("nsURL")) ?? "https://my.nightscout.site"
+        self.nsSecret = defaults.string(forKey: key("nsSecret")) ?? ""
 
         // Dexcom Share
-        self.dxEmail = defaults.string(forKey: "dxEmail") ?? "your@email.com"
-        self.dxPassword = defaults.string(forKey: "dxPassword") ?? ""
-        let dxSrv = defaults.string(forKey: "dxServer") ?? DexcomServer.ous.url
+        self.dxEmail = defaults.string(forKey: key("dxEmail")) ?? "your@email.com"
+        self.dxPassword = defaults.string(forKey: key("dxPassword")) ?? ""
+        let dxSrv = defaults.string(forKey: key("dxServer")) ?? DexcomServer.ous.url
         switch dxSrv {
         case DexcomServer.ous.url:
             self.dxServer = .ous
@@ -126,33 +171,33 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         }
 
         // Libre LinkUp
-        self.libreUsername = defaults.string(forKey: "libreUsername") ?? "your@email.com"
-        self.librePassword = defaults.string(forKey: "librePassword") ?? ""
-        self.libreConnectionID = defaults.string(forKey: "libreConnectionID") ?? ""
-        self.libreServer = defaults.string(forKey: "libreServer") ?? ""
+        self.libreUsername = defaults.string(forKey: key("libreUsername")) ?? "your@email.com"
+        self.librePassword = defaults.string(forKey: key("librePassword")) ?? ""
+        self.libreConnectionID = defaults.string(forKey: key("libreConnectionID")) ?? ""
+        self.libreServer = defaults.string(forKey: key("libreServer")) ?? ""
 
-        self.highThreshold = defaults.double(forKey: "highThreshold")
+        self.highThreshold = defaults.double(forKey: key("highThreshold"))
         if (self.highThreshold == 0.0) {
             self.highThreshold = 180
         }
 
-        self.lowThreshold = defaults.double(forKey: "lowThreshold")
+        self.lowThreshold = defaults.double(forKey: key("lowThreshold"))
         if (self.lowThreshold == 0.0) {
             self.lowThreshold = 70
         }
 
-        self.graphMinutes = defaults.integer(forKey: "graphMinutes")
+        self.graphMinutes = defaults.integer(forKey: key("graphMinutes"))
         if (self.graphMinutes == 0) {
             self.graphMinutes = 180
         }
 
-        self.showTimeSince = defaults.bool(forKey: "showTimeSince")
-        self.showDelta = defaults.bool(forKey: "showDelta")
-        self.showMenuBarIcon = defaults.bool(forKey: "showMenuBarIcon")
+        self.showTimeSince = defaults.bool(forKey: key("showTimeSince"))
+        self.showDelta = defaults.bool(forKey: key("showDelta"))
+        self.showMenuBarIcon = defaults.bool(forKey: key("showMenuBarIcon"))
 
-//        defaults.removeObject(forKey: "menuBarItems")
+//        defaults.removeObject(forKey: key("menuBarItems"))
 
-        let jsonMenuBarItems = defaults.string(forKey: "menuBarItems")
+        let jsonMenuBarItems = defaults.string(forKey: key("menuBarItems"))
         if let jsonMenuBarItems = jsonMenuBarItems {
             let decoder = JSONDecoder()
             if let data = jsonMenuBarItems.data(using: .utf8) {
@@ -166,15 +211,15 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
             }
         }
 
-        var storedMenuBarItemSpacing = defaults.float(forKey: "menuBarItemSpacing")
+        var storedMenuBarItemSpacing = defaults.float(forKey: key("menuBarItemSpacing"))
         if storedMenuBarItemSpacing == 0.0 {
             storedMenuBarItemSpacing = 8.0
         }
         self.menuBarItemSpacing = CGFloat(storedMenuBarItemSpacing)
 
-        self.zenMode = defaults.bool(forKey: "zenMode")
+        self.zenMode = defaults.bool(forKey: key("zenMode"))
 
-        let cgmProv = defaults.string(forKey: "cgmProvider") ?? ""
+        let cgmProv = defaults.string(forKey: key("cgmProvider")) ?? ""
         switch cgmProv {
         case CGMProvider.simulator.presentable:
             self.cgmProvider = .simulator
@@ -190,7 +235,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
             self.logger.dlog("cgmProvider was default", category: "settingsstore", level: .default)
         }
 
-        let gunit = defaults.string(forKey: "glucoseUnit") ?? GlucoseUnit.mmoll.presentable
+        let gunit = defaults.string(forKey: key("glucoseUnit")) ?? GlucoseUnit.mmoll.presentable
         switch gunit {
         case GlucoseUnit.mmoll.presentable:
             self.glucoseUnit = .mmoll
@@ -200,12 +245,12 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
             self.glucoseUnit = .mgdl
         }
 
-        self.glucoseTarget = defaults.double(forKey: "glucoseTarget")
+        self.glucoseTarget = defaults.double(forKey: key("glucoseTarget"))
         if self.glucoseTarget == 0 {
             self.glucoseTarget = 100.0
         }
 
-        let colorScheme = defaults.string(forKey: "glucoseColorScheme") ?? GlucoseColorScheme.dynamicColor.displayName
+        let colorScheme = defaults.string(forKey: key("glucoseColorScheme")) ?? GlucoseColorScheme.dynamicColor.displayName
         switch colorScheme {
         case GlucoseColorScheme.staticColor.displayName:
             self.glucoseColorScheme = .staticColor
@@ -215,18 +260,18 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
             self.glucoseColorScheme = .dynamicColor
         }
 
-        self.showHighThreshold = defaults.bool(forKey: "showHighThreshold")
-        self.showLowThreshold = defaults.bool(forKey: "showLowThreshold")
-        self.showTarget = defaults.bool(forKey: "showTarget")
+        self.showHighThreshold = defaults.bool(forKey: key("showHighThreshold"))
+        self.showLowThreshold = defaults.bool(forKey: key("showLowThreshold"))
+        self.showTarget = defaults.bool(forKey: key("showTarget"))
 
-        self.aidEnableIntegration = defaults.bool(forKey: "trioEnableIntegration")
+        self.aidEnableIntegration = defaults.bool(forKey: key("trioEnableIntegration"))
 
-        self.trioBarShowIOB = defaults.bool(forKey: "trioBarShowIOB")
-        self.trioBarShowCOB = defaults.bool(forKey: "trioBarShowCOB")
-        self.trioBarShowEventualGlucose = defaults.bool(forKey: "trioBarShowEventualGlucose")
+        self.trioBarShowIOB = defaults.bool(forKey: key("trioBarShowIOB"))
+        self.trioBarShowCOB = defaults.bool(forKey: key("trioBarShowCOB"))
+        self.trioBarShowEventualGlucose = defaults.bool(forKey: key("trioBarShowEventualGlucose"))
 
-        self.aidChartShowForecast = defaults.bool(forKey: "trioChartShowForecast")
-        let forecastDisplay = defaults.string(forKey: "trioChartForecastDisplay") ?? ForecastDisplay.lines.presentable
+        self.aidChartShowForecast = defaults.bool(forKey: key("trioChartShowForecast"))
+        let forecastDisplay = defaults.string(forKey: key("trioChartForecastDisplay")) ?? ForecastDisplay.lines.presentable
         switch forecastDisplay {
         case ForecastDisplay.lines.presentable:
             self.aidChartForecastDisplay = .lines
@@ -236,10 +281,10 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
             self.aidChartForecastDisplay = .lines
         }
 
-        self.aidChartShowIOB = defaults.bool(forKey: "trioChartShowIOB")
-        self.aidChartShowCOB = defaults.bool(forKey: "trioChartShowCOB")
-        self.aidChartShowEventualGlucose = defaults.bool(forKey: "trioChartShowEventualGlucose")
-        self.aidChartShowLoopStatus = defaults.bool(forKey: "trioChartShowLoopStatus")
+        self.aidChartShowIOB = defaults.bool(forKey: key("trioChartShowIOB"))
+        self.aidChartShowCOB = defaults.bool(forKey: key("trioChartShowCOB"))
+        self.aidChartShowEventualGlucose = defaults.bool(forKey: key("trioChartShowEventualGlucose"))
+        self.aidChartShowLoopStatus = defaults.bool(forKey: key("trioChartShowLoopStatus"))
     }
 
     func save() {
@@ -253,69 +298,95 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 
     private func saveInternal() {
         let defaults = UserDefaults.standard
-        defaults.set(true, forKey: "validSettings")
+        defaults.set(true, forKey: key("validSettings"))
         defaults.set(self.debugMode, forKey: "debugMode")
-        defaults.set(self.glucoseUnit.presentable, forKey: "glucoseUnit")
-        defaults.set(self.cgmProvider.presentable, forKey: "cgmProvider")
+        defaults.set(self.glucoseUnit.presentable, forKey: key("glucoseUnit"))
+        defaults.set(self.cgmProvider.presentable, forKey: key("cgmProvider"))
 
-        defaults.set(self.showTimeSince, forKey: "showTimeSince")
-        defaults.set(self.showDelta, forKey: "showDelta")
-        defaults.set(self.showMenuBarIcon, forKey: "showMenuBarIcon")
+
+        defaults.set(self.showTimeSince, forKey: key("showTimeSince"))
+        defaults.set(self.showDelta, forKey: key("showDelta"))
+        defaults.set(self.showMenuBarIcon, forKey: key("showMenuBarIcon"))
 
         do {
             let jsonMenuBarItems = try JSONEncoder().encode(self.menuBarItems)
             if let jsonString = String(data: jsonMenuBarItems, encoding: String.Encoding.utf8) {
-                defaults.set(jsonString, forKey: "menuBarItems")
-        } else {
-            logger.dlog("Unable to convert encoded menuBarItems object to string", category: "settingsstore", level: .error)
-        }
+                defaults.set(jsonString, forKey: key("menuBarItems"))
+            } else {
+                logger.dlog("Unable to convert encoded menuBarItems object to string", category: "settingsstore", level: .error)
+            }
+
         } catch {
             logger.dlog("failed to encode menuBarItems object: \(String(describing: error))", category: "settingsstore", level: .error)
         }
 
-        defaults.set(self.menuBarItemSpacing, forKey: "menuBarItemSpacing")
+        defaults.set(self.menuBarItemSpacing, forKey: key("menuBarItemSpacing"))
 
-        defaults.set(self.zenMode, forKey: "zenMode")
+        defaults.set(self.zenMode, forKey: key("zenMode"))
 
-        defaults.set(self.graphMinutes, forKey: "graphMinutes")
+        defaults.set(self.graphMinutes, forKey: key("graphMinutes"))
 
-        defaults.set(self.highThreshold, forKey: "highThreshold")
-        defaults.set(self.lowThreshold, forKey: "lowThreshold")
+        defaults.set(self.highThreshold, forKey: key("highThreshold"))
+        defaults.set(self.lowThreshold, forKey: key("lowThreshold"))
 
         // Nightscout
-        defaults.set(self.nsURL, forKey: "nsURL")
-        defaults.set(self.nsSecret, forKey: "nsSecret")
+        defaults.set(self.nsURL, forKey: key("nsURL"))
+        defaults.set(self.nsSecret, forKey: key("nsSecret"))
 
         // Dexcom Share
-        defaults.set(self.dxServer.url, forKey: "dxServer")
-        defaults.set(self.dxEmail, forKey: "dxEmail")
-        defaults.set(self.dxPassword, forKey: "dxPassword")
+        defaults.set(self.dxServer.url, forKey: key("dxServer"))
+        defaults.set(self.dxEmail, forKey: key("dxEmail"))
+        defaults.set(self.dxPassword, forKey: key("dxPassword"))
 
         // Libre LinkUp
-        defaults.set(self.libreServer, forKey: "libreServer")
-        defaults.set(self.libreUsername, forKey: "libreUsername")
-        defaults.set(self.librePassword, forKey: "librePassword")
-        defaults.set(self.libreConnectionID, forKey: "libreConnectionID")
+        defaults.set(self.libreServer, forKey: key("libreServer"))
+        defaults.set(self.libreUsername, forKey: key("libreUsername"))
+        defaults.set(self.librePassword, forKey: key("librePassword"))
+        defaults.set(self.libreConnectionID, forKey: key("libreConnectionID"))
 
-        defaults.set(self.glucoseTarget, forKey: "glucoseTarget")
-        defaults.set(self.glucoseColorScheme.displayName, forKey: "glucoseColorScheme")
-        defaults.set(self.showHighThreshold, forKey: "showHighThreshold")
-        defaults.set(self.showLowThreshold, forKey: "showLowThreshold")
-        defaults.set(self.showTarget, forKey: "showTarget")
+        defaults.set(self.glucoseTarget, forKey: key("glucoseTarget"))
+        defaults.set(self.glucoseColorScheme.displayName, forKey: key("glucoseColorScheme"))
+        defaults.set(self.showHighThreshold, forKey: key("showHighThreshold"))
+        defaults.set(self.showLowThreshold, forKey: key("showLowThreshold"))
+        defaults.set(self.showTarget, forKey: key("showTarget"))
 
-        defaults.set(self.aidEnableIntegration, forKey: "trioEnableIntegration")
-        defaults.set(self.trioBarShowIOB, forKey: "trioBarShowIOB")
-        defaults.set(self.trioBarShowCOB, forKey: "trioBarShowCOB")
-        defaults.set(self.trioBarShowEventualGlucose, forKey: "trioBarShowEventualGlucose")
-        defaults.set(self.aidChartShowForecast, forKey: "trioChartShowForecast")
-        defaults.set(self.aidChartForecastDisplay.presentable, forKey: "trioChartForecastDisplay")
-        defaults.set(self.aidChartShowIOB, forKey: "trioChartShowIOB")
-        defaults.set(self.aidChartShowCOB, forKey: "trioChartShowCOB")
-        defaults.set(self.aidChartShowEventualGlucose, forKey: "trioChartShowEventualGlucose")
-        defaults.set(self.aidChartShowLoopStatus, forKey: "trioChartShowLoopStatus")
+        defaults.set(self.aidEnableIntegration, forKey: key("trioEnableIntegration"))
+        defaults.set(self.trioBarShowIOB, forKey: key("trioBarShowIOB"))
+        defaults.set(self.trioBarShowCOB, forKey: key("trioBarShowCOB"))
+        defaults.set(self.trioBarShowEventualGlucose, forKey: key("trioBarShowEventualGlucose"))
+        defaults.set(self.aidChartShowForecast, forKey: key("trioChartShowForecast"))
+        defaults.set(self.aidChartForecastDisplay.presentable, forKey: key("trioChartForecastDisplay"))
+        defaults.set(self.aidChartShowIOB, forKey: key("trioChartShowIOB"))
+        defaults.set(self.aidChartShowCOB, forKey: key("trioChartShowCOB"))
+        defaults.set(self.aidChartShowEventualGlucose, forKey: key("trioChartShowEventualGlucose"))
+        defaults.set(self.aidChartShowLoopStatus, forKey: key("trioChartShowLoopStatus"))
+
+        // Identity
+        defaults.set(self.sourceName, forKey: key("sourceName"))
+        defaults.set(self.iconSymbol, forKey: key("iconSymbol"))
+        defaults.set(self.showSourceIcon, forKey: key("showSourceIcon"))
+        if let data = try? JSONEncoder().encode(self.iconColor) {
+            defaults.set(data, forKey: key("iconColor"))
+        }
 
         defaults.synchronize()
         self.loadInternal()
+    }
+
+    /// Removes all UserDefaults keys for this source and reloads (returns to
+    /// fresh-install defaults). Called by `SourceManager` when the user tries to
+    /// delete the last remaining source.
+    func resetToDefaults() {
+        settingsQueue.async(flags: .barrier) { [weak self] in
+            Task { @MainActor in
+                guard let self = self else { return }
+                let prefix = "\(self.sourceId.uuidString)."
+                for k in UserDefaults.standard.dictionaryRepresentation().keys where k.hasPrefix(prefix) {
+                    UserDefaults.standard.removeObject(forKey: k)
+                }
+                self.loadInternal()
+            }
+        }
     }
 
     func deleteCGMProvider() {
@@ -334,15 +405,15 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         case .nightscout:
             self.nsURL = ""
             self.nsSecret = ""
-            defaults.removeObject(forKey: "nsURL")
-            defaults.removeObject(forKey: "nsSecret")
+            defaults.removeObject(forKey: key("nsURL"))
+            defaults.removeObject(forKey: key("nsSecret"))
         case .dexcomshare:
             self.dxServer = .ous
             self.dxEmail = ""
             self.dxPassword = ""
-            defaults.removeObject(forKey: "dxServer")
-            defaults.removeObject(forKey: "dxEmail")
-            defaults.removeObject(forKey: "dxPassword")
+            defaults.removeObject(forKey: key("dxServer"))
+            defaults.removeObject(forKey: key("dxEmail"))
+            defaults.removeObject(forKey: key("dxPassword"))
         default:
             // noop
             return

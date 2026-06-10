@@ -75,6 +75,12 @@ struct MenuBarView: View {
 
     var menuStack: any View {
         return HStack(spacing: s.menuBarItemSpacing) {
+            if s.showSourceIcon {
+                Image(systemName: s.iconSymbol)
+                    .foregroundStyle(s.iconColor.color)
+                    .font(.system(size: 22))
+                    .padding(.horizontal, 4)
+            }
             updateNotice()
             ForEach(menuBarItems, id: \.id) { item in
                 // aid integration only works with nightscout, so don't draw it's views for other providers

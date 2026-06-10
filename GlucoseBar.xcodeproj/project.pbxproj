@@ -10,6 +10,7 @@
 		1C9D32E50F0A4B5188710489 /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FD07E1B22AA4C509A1D6887 /* UpdateChecker.swift */; };
 		830C4D062B0166F8000A0E87 /* DexcomShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = 830C4D052B0166F8000A0E87 /* DexcomShare.swift */; };
 		831CC8332DE269C800E04180 /* GlucoseSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 831CC8322DE269C500E04180 /* GlucoseSource.swift */; };
+		8330335D2FD6099E00C7ACF9 /* MenuBarExtraAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 8330335C2FD6099E00C7ACF9 /* MenuBarExtraAccess */; };
 		834156CC2EDCD41F004D9260 /* KeepAliveManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834156CB2EDCD41A004D9260 /* KeepAliveManager.swift */; };
 		834621282ADDACB20024048E /* Simulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834621272ADDACB20024048E /* Simulator.swift */; };
 		8346212A2ADDACC20024048E /* Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834621292ADDACC20024048E /* Provider.swift */; };
@@ -33,6 +34,13 @@
 		83A3301C2AC9F70100222445 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A3301B2AC9F70100222445 /* SettingsView.swift */; };
 		83B737A22BE9728F00B84A75 /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 83B737A12BE9728F00B84A75 /* LaunchAtLogin */; };
 		83CA4BBA2DE26ED3003E5A24 /* DeviceStatusResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CA4BB92DE26ECA003E5A24 /* DeviceStatusResponse.swift */; };
+		83CC00022F0000010000CC00 /* CodableColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC00012F0000010000CC00 /* CodableColor.swift */; };
+		83CC00042F0000010000CC00 /* SourceConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC00032F0000010000CC00 /* SourceConfiguration.swift */; };
+		83CC00062F0000010000CC00 /* SourceState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC00052F0000010000CC00 /* SourceState.swift */; };
+		83CC00082F0000010000CC00 /* SourceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC00072F0000010000CC00 /* SourceManager.swift */; };
+		83CC000A2F0000010000CC00 /* SourceMenuBarLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC00092F0000010000CC00 /* SourceMenuBarLabel.swift */; };
+		83CC000C2F0000010000CC00 /* SymbolPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC000B2F0000010000CC00 /* SymbolPickerView.swift */; };
+		83CC000E2F0000010000CC00 /* MenuBarCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC000D2F0000010000CC00 /* MenuBarCoordinator.swift */; };
 		83CE1E872E5906D000630629 /* ZenModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CE1E862E5906CB00630629 /* ZenModeView.swift */; };
 		83CE1E8A2E5917E300630629 /* ZenModeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CE1E892E5917DD00630629 /* ZenModeSettingsView.swift */; };
 		83CE1E8C2E59239700630629 /* GlucoseAgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CE1E8B2E59238E00630629 /* GlucoseAgeView.swift */; };
@@ -100,6 +108,13 @@
 		83A330192AC9F69B00222445 /* GraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphView.swift; sourceTree = "<group>"; };
 		83A3301B2AC9F70100222445 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		83CA4BB92DE26ECA003E5A24 /* DeviceStatusResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusResponse.swift; sourceTree = "<group>"; };
+		83CC00012F0000010000CC00 /* CodableColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodableColor.swift; sourceTree = "<group>"; };
+		83CC00032F0000010000CC00 /* SourceConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceConfiguration.swift; sourceTree = "<group>"; };
+		83CC00052F0000010000CC00 /* SourceState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceState.swift; sourceTree = "<group>"; };
+		83CC00072F0000010000CC00 /* SourceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceManager.swift; sourceTree = "<group>"; };
+		83CC00092F0000010000CC00 /* SourceMenuBarLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceMenuBarLabel.swift; sourceTree = "<group>"; };
+		83CC000B2F0000010000CC00 /* SymbolPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolPickerView.swift; sourceTree = "<group>"; };
+		83CC000D2F0000010000CC00 /* MenuBarCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarCoordinator.swift; sourceTree = "<group>"; };
 		83CE1E862E5906CB00630629 /* ZenModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenModeView.swift; sourceTree = "<group>"; };
 		83CE1E892E5917DD00630629 /* ZenModeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenModeSettingsView.swift; sourceTree = "<group>"; };
 		83CE1E8B2E59238E00630629 /* GlucoseAgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseAgeView.swift; sourceTree = "<group>"; };
@@ -147,6 +162,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				83B737A22BE9728F00B84A75 /* LaunchAtLogin in Frameworks */,
+				8330335D2FD6099E00C7ACF9 /* MenuBarExtraAccess in Frameworks */,
 				8381E1942F1C349800002B77 /* SocketIO in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -223,6 +239,12 @@
 				AA000001DEBUGLOGGER00001B /* DebugLogger.swift */,
 				8381599C2BE4257F00A228F3 /* MainAppView.swift */,
 				838B25DE2BF0146F00D10DDA /* WelcomeView.swift */,
+				83CC00012F0000010000CC00 /* CodableColor.swift */,
+				83CC00032F0000010000CC00 /* SourceConfiguration.swift */,
+				83CC00052F0000010000CC00 /* SourceState.swift */,
+				83CC00072F0000010000CC00 /* SourceManager.swift */,
+				83CC00092F0000010000CC00 /* SourceMenuBarLabel.swift */,
+				83CC000D2F0000010000CC00 /* MenuBarCoordinator.swift */,
 			);
 			path = GlucoseBar;
 			sourceTree = "<group>";
@@ -333,6 +355,7 @@
 				83E198122DEEE23F00B0F995 /* MenuBarSettingsView.swift */,
 				83E198102DEE5ECA00B0F995 /* GeneralSettingsView.swift */,
 				83E323802AC21DDD00CB5206 /* Settings.swift */,
+				83CC000B2F0000010000CC00 /* SymbolPickerView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -372,6 +395,7 @@
 			packageProductDependencies = (
 				83B737A12BE9728F00B84A75 /* LaunchAtLogin */,
 				8381E1932F1C349800002B77 /* SocketIO */,
+				8330335C2FD6099E00C7ACF9 /* MenuBarExtraAccess */,
 			);
 			productName = GlucoseBar;
 			productReference = 836351802ABF6A9000BDAA96 /* GlucoseBar.app */;
@@ -407,6 +431,7 @@
 			packageReferences = (
 				8312CEA72AC78C7900CD4FC9 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
 				8381E1922F1C349800002B77 /* XCRemoteSwiftPackageReference "socket" */,
+				8330335B2FD6099E00C7ACF9 /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */,
 			);
 			productRefGroup = 836351812ABF6A9000BDAA96 /* Products */;
 			projectDirPath = "";
@@ -494,6 +519,13 @@
 				83DF71B22AEDA9EB00FC0566 /* Nightscout.swift in Sources */,
 				AA000001DEBUGLOGGER00001A /* DebugLogger.swift in Sources */,
 				AA000002DEBUGSETTINGS001A /* DebugSettingsView.swift in Sources */,
+				83CC00022F0000010000CC00 /* CodableColor.swift in Sources */,
+				83CC00042F0000010000CC00 /* SourceConfiguration.swift in Sources */,
+				83CC00062F0000010000CC00 /* SourceState.swift in Sources */,
+				83CC00082F0000010000CC00 /* SourceManager.swift in Sources */,
+				83CC000A2F0000010000CC00 /* SourceMenuBarLabel.swift in Sources */,
+				83CC000C2F0000010000CC00 /* SymbolPickerView.swift in Sources */,
+				83CC000E2F0000010000CC00 /* MenuBarCoordinator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -743,6 +775,14 @@
 				kind = branch;
 			};
 		};
+		8330335B2FD6099E00C7ACF9 /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/orchetect/MenuBarExtraAccess";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.0;
+			};
+		};
 		8381E1922F1C349800002B77 /* XCRemoteSwiftPackageReference "socket" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/socketio/socket.io-client-swift";
@@ -754,6 +794,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		8330335C2FD6099E00C7ACF9 /* MenuBarExtraAccess */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8330335B2FD6099E00C7ACF9 /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */;
+			productName = MenuBarExtraAccess;
+		};
 		8381E1932F1C349800002B77 /* SocketIO */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 8381E1922F1C349800002B77 /* XCRemoteSwiftPackageReference "socket" */;
