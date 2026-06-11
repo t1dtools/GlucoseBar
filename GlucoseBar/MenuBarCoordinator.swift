@@ -4,7 +4,7 @@
 //  Created by Andreas Stokholm on 2026-06-10.
 //
 
-import AppKit
+@preconcurrency import AppKit
 import OSLog
 
 /// Fixes the double-click-to-open bug that occurs when switching between
@@ -48,18 +48,14 @@ final class MenuBarCoordinator: ObservableObject {
     nonisolated(unsafe) private var observer: NSObjectProtocol?
 
     init() {
-        // Register synchronously so this observer fires before the library's
-        // Combine-based observer (registered asynchronously via Task).
         observer = NotificationCenter.default.addObserver(
             forName: NSWindow.didResignKeyNotification,
             object: nil,
             queue: .main
         ) { [weak self] notification in
-            // queue: .main guarantees main-thread execution, so assumeIsolated is safe.
-            // Extract object before crossing into actor isolation to avoid Sendable warning.
-            let object = notification.object as AnyObject?
+            let window = notification.object as? NSWindow  // NSWindow? is Sendable via @preconcurrency
             MainActor.assumeIsolated {
-                self?.handleWindowDidResignKey(object)
+                self?.handleWindowDidResignKey(window)     // ← no Sendable warning
             }
         }
     }
@@ -70,9 +66,9 @@ final class MenuBarCoordinator: ObservableObject {
         }
     }
 
-    private func handleWindowDidResignKey(_ object: AnyObject?) {
+    private func handleWindowDidResignKey(_ window: NSWindow?) {
         guard
-            let window = object as? NSWindow,
+            let window,
             window.isVisible,
             window.className.contains("MenuBarExtraWindow"),
             let idx = activeSourceIndex,
