@@ -30,9 +30,20 @@ private enum SidebarItem: Hashable {
 private struct SourceSidebarSection: View {
     @ObservedObject var settings: SettingsStore
     let sourceId: UUID
+    let index: Int
+
+    @State var isExpanded: Bool = true
+
+    init(settings: SettingsStore, sourceId: UUID, index: Int) {
+        self.settings = settings
+        self.sourceId = sourceId
+        self.index = index
+
+        self._isExpanded = State(initialValue: index == 0)
+    }
 
     var body: some View {
-        Section {
+        Section(isExpanded: $isExpanded) {
             Label("Identity", systemImage: "person.crop.circle")
                 .tag(SidebarItem.sourceIdentity(sourceId))
             Label("CGM", systemImage: "bandage.fill")
@@ -51,7 +62,6 @@ private struct SourceSidebarSection: View {
                     .foregroundStyle(settings.iconColor.color)
                 Text(settings.sourceName)
                     .font(.headline)
-                Spacer()
             }
         }
     }
@@ -69,10 +79,11 @@ struct SettingsView: View {
         NavigationSplitView(columnVisibility: .constant(.doubleColumn)) {
             VStack {
                 List(selection: $selectedItem) {
-                    ForEach(sourceManager.sources) { source in
+                    ForEach(Array(sourceManager.sources.enumerated()), id: \.element.id) { index, source in
                         SourceSidebarSection(
                             settings: source.settings,
-                            sourceId: source.id
+                            sourceId: source.id,
+                            index: index
                         )
                     }
 
