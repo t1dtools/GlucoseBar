@@ -14,10 +14,20 @@ class ViewState: ObservableObject, @unchecked Sendable {
     private let networkMonitor = NWPathMonitor()
     private var probe: NWConnection?
     private let probeQueue = DispatchQueue(label: "tools.t1d.GlucoseBar.probe")
+
+    // Fallback hosts tried in order. Using two independent services avoids
+    // false-offline when a single host (e.g. 1.1.1.1) is blocked by a firewall.
+    private let probeHosts: [(String, UInt16)] = [
+        ("1.1.1.1", 443),
+        ("8.8.8.8", 443),
+    ]
+    private var probeHostIndex: Int = 0
+
     init() {
         networkMonitor.pathUpdateHandler = { [weak self] path in
             guard let self = self else { return }
             if path.status == .satisfied {
+                self.probeHostIndex = 0
                 self.startProbe()
             } else {
                 self.cancelProbe()
@@ -28,8 +38,9 @@ class ViewState: ObservableObject, @unchecked Sendable {
     }
     private func startProbe() {
         cancelProbe()
-        let host = NWEndpoint.Host("1.1.1.1")
-        let port = NWEndpoint.Port(rawValue: 443)!
+        let (hostStr, portVal) = probeHosts[probeHostIndex]
+        let host = NWEndpoint.Host(hostStr)
+        let port = NWEndpoint.Port(rawValue: portVal)!
         let conn = NWConnection(host: host, port: port, using: .tcp)
         probe = conn
         conn.stateUpdateHandler = { [weak self] state in
@@ -39,13 +50,24 @@ class ViewState: ObservableObject, @unchecked Sendable {
                 Task { @MainActor in self.isOnline = true }
                 self.cancelProbe()
             case .failed:
-                // retry after 3 seconds if path is still satisfied
+                // Try the next fallback host, retry after 3s
                 probeQueue.asyncAfter(deadline: .now() + 3) { [weak self] in
                     guard let self = self else { return }
-                    if self.networkMonitor.currentPath.status == .satisfied {
-                        self.startProbe()
-                    }
+                    guard self.networkMonitor.currentPath.status == .satisfied else { return }
+                    self.probeHostIndex = (self.probeHostIndex + 1) % self.probeHosts.count
+                    self.startProbe()
                 }
+            case .waiting:
+                // Probe is waiting (e.g. transient DNS/firewall block); retry after 5s
+                probeQueue.asyncAfter(deadline: .now() + 5) { [weak self] in
+                    guard let self = self else { return }
+                    guard self.networkMonitor.currentPath.status == .satisfied else { return }
+                    self.probeHostIndex = (self.probeHostIndex + 1) % self.probeHosts.count
+                    self.startProbe()
+                }
+            case .cancelled:
+                // Cancelled intentionally by startProbe/cancelProbe — no action needed
+                break
             default:
                 break
             }
