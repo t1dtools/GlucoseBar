@@ -92,16 +92,8 @@ struct GlucoseBarApp: App {
     @State var activeSourceIndex: Int? = nil
     @State private var menuBarStatusItems: [Int: NSStatusItem] = [:]
 
-    // vs and g share the same ViewState so that Glucose's online check and
-    // the UI's offline indicator always reflect the same NWPathMonitor.
-    @StateObject var vs: ViewState
-    @StateObject var g: Glucose
-
     init() {
         _ = KeepAliveManager.shared
-        let sharedVS = ViewState()
-        _vs = StateObject(wrappedValue: sharedVS)
-        _g = StateObject(wrappedValue: Glucose(SettingsStore(), viewState: sharedVS))
     }
 
     // MARK: - Scene body
@@ -172,7 +164,6 @@ struct GlucoseBarApp: App {
         Settings {
             SettingsView()
                 .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeMainNotification)) { _ in
-                    Task { vs.isPanePresented = false }
                     NSApp.setActivationPolicy(.regular)
                     NSApp.activate(ignoringOtherApps: true)
                     NSApp.windows.first?.orderFrontRegardless()
