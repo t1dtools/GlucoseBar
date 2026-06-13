@@ -151,7 +151,7 @@ class Provider: ObservableObject, @unchecked Sendable {
     }
 
     internal func fetch() async {
-        self.logger.error("Base fetch function called. This should not happen. Occurrences of this message means that your CGM provider implementation does not have it's own `fetch` implementation, or that no provider is configured.")
+        self.logger.dlog("Base fetch function called. This should not happen. Occurrences of this message means that your CGM provider implementation does not have it's own `fetch` implementation, or that no provider is configured.", category: "provider", level: .error)
         // Should be implemented in the discrete providers
     }
 }

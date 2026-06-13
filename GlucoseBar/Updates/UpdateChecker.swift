@@ -73,7 +73,7 @@ class UpdateChecker: ObservableObject {
 
     init() {
         channel = DistributionChannel.detect()
-        logger.info("Distribution channel: \(self.channel.displayName)")
+        logger.dlog("Distribution channel: \(self.channel.displayName)", category: "UpdateChecker", level: .info)
         startTimer()
     }
 
@@ -95,7 +95,7 @@ class UpdateChecker: ObservableObject {
         #endif
         let lastCheck = UserDefaults.standard.object(forKey: lastCheckKey) as? Date ?? .distantPast
         guard Date().timeIntervalSince(lastCheck) >= checkInterval else {
-            logger.debug("Skipping update check — last checked \(lastCheck)")
+            logger.dlog("Skipping update check — last checked \(lastCheck)", category: "UpdateChecker", level: .debug)
             return
         }
         await check()
@@ -119,15 +119,15 @@ class UpdateChecker: ObservableObject {
                     downloadURL = url
                 }
                 status = .outdated(latestVersion: entry.version, latestBuild: entry.build)
-                logger.info("Update available: \(entry.version) build \(entry.build) (current build: \(currentBuild))")
+                logger.dlog("Update available: \(entry.version) build \(entry.build) (current build: \(currentBuild))", category: "UpdateChecker", level: .info)
             } else {
                 status = .upToDate
-                logger.info("Up to date: build \(currentBuild)")
+                logger.dlog("Up to date: build \(currentBuild)", category: "UpdateChecker", level: .info)
             }
         } catch {
             // Silently do nothing on failure
             status = .unknown
-            logger.error("Update check failed: \(error.localizedDescription)")
+            logger.dlog("Update check failed: \(error.localizedDescription)", category: "UpdateChecker", level: .error)
         }
     }
 

@@ -26,6 +26,12 @@ GlucoseBar is available in the following languages currently:
 
 If you would like to help translate GlucoseBar into your language, please send an email to glucosebar@t1d.tools with the language you would like to help with, and we can take it from there.
 
+## Debugging
+
+To enable debug mode open a terminal emulator and run the following command: `defaults write t1d.tools.GlucoseBar debugMode -bool YES`
+
+After running the command, restart GlucoseBar and you will now see debug UI in the settings. Share the file after triggering the issue you want to report.
+
 ### Translators
 
 This is a list of our amazing translators who have helped make GlucoseBar available in multiple languages:

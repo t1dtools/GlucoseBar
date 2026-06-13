@@ -69,12 +69,18 @@ struct GlucoseBarApp: App {
     @State private var keepAliveActivity: NSObjectProtocol?
 
     @StateObject var s: SettingsStore = SettingsStore()
-    @StateObject var g: Glucose = Glucose(SettingsStore())
-    @StateObject var vs: ViewState = ViewState()
     @StateObject var uc: UpdateChecker = UpdateChecker()
+
+    // vs and g share the same ViewState so that Glucose's online check and
+    // the UI's offline indicator always reflect the same NWPathMonitor.
+    @StateObject var vs: ViewState
+    @StateObject var g: Glucose
 
     init() {
         _ = KeepAliveManager.shared
+        let sharedVS = ViewState()
+        _vs = StateObject(wrappedValue: sharedVS)
+        _g = StateObject(wrappedValue: Glucose(SettingsStore(), viewState: sharedVS))
     }
 
     var body: some Scene {

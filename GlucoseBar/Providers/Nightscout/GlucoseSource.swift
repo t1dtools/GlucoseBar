@@ -73,10 +73,10 @@ struct GlucoseSource {
     private let httpTimeout = 120.0
 
     func checkDeviceStatusForGSE() async throws -> (device: GlucoseSourceDevice, error: String?) {
-        logger.debug("Nightscout.GlucoseSource.checkDeviceStatusForGSE")
+        logger.dlog("Nightscout.GlucoseSource.checkDeviceStatusForGSE", category: "GlucoseSource", level: .debug)
 
         if !aidEnabled {
-            logger.debug("AID integration not enabled, bailing out.")
+            logger.dlog("AID integration not enabled, bailing out.", category: "GlucoseSource", level: .debug)
             return (.null, nil)
         }
 
@@ -95,7 +95,7 @@ struct GlucoseSource {
 
             let res = response as? HTTPURLResponse
             if res == nil {
-                self.logger.error("Unable to cast response to HTTPURLResponse")
+                self.logger.dlog("Unable to cast response to HTTPURLResponse", category: "GlucoseSource", level: .error)
                 return (.unknown, nil)
             }
 
@@ -112,7 +112,7 @@ struct GlucoseSource {
                 let handled = await handleGSE(result.result.first!)
                 return (handled.device, nil)
             } catch {
-                self.logger.error("Unable to decode NS response when checking for GSE: \(String(describing: error), privacy: .public)")
+                self.logger.dlog("Unable to decode NS response when checking for GSE: \(String(describing: error))", category: "GlucoseSource", level: .error)
                 return (.unknown, String(describing: error))
             }
 
@@ -123,7 +123,7 @@ struct GlucoseSource {
                 err = String(localized: "Unable to get Trio data: Request timed out")
             }
 
-            self.logger.error("Error parsing NS response: \(err, privacy: .public)")
+            self.logger.dlog("Error parsing NS response: \(err)", category: "GlucoseSource", level: .error)
             return (.unknown, err)
         }
     }
@@ -131,7 +131,7 @@ struct GlucoseSource {
     func getGlucoseSourceExtras() async -> GlucoseSourceExtraProperties {
         let empty = GlucoseSourceExtraProperties(aid: .unknown)
 
-        logger.debug("Nightscout.GlucoseSource.getGlucoseSourceExtras")
+        logger.dlog("Nightscout.GlucoseSource.getGlucoseSourceExtras", category: "GlucoseSource", level: .debug)
 
         let url = "\(baseURL)/api/v3/devicestatus?sort%24desc=created_at&limit=1&skip=0&fields=_all"
 
@@ -148,7 +148,7 @@ struct GlucoseSource {
 
             let res = response as? HTTPURLResponse
             if res == nil {
-                self.logger.error("Unable to cast response to HTTPURLResponse")
+                self.logger.dlog("Unable to cast response to HTTPURLResponse", category: "GlucoseSource", level: .error)
                 return empty
             }
 
@@ -168,7 +168,7 @@ struct GlucoseSource {
 //                }
                 return gse.gse
             } catch {
-                self.logger.error("Unable to decode NS response when checking for GSE: \(String(describing: error), privacy: .public)")
+                self.logger.dlog("Unable to decode NS response when checking for GSE: \(String(describing: error))", category: "GlucoseSource", level: .error)
             }
         } catch {
             var err = String(describing: error)
@@ -176,7 +176,7 @@ struct GlucoseSource {
                 err = String(localized: "Unable to get Trio data: Request timed out")
             }
 
-            self.logger.error("Error fetching GlucoseSourceExtra: \(err, privacy: .public)")
+            self.logger.dlog("Error fetching GlucoseSourceExtra: \(err)", category: "GlucoseSource", level: .error)
         }
 
         return empty
