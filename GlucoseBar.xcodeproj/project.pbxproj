@@ -69,6 +69,8 @@
 		83F850302E42A1C500F8699F /* IOBSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F8502F2E42A1C400F8699F /* IOBSettingsView.swift */; };
 		83F850322E42A27E00F8699F /* SeparatorSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F850312E42A27C00F8699F /* SeparatorSettingsView.swift */; };
 		83F888412B1A888000A50E74 /* LibreLinkUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F888402B1A888000A50E74 /* LibreLinkUp.swift */; };
+		AA000001DEBUGLOGGER00001A /* DebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001DEBUGLOGGER00001B /* DebugLogger.swift */; };
+		AA000002DEBUGSETTINGS001A /* DebugSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002DEBUGSETTINGS001B /* DebugSettingsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -135,6 +137,8 @@
 		83F8502F2E42A1C400F8699F /* IOBSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOBSettingsView.swift; sourceTree = "<group>"; };
 		83F850312E42A27C00F8699F /* SeparatorSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeparatorSettingsView.swift; sourceTree = "<group>"; };
 		83F888402B1A888000A50E74 /* LibreLinkUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibreLinkUp.swift; sourceTree = "<group>"; };
+		AA000001DEBUGLOGGER00001B /* DebugLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogger.swift; sourceTree = "<group>"; };
+		AA000002DEBUGSETTINGS001B /* DebugSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSettingsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -216,6 +220,7 @@
 				8363136D2ABF8CAA0047C99D /* GlucoseEntry.swift */,
 				836313732ABF99210047C99D /* DispatchTimer.swift */,
 				836313752AC0808E0047C99D /* Glucose.swift */,
+				AA000001DEBUGLOGGER00001B /* DebugLogger.swift */,
 				8381599C2BE4257F00A228F3 /* MainAppView.swift */,
 				838B25DE2BF0146F00D10DDA /* WelcomeView.swift */,
 			);
@@ -321,6 +326,7 @@
 			children = (
 				8384A3132E70B9DF00C93DD8 /* AboutView.swift */,
 				83E198162DEF269F00B0F995 /* AidSettingsView.swift */,
+				AA000002DEBUGSETTINGS001B /* DebugSettingsView.swift */,
 				83E1980E2DEE5E6400B0F995 /* CGMSettingsView.swift */,
 				83A3301B2AC9F70100222445 /* SettingsView.swift */,
 				83E198142DEEE2A900B0F995 /* ChartSettingsView.swift */,
@@ -486,6 +492,8 @@
 				83E198032DEB595700B0F995 /* DrawGlucose.swift in Sources */,
 				83DB10F12DFF45B0001ADCE7 /* GlucoseOps.swift in Sources */,
 				83DF71B22AEDA9EB00FC0566 /* Nightscout.swift in Sources */,
+				AA000001DEBUGLOGGER00001A /* DebugLogger.swift in Sources */,
+				AA000002DEBUGSETTINGS001A /* DebugSettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -634,7 +642,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 106;
+				CURRENT_PROJECT_VERSION = 108;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"GlucoseBar/Preview Content\"";
@@ -654,7 +662,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.3.1;
+				MARKETING_VERSION = 1.3.2;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = t1d.tools.GlucoseBar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -674,7 +682,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 106;
+				CURRENT_PROJECT_VERSION = 108;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"GlucoseBar/Preview Content\"";
 				ENABLE_APP_SANDBOX = YES;
@@ -693,7 +701,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.3.1;
+				MARKETING_VERSION = 1.3.2;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = t1d.tools.GlucoseBar;
 				PRODUCT_NAME = "$(TARGET_NAME)";

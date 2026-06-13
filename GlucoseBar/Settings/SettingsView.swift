@@ -14,6 +14,7 @@ struct SettingsView: View {
     @EnvironmentObject var g: Glucose
     @EnvironmentObject var uc: UpdateChecker
 
+    @AppStorage("debugMode") private var debugMode: Bool = false
     @State var selectedItem: String = "General"
 
     var body: some View {
@@ -49,6 +50,14 @@ struct SettingsView: View {
                             Label("AID Integration", systemImage: "apps.iphone")
                         }.tag("AID").onTapGesture {
                             selectedItem = "AID"
+                        }
+                    }
+
+                    if debugMode {
+                        NavigationLink(destination: DebugSettingsView().environmentObject(s)) {
+                            Label("Debug", systemImage: "ladybug.fill")
+                        }.tag("Debug").onTapGesture {
+                            selectedItem = "Debug"
                         }
                     }
 

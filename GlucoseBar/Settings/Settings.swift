@@ -66,11 +66,29 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     @Published var aidChartShowLoopStatus: Bool = true
 
     @Published var validSettings: Bool = false
+    @Published var debugMode: Bool = false
 
     let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "settingsstore")
 
     public init() {
         load()
+        // Re-open the log file if debug mode was already enabled before this launch.
+        // This is where file rotation happens: the previous session's debug.log gets
+        // archived with a timestamp before a fresh one is opened.
+        if debugMode {
+            DebugLogger.shared.enable()
+        }
+    }
+
+    /// Toggles debug mode and starts/stops the file logger accordingly.
+    func setDebugMode(_ enabled: Bool) {
+        debugMode = enabled
+        UserDefaults.standard.set(enabled, forKey: "debugMode")
+        if enabled {
+            DebugLogger.shared.enable()
+        } else {
+            DebugLogger.shared.disable()
+        }
     }
 
     func load() {
@@ -88,6 +106,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 //        UserDefaults.standard.synchronize()
 
         self.validSettings = defaults.bool(forKey: "validSettings")
+        self.debugMode = defaults.bool(forKey: "debugMode")
 
         // Nightscout
         self.nsURL = defaults.string(forKey: "nsURL") ?? "https://my.nightscout.site"
@@ -141,7 +160,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
                     let decoded = try decoder.decode([MenuBarItemContainer].self, from: data)
                     self.menuBarItems = decoded
                 } catch {
-                    logger.error("Unable to decode menuBarItems object from json saved in UserDefaults: \(String(describing: error), privacy: .public)")
+                    logger.dlog("Unable to decode menuBarItems object from json saved in UserDefaults: \(String(describing: error))", category: "settingsstore", level: .error)
                     self.menuBarItems = []
                 }
             }
@@ -159,16 +178,16 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         switch cgmProv {
         case CGMProvider.simulator.presentable:
             self.cgmProvider = .simulator
-            self.logger.notice("cgmProvider was simulator")
+            self.logger.dlog("cgmProvider was simulator", category: "settingsstore", level: .default)
         case CGMProvider.nightscout.presentable:
             self.cgmProvider = .nightscout
-            self.logger.notice("cgmProvider was nightscout")
+            self.logger.dlog("cgmProvider was nightscout", category: "settingsstore", level: .default)
         case CGMProvider.dexcomshare.presentable:
             self.cgmProvider = .dexcomshare
-            self.logger.notice("cgmProvider was dexcomshare")
+            self.logger.dlog("cgmProvider was dexcomshare", category: "settingsstore", level: .default)
         default:
             self.cgmProvider = .null
-            self.logger.notice("cgmProvider was default")
+            self.logger.dlog("cgmProvider was default", category: "settingsstore", level: .default)
         }
 
         let gunit = defaults.string(forKey: "glucoseUnit") ?? GlucoseUnit.mmoll.presentable
@@ -235,6 +254,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     private func saveInternal() {
         let defaults = UserDefaults.standard
         defaults.set(true, forKey: "validSettings")
+        defaults.set(self.debugMode, forKey: "debugMode")
         defaults.set(self.glucoseUnit.presentable, forKey: "glucoseUnit")
         defaults.set(self.cgmProvider.presentable, forKey: "cgmProvider")
 
@@ -246,11 +266,11 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
             let jsonMenuBarItems = try JSONEncoder().encode(self.menuBarItems)
             if let jsonString = String(data: jsonMenuBarItems, encoding: String.Encoding.utf8) {
                 defaults.set(jsonString, forKey: "menuBarItems")
-            } else {
-                logger.error("Unable to convert encoded menuBarItems object to string")
-            }
+        } else {
+            logger.dlog("Unable to convert encoded menuBarItems object to string", category: "settingsstore", level: .error)
+        }
         } catch {
-            logger.error("failed to encode menuBarItems object: \(String(describing: error), privacy: .public)")
+            logger.dlog("failed to encode menuBarItems object: \(String(describing: error))", category: "settingsstore", level: .error)
         }
 
         defaults.set(self.menuBarItemSpacing, forKey: "menuBarItemSpacing")
@@ -331,7 +351,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 
     func testCGMProvider() async -> Bool {
         var provider: Provider
-        self.logger.notice("testCGMProvider: \(self.cgmProvider.presentable, privacy: .public)")
+        self.logger.dlog("testCGMProvider: \(self.cgmProvider.presentable)", category: "settingsstore", level: .default)
         switch self.cgmProvider {
         case .simulator:
             provider = Simulator("test auth")
@@ -343,8 +363,27 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
             provider = Simulator("")
         }
 
-        self.logger.notice("testCGMProvider calling verifyCredentials with provider: \(provider.type.presentable, privacy: .public)")
+        self.logger.dlog("testCGMProvider calling verifyCredentials with provider: \(provider.type.presentable)", category: "settingsstore", level: .default)
         return await provider.verifyCredentials()
+    }
+
+    func resetApplication() async -> Bool {
+        let installID = UserDefaults.standard.string(forKey: "GlucoseBar.installID")
+        if let id = Bundle.main.bundleIdentifier {
+            UserDefaults.standard.removePersistentDomain(forName: id)
+        }
+        if let installID {
+            UserDefaults.standard.set(installID, forKey: "GlucoseBar.installID")
+        }
+        UserDefaults.standard.set(true, forKey: "debugMode")
+        load()
+        return true
+    }
+
+    func disableDebugMode() async -> Bool {
+        UserDefaults.standard.set(false, forKey: "debugMode")
+        load()
+        return true
     }
 }
 
