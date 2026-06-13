@@ -18,6 +18,7 @@ private enum SidebarItem: Hashable {
     case sourceThresholds(UUID)
     case sourceAID(UUID)
     case chart
+    case debug
     case about
 }
 
@@ -90,6 +91,10 @@ struct SettingsView: View {
                     Section {
                         Label("Chart", systemImage: "chart.dots.scatter")
                             .tag(SidebarItem.chart)
+                        if sourceManager.sources.first?.settings.debugMode == true {
+                            Label("Debug", systemImage: "ladybug.fill")
+                                .tag(SidebarItem.debug)
+                        }
                         Label("About", systemImage: "info.circle")
                             .tag(SidebarItem.about)
                     }
@@ -170,7 +175,7 @@ struct SettingsView: View {
             case .sourceMenuBar(let id):    sourceId = id
             case .sourceThresholds(let id): sourceId = id
             case .sourceAID(let id):        sourceId = id
-            case .chart, .about:            sourceId = nil
+            case .chart, .debug, .about:    sourceId = nil
             }
             guard let id = sourceId else { return }
             if !sourceManager.sources.contains(where: { $0.id == id }) {
@@ -218,6 +223,11 @@ struct SettingsView: View {
                     ChartSettingsView()
                         .environmentObject(source.settings)
                         .environmentObject(source.glucose)
+                }
+            case .debug:
+                if let source = sourceManager.sources.first {
+                    DebugSettingsView()
+                        .environmentObject(source.settings)
                 }
             case .about:
                 AboutView()
