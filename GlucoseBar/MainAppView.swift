@@ -87,7 +87,7 @@ struct MainAppView: View {
 
     var body: some View {
         if g.error != "" && s.validSettings && vs.isOnline {
-            if g.provider.providerIssue == "Dexcom: No Data" {
+            if g.provider.providerIssue == DexcomShare.noDataIssue {
                 ScrollView {
                     Image(systemName: "bolt.trianglebadge.exclamationmark").resizable()
                         .frame(width: 96, height: 96).foregroundColor(.red).padding(.top, 5).padding(.horizontal)

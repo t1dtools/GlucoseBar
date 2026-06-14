@@ -61,46 +61,59 @@ class Glucose: ObservableObject, Sendable {
     }
 
     func timerEventHandler() {
-        if self.settings.cgmProvider != self.provider.type {
-            self.setSettings(settings)
-        }
-        var shouldFetch: Bool = false
-        if !vs.isOnline {
-            self.logger.dlog("Aborting fetch because network is offline", category: "glucose", level: .default)
-            return
-        }
-
-        if self.provider.lastFetch.timeIntervalSinceNow <= -60 {
-            shouldFetch = true
-            self.logger.dlog("Glucose.timer initiating fetch because last fetch was over 1 minute ago", category: "glucose", level: .default)
-        }
-
-        if let entries = self.entries, let firstEntry = entries.first {
-            if firstEntry.date.timeIntervalSinceNow <= -300 && self.provider.lastFetch.timeIntervalSinceNow <= -10 {
-                shouldFetch = true
-                self.logger.dlog("Glucose.timer initiating fetch because latest reading is over 5 minutes old and last fetch was over 10 seconds ago", category: "glucose", level: .default)
+        // This handler is invoked from the background CGMQueue DispatchQueue, but
+        // Glucose is @MainActor-isolated. Hop to the main actor before touching any
+        // published or stored properties to eliminate the data race.
+        Task { @MainActor in
+            if self.settings.cgmProvider != self.provider.type {
+                self.setSettings(settings)
             }
-        }
+            var shouldFetch: Bool = false
+            if !vs.isOnline {
+                self.logger.dlog("Aborting fetch because network is offline", category: "glucose", level: .default)
+                return
+            }
 
-        if shouldFetch {
-            fetchQueue.async { [weak self] in
-                guard let self = self else { return }
-                Task {
-                    let alreadyFetching = await MainActor.run { self.isFetching }
-                    if alreadyFetching {
-                        await MainActor.run { self.logger.dlog("Skipping fetch - already in progress", category: "glucose", level: .debug) }
-                        return
-                    }
-                    await MainActor.run { self.isFetching = true }
-                    defer { Task { await MainActor.run { self.isFetching = false } } }
-                    await self.provider.fetch()
+            if self.provider.lastFetch.timeIntervalSinceNow <= -60 {
+                shouldFetch = true
+                self.logger.dlog("Glucose.timer initiating fetch because last fetch was over 1 minute ago", category: "glucose", level: .default)
+            }
+
+            if let entries = self.entries, let firstEntry = entries.first {
+                if firstEntry.date.timeIntervalSinceNow <= -300 && self.provider.lastFetch.timeIntervalSinceNow <= -10 {
+                    shouldFetch = true
+                    self.logger.dlog("Glucose.timer initiating fetch because latest reading is over 5 minutes old and last fetch was over 10 seconds ago", category: "glucose", level: .default)
                 }
             }
-        }
 
-        Task {
+            if shouldFetch {
+                fetchQueue.async { [weak self] in
+                    guard let self = self else { return }
+                    Task {
+                        let alreadyFetching = await MainActor.run { self.isFetching }
+                        if alreadyFetching {
+                            await MainActor.run { self.logger.dlog("Skipping fetch - already in progress", category: "glucose", level: .debug) }
+                            return
+                        }
+                        await MainActor.run { self.isFetching = true }
+                        defer { Task { await MainActor.run { self.isFetching = false } } }
+                        await self.provider.fetch()
+                    }
+                }
+            }
+
             self.getGlucose()
         }
+    }
+
+    /// Subscribe `providerCancellable` to the current provider's `objectWillChange`.
+    /// Must be called every time `self.provider` is replaced (both in `setSettings` and `reset`).
+    private func subscribeToProvider() {
+        self.providerCancellable = self.provider.objectWillChange
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.getGlucose()
+            }
     }
 
     func reset(_ settings: SettingsStore) {
@@ -123,6 +136,10 @@ class Glucose: ObservableObject, Sendable {
         default:
             provider = Simulator("defaulted")
         }
+
+        // Re-subscribe to the new provider's changes (was missing before this fix,
+        // causing the menu bar to never update after a reset).
+        subscribeToProvider()
 
         timer = DispatchTimer(timeInterval: 15, queue: DispatchQueue(label: "tools.t1d.GlucoseBar.CGMQueue"))
         timer.suspend()
@@ -173,11 +190,7 @@ class Glucose: ObservableObject, Sendable {
             }
 
             // Subscribe to the newly assigned provider's changes
-            self.providerCancellable = self.provider.objectWillChange
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] _ in
-                    self?.getGlucose()
-                }
+            subscribeToProvider()
 
         }
 
