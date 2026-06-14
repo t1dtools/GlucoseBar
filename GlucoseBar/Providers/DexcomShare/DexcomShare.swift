@@ -31,17 +31,29 @@ public enum DexcomServer: String, CaseIterable, Identifiable {
 
 class DexcomShare: Provider, @unchecked Sendable {
 
-    private var isAuthenticated = false
     private var accountID: String = ""
     private var sessionID: String = ""
     public var validSettings: Bool = true
     public var settingsError: String = ""
+    /// Count of consecutive credential-level auth failures (4xx responses).
+    /// Only incremented for definitive credential errors, not transient server
+    /// errors (5xx), so a brief Dexcom outage cannot permanently lock the provider.
     private var unsuccessfulAuthAttempts = 0
+    /// Timestamp of the last credential failure. Allows the lockout to be
+    /// automatically cleared after a cooling-off period even without a settings reset.
+    private var lastAuthFailureDate: Date? = nil
+    /// How long the lock-out lasts before being automatically retried (30 minutes).
+    private let authLockoutDuration: TimeInterval = 30 * 60
 
     @MainActor
     func setProviderIssue(_ value: String?) {
         self.providerIssue = value
     }
+
+    /// Sentinel string used when Dexcom returns a valid 200 response but with no
+    /// glucose entries (e.g. sensor warm-up, signal loss). Referenced by views to
+    /// show a tailored "No data" UI rather than a generic error.
+    static let noDataIssue = "Dexcom: No Data"
 
     // Hardcoded value found in https://github.com/gagebenne/pydexcom
     private let dexcomApplicationID = "d89443d2-327c-4a6f-89e5-496bbb0317db"
@@ -103,16 +115,29 @@ class DexcomShare: Provider, @unchecked Sendable {
 
     override internal func fetch() async {
         logger.dlog("DexcomShare.fetch", category: "dexcomshare", level: .debug)
+
+        // Auto-reset the lockout after the cooling-off period so transient outages
+        // don't require the user to manually reset settings.
         if unsuccessfulAuthAttempts > 5 {
-            self.providerIssue = "Unable to connect to Dexcom Share after 5 attempts. Please check your credentials and if Dexcom is asking to send a code to your email or phone, please go through that flow on your device."
-            return
+            if let failDate = lastAuthFailureDate,
+               Date().timeIntervalSince(failDate) > authLockoutDuration {
+                logger.dlog("Auth lockout expired, resetting counter", category: "dexcomshare", level: .default)
+                unsuccessfulAuthAttempts = 0
+                lastAuthFailureDate = nil
+                accountID = ""
+                sessionID = ""
+            } else {
+                self.providerIssue = "Unable to connect to Dexcom Share after 5 attempts. Please check your credentials and if Dexcom is asking to send a code to your email or phone, please go through that flow on your device."
+                return
+            }
         }
 
         if !isAuthValid() {
             logger.dlog("calling authenticate from fetch", category: "dexcomshare", level: .debug)
             await authenticate()
-            await fetch()
-            return
+            // Only proceed if authentication actually succeeded; do not recurse
+            // to avoid cascading network calls when auth fails repeatedly.
+            guard isAuthValid() else { return }
         }
 
         await self.setProviderIssue(nil)
@@ -146,10 +171,14 @@ class DexcomShare: Provider, @unchecked Sendable {
                 do {
                     let result = try JSONDecoder().decode(DexcomShareErrorResponse.self, from: data)
 
-                    // If auth error, clear auth data and re-fetch
+                    // If session expired, clear auth data and re-authenticate inline
+                    // (one level only — no recursive fetch to avoid cascading calls).
                     if result.Code == "SessionIdNotFound" || result.Code == "SessionNotValid" {
                         self.accountID = ""
                         self.sessionID = ""
+                        await authenticate()
+                        guard isAuthValid() else { return }
+                        // Re-attempt the data fetch now that we have a fresh session.
                         await self.fetch()
                         return
                     }
@@ -178,9 +207,12 @@ class DexcomShare: Provider, @unchecked Sendable {
 
                     let newEntries = self.dexcomEntriesToGlucoseEntries(input: result, previous: previous)
                     if newEntries.isEmpty {
-                        await self.setProviderIssue("Dexcom: No Data")
+                        await self.setProviderIssue(DexcomShare.noDataIssue)
+                        // Do NOT call setGlucoseEntries([]) — preserve the existing
+                        // cache so the chart and last-known glucose remain visible.
+                    } else {
+                        self.setGlucoseEntries(newEntries)
                     }
-                    self.setGlucoseEntries(newEntries)
                     self.lastFetch = Date()
                 } catch DecodingError.dataCorrupted(_) {
                     await self.setProviderIssue(String(localized: "Unable to read data from Dexcom Share: Data corrupted."))
@@ -204,9 +236,11 @@ class DexcomShare: Provider, @unchecked Sendable {
     }
 
     private func dexcomEntriesToGlucoseEntries(input: [DXEntriesResult], previous: GlucoseEntry?) -> [GlucoseEntry] {
+        // Dexcom returns entries newest-first.
+        // To compute changeRate for entry[i] we need entry[i+1] (the older neighbour),
+        // which we can look up by index once we have the raw value array.
         var ge: [GlucoseEntry] = []
-        var lastValue: Int64 = 0
-        input.forEach { dxEntry in
+        for (i, dxEntry) in input.enumerated() {
             var wt = dxEntry.WT.replacingOccurrences(of: "Date(", with: "")
             wt = wt.replacingOccurrences(of: ")", with: "")
             let date = Date(timeIntervalSince1970: (Double(wt)! / 1000))
@@ -216,15 +250,12 @@ class DexcomShare: Provider, @unchecked Sendable {
                 trend = GlucoseEntry.GlucoseTrend(direction: dxEntry.Trend)
             }
 
-            var changeRate = 0.0
-            if lastValue > 0 {
-                changeRate = Double(lastValue - dxEntry.Value)
-            }
+            // positive = rising, negative = falling; 0 for the oldest entry (no prior reference).
+            let olderValue = i + 1 < input.count ? Double(input[i + 1].Value) : nil
+            let changeRate = olderValue.map { Double(dxEntry.Value) - $0 } ?? 0.0
 
             let entry = GlucoseEntry(glucose: Double(dxEntry.Value), date: date, glucoseType: .sensor, trend: trend, changeRate: changeRate)
             ge.append(entry)
-
-            lastValue = dxEntry.Value
         }
 
         return ge
@@ -274,7 +305,13 @@ class DexcomShare: Provider, @unchecked Sendable {
                 return
             }
             if res.statusCode > 299 {
-                unsuccessfulAuthAttempts += 1
+                // Only count 4xx responses as credential failures.
+                // 5xx responses are transient server errors and must not
+                // count toward the lockout threshold.
+                if res.statusCode < 500 {
+                    unsuccessfulAuthAttempts += 1
+                    lastAuthFailureDate = Date()
+                }
                 var providerError: String? = nil
                 let responseString = String(data: data, encoding: .utf8) ?? "Unable to decode response"
                 self.logger.dlog("\(responseString)", category: "dexcomshare", level: .error)
@@ -347,7 +384,11 @@ class DexcomShare: Provider, @unchecked Sendable {
                 return
             }
             if res.statusCode > 299 {
-                unsuccessfulAuthAttempts += 1
+                // Only count 4xx responses as credential failures (not transient 5xx).
+                if res.statusCode < 500 {
+                    unsuccessfulAuthAttempts += 1
+                    lastAuthFailureDate = Date()
+                }
                 var providerError = ""
                 let responseString = String(data: data, encoding: .utf8) ?? "Unable to decode response"
                 self.logger.dlog("\(responseString)", category: "dexcomshare", level: .error)

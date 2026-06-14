@@ -37,7 +37,7 @@ struct SourceMenuBarLabel: View {
                     }
                 }
             } else if g.error != "" && s.validSettings && vs.isOnline {
-                if g.provider.providerIssue == "Dexcom: No Data" {
+                if g.provider.providerIssue == DexcomShare.noDataIssue {
                     Label(
                         title: { Text(" No data") },
                         icon: { Image(systemName: "bolt.trianglebadge.exclamationmark") }
