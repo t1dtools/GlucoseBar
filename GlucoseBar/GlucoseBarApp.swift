@@ -12,22 +12,29 @@ class ViewState: ObservableObject, @unchecked Sendable {
     @Published var isPanePresented: Bool = false
     @Published var isOnline: Bool = false
     private let networkMonitor = NWPathMonitor()
-    private var probe: NWConnection?
     private let probeQueue = DispatchQueue(label: "tools.t1d.GlucoseBar.probe")
+    private var probeTask: URLSessionDataTask?
+    private var probeURLIndex: Int = 0
 
-    // Fallback hosts tried in order. Using two independent services avoids
-    // false-offline when a single host (e.g. 1.1.1.1) is blocked by a firewall.
-    private let probeHosts: [(String, UInt16)] = [
-        ("1.1.1.1", 443),
-        ("8.8.8.8", 443),
-    ]
-    private var probeHostIndex: Int = 0
+    // Primary probe target: set externally when the CGM provider is configured.
+    // Falls back to the app's own version endpoint, then google.com.
+    var providerURL: URL?
+
+    private var probeURLs: [URL] {
+        var urls: [URL] = []
+        if let url = providerURL {
+            urls.append(url)
+        }
+        urls.append(URL(string: "https://glucosebar.t1d.tools/version.json")!)
+        urls.append(URL(string: "https://google.com")!)
+        return urls
+    }
 
     init() {
         networkMonitor.pathUpdateHandler = { [weak self] path in
             guard let self = self else { return }
             if path.status == .satisfied {
-                self.probeHostIndex = 0
+                self.probeURLIndex = 0
                 self.startProbe()
             } else {
                 self.cancelProbe()
@@ -36,47 +43,36 @@ class ViewState: ObservableObject, @unchecked Sendable {
         }
         networkMonitor.start(queue: DispatchQueue(label: "NetworkMonitor"))
     }
+
     private func startProbe() {
         cancelProbe()
-        let (hostStr, portVal) = probeHosts[probeHostIndex]
-        let host = NWEndpoint.Host(hostStr)
-        let port = NWEndpoint.Port(rawValue: portVal)!
-        let conn = NWConnection(host: host, port: port, using: .tcp)
-        probe = conn
-        conn.stateUpdateHandler = { [weak self] state in
+        let urls = probeURLs
+        let url = urls[probeURLIndex]
+        var request = URLRequest(url: url, timeoutInterval: 10)
+        request.httpMethod = "HEAD"
+
+        let task = URLSession.shared.dataTask(with: request) { [weak self] _, response, error in
             guard let self = self else { return }
-            switch state {
-            case .ready:
+            if let httpResponse = response as? HTTPURLResponse,
+               (200...399).contains(httpResponse.statusCode) {
                 Task { @MainActor in self.isOnline = true }
                 self.cancelProbe()
-            case .failed:
-                // Try the next fallback host, retry after 3s
-                probeQueue.asyncAfter(deadline: .now() + 3) { [weak self] in
+            } else {
+                self.probeQueue.asyncAfter(deadline: .now() + 3) { [weak self] in
                     guard let self = self else { return }
                     guard self.networkMonitor.currentPath.status == .satisfied else { return }
-                    self.probeHostIndex = (self.probeHostIndex + 1) % self.probeHosts.count
+                    self.probeURLIndex = (self.probeURLIndex + 1) % urls.count
                     self.startProbe()
                 }
-            case .waiting:
-                // Probe is waiting (e.g. transient DNS/firewall block); retry after 5s
-                probeQueue.asyncAfter(deadline: .now() + 5) { [weak self] in
-                    guard let self = self else { return }
-                    guard self.networkMonitor.currentPath.status == .satisfied else { return }
-                    self.probeHostIndex = (self.probeHostIndex + 1) % self.probeHosts.count
-                    self.startProbe()
-                }
-            case .cancelled:
-                // Cancelled intentionally by startProbe/cancelProbe — no action needed
-                break
-            default:
-                break
             }
         }
-        conn.start(queue: probeQueue)
+        probeTask = task
+        task.resume()
     }
+
     private func cancelProbe() {
-        probe?.cancel()
-        probe = nil
+        probeTask?.cancel()
+        probeTask = nil
     }
 }
 

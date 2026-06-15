@@ -157,6 +157,15 @@ class Glucose: ObservableObject, Sendable {
 
         self.settings = settings
 
+        switch settings.cgmProvider {
+        case .nightscout:
+            vs.providerURL = URL(string: settings.nsURL)
+        case .dexcomshare:
+            vs.providerURL = URL(string: settings.dxServer.url)
+        default:
+            vs.providerURL = nil
+        }
+
         self.logger.dlog("Current provider before provider comparison: \(String(describing: self.provider))", category: "glucose", level: .debug)
         if self.provider.type != settings.cgmProvider {
             self.logger.dlog("found provider \(self.provider.type.presentable) != \(settings.cgmProvider.presentable)", category: "glucose", level: .debug)
