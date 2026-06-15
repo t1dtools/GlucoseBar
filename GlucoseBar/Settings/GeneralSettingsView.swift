@@ -7,108 +7,60 @@
 
 import Foundation
 import SwiftUI
-
+import LaunchAtLogin
 
 struct GeneralSettingsView: View {
-    @EnvironmentObject var s: SettingsStore
+    @EnvironmentObject var uc: UpdateChecker
 
     var body: some View {
         ScrollView {
             VStack {
-                Text("Glucose Options").font(.headline).frame(maxWidth: .infinity, alignment: .leading)
-
                 GroupBox {
-                    VStack {
-                        HStack {
-                            Text("Glucose Unit").frame(width: 120, alignment: .leading)
-                            Spacer()
-                            Picker("", selection: $s.glucoseUnit) {
-                                ForEach(GlucoseUnit.allCases) { unit in
-                                    Text(unit.presentable).tag(unit)
+                    HStack {
+                        if let image = NSImage(named: "AppIcon") {
+                            Image(nsImage: image)
+                                .aspectRatio(contentMode: .fit)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                        Spacer()
+                        VStack {
+                            Text("Hi,\nI'm GlucoseBar.").font(.title).multilineTextAlignment(.center)
+                            Text(verbatim: "Version: \(Bundle.main.appVersionLong) (\(Bundle.main.appBuild)) ").font(.footnote)
+                            Text(verbatim: uc.channel == .appStore ? "Mac App Store" : uc.channel == .testFlight ? "TestFlight" : "Direct Download").font(.footnote).foregroundStyle(.secondary)
+                            Button(action: {
+                                NSWorkspace.shared.open(URL(string: "https://glucosebar.t1d.tools")!)
+                            }) {
+                                HStack {
+                                    Text(verbatim: "glucosebar.t1d.tools").font(.footnote)
                                 }
-                            }.onChange(of: s.glucoseUnit) {
-                                s.save()
-                            }
-                        }
-
-                        HStack {
-                            Text("High Threshold").frame(width: 120, alignment: .leading)
-                            Spacer()
-                            VStack {
-                                Slider(value: Binding(
-                                    get: { s.highThreshold },
-                                    set: {
-                                        if $0 > s.lowThreshold {
-                                            s.highThreshold = $0
-                                        } else {
-                                            s.highThreshold = (s.lowThreshold + 1)
-                                        }
-                                    }
-                                ), in: 40...400) {
-                                } minimumValueLabel: {
-                                    Text("\(formatGlucoseForDisplay(settings: s, glucose: 40))")
-                                } maximumValueLabel: {
-                                    Text("\(formatGlucoseForDisplay(settings: s, glucose: 400))")
-                                }.onChange(of: s.highThreshold) {
-                                    s.save()
+                            }.buttonStyle(.plain).foregroundStyle(.blue).padding(.top, 2)
+                            Button(action: {
+                                NSWorkspace.shared.open(URL(string: "https://github.com/t1dtools/glucosebar")!)
+                            }) {
+                                HStack {
+                                    Text(verbatim: "GitHub").font(.footnote)
                                 }
-                            }.frame(width:220, alignment: .leading)
-                            Spacer()
-                            Text(formatGlucoseForDisplay(settings: s, glucose: s.highThreshold)).frame(width:50, alignment: .trailing)
+                            }.buttonStyle(.plain).foregroundStyle(.blue).padding(.top, 2)
                         }
-
-                        HStack {
-                            Text("Low Threshold").frame(width: 120, alignment: .leading)
-                            Spacer()
-                            VStack {
-                                Slider(value: Binding(
-                                    get: { s.lowThreshold },
-                                    set: {
-                                        if $0 < s.highThreshold {
-                                            s.lowThreshold = $0
-                                        } else {
-                                            s.lowThreshold = (s.highThreshold - 1)
-                                        }
-                                    }
-                                ), in: 40...400) {
-                                } minimumValueLabel: {
-                                    Text("\(formatGlucoseForDisplay(settings: s, glucose: 40))")
-                                } maximumValueLabel: {
-                                    Text("\(formatGlucoseForDisplay(settings: s, glucose: 400))")
-                                }.onChange(of: s.lowThreshold) {
-                                    s.save()
-                                }
-                            }.frame(width:220, alignment: .leading)
-                            Spacer()
-                            Text(formatGlucoseForDisplay(settings: s, glucose: s.lowThreshold)).frame(width:50, alignment: .trailing)
-                        }
-
-                        HStack {
-                            Text("Target").frame(width: 120, alignment: .leading)
-                            Spacer()
-                            VStack {
-                                Slider(value: Binding(
-                                    get: { s.glucoseTarget },
-                                    set: { s.glucoseTarget = $0 }
-                                ), in: 40...400) {
-                                } minimumValueLabel: {
-                                    Text("\(formatGlucoseForDisplay(settings: s, glucose: 40))")
-                                } maximumValueLabel: {
-                                    Text("\(formatGlucoseForDisplay(settings: s, glucose: 400))")
-                                }.onChange(of: s.glucoseTarget) {
-                                    s.save()
-                                }
-                            }.frame(width:220, alignment: .leading)
-                            Spacer()
-                            Text(formatGlucoseForDisplay(settings: s, glucose: s.glucoseTarget)).frame(width:50, alignment: .trailing)
-                        }
-                        HStack {
-                            Text("The target is used to correctly color the glucose values in the chart when you have it set to use dynamic colors.").font(.footnote).foregroundStyle(.gray)
-                            Spacer()
-                        }
+                        Spacer()
                     }.padding()
                 }
 
+                Text("Launch Behavior").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 10)
+                GroupBox {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Launch at Login")
+                            Text("Automatically start GlucoseBar when you log in to your Mac")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        Spacer()
+                        LaunchAtLogin.Toggle("").toggleStyle(.switch).tint(.blue).fixedSize()
+                            .scaleEffect(0.7, anchor: .trailing)
+                    }.padding()
+                }
             }.padding()
         }
     }

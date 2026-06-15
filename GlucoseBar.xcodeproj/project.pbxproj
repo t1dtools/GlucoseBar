@@ -70,6 +70,7 @@
 		83E198152DEEE2A900B0F995 /* ChartSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E198142DEEE2A900B0F995 /* ChartSettingsView.swift */; };
 		83E198172DEF269F00B0F995 /* AidSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E198162DEF269F00B0F995 /* AidSettingsView.swift */; };
 		83E323812AC21DDD00CB5206 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E323802AC21DDD00CB5206 /* Settings.swift */; };
+		83F2FC602FDFEE13000B7ACD /* GlucoseThresholdsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F2FC5F2FDFEE0C000B7ACD /* GlucoseThresholdsView.swift */; };
 		83F850282E429F2A00F8699F /* GlucoseDeltaSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F850272E429F2400F8699F /* GlucoseDeltaSettingsView.swift */; };
 		83F8502A2E42A02400F8699F /* GlucoseTrendSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F850292E42A01F00F8699F /* GlucoseTrendSettingsView.swift */; };
 		83F8502C2E42A14700F8699F /* EventualGlucoseSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F8502B2E42A14600F8699F /* EventualGlucoseSettingsView.swift */; };
@@ -145,6 +146,7 @@
 		83E198142DEEE2A900B0F995 /* ChartSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartSettingsView.swift; sourceTree = "<group>"; };
 		83E198162DEF269F00B0F995 /* AidSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AidSettingsView.swift; sourceTree = "<group>"; };
 		83E323802AC21DDD00CB5206 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
+		83F2FC5F2FDFEE0C000B7ACD /* GlucoseThresholdsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseThresholdsView.swift; sourceTree = "<group>"; };
 		83F850272E429F2400F8699F /* GlucoseDeltaSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseDeltaSettingsView.swift; sourceTree = "<group>"; };
 		83F850292E42A01F00F8699F /* GlucoseTrendSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseTrendSettingsView.swift; sourceTree = "<group>"; };
 		83F8502B2E42A14600F8699F /* EventualGlucoseSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventualGlucoseSettingsView.swift; sourceTree = "<group>"; };
@@ -346,6 +348,7 @@
 		83E1980D2DEE5B9500B0F995 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				83F2FC5F2FDFEE0C000B7ACD /* GlucoseThresholdsView.swift */,
 				8384A3132E70B9DF00C93DD8 /* AboutView.swift */,
 				83E198162DEF269F00B0F995 /* AidSettingsView.swift */,
 				AA000002DEBUGSETTINGS001B /* DebugSettingsView.swift */,
@@ -514,6 +517,7 @@
 				834156CC2EDCD41F004D9260 /* KeepAliveManager.swift in Sources */,
 				83F8502A2E42A02400F8699F /* GlucoseTrendSettingsView.swift in Sources */,
 				83CE1E8A2E5917E300630629 /* ZenModeSettingsView.swift in Sources */,
+				83F2FC602FDFEE13000B7ACD /* GlucoseThresholdsView.swift in Sources */,
 				83E198032DEB595700B0F995 /* DrawGlucose.swift in Sources */,
 				83DB10F12DFF45B0001ADCE7 /* GlucoseOps.swift in Sources */,
 				83DF71B22AEDA9EB00FC0566 /* Nightscout.swift in Sources */,
