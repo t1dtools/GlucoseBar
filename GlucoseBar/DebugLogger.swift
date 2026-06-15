@@ -88,6 +88,8 @@ final class DebugLogger: @unchecked Sendable {
             fileHandle = nil
             currentLogURL = nil
         }
+
+        // TODO: Attempt cleanup of old stale files (eg keep 10 or so)
     }
 
     private func closeLog() {

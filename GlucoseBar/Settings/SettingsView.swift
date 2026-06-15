@@ -7,19 +7,19 @@
 
 import Foundation
 import SwiftUI
-import LaunchAtLogin
 
 // MARK: - Navigation enums
 
 private enum SidebarItem: Hashable {
+    case general
+    case debug
+    case about
     case sourceIdentity(UUID)
     case sourceCGM(UUID)
     case sourceMenuBar(UUID)
     case sourceThresholds(UUID)
     case sourceAID(UUID)
-    case chart
-    case debug
-    case about
+    case sourceChart(UUID)
 }
 
 // MARK: - SourceSidebarSection
@@ -51,6 +51,8 @@ private struct SourceSidebarSection: View {
                 .tag(SidebarItem.sourceCGM(sourceId))
             Label("Menu Bar", systemImage: "menubar.rectangle")
                 .tag(SidebarItem.sourceMenuBar(sourceId))
+            Label("Chart", systemImage: "chart.dots.scatter")
+                .tag(SidebarItem.sourceChart(sourceId))
             Label("Thresholds & Display", systemImage: "gear")
                 .tag(SidebarItem.sourceThresholds(sourceId))
             if settings.aidEnableIntegration && settings.cgmProvider == .nightscout {
@@ -80,6 +82,26 @@ struct SettingsView: View {
         NavigationSplitView(columnVisibility: .constant(.doubleColumn)) {
             VStack {
                 List(selection: $selectedItem) {
+
+                    Section {
+                        Label("General", systemImage: "gear")
+                            .tag(SidebarItem.general)
+                        if sourceManager.sources.first?.settings.debugMode == true {
+                            Label("Debug", systemImage: "ladybug.fill")
+                                .tag(SidebarItem.debug)
+                        }
+                    }
+
+//                    Picker("", selection: $selectedItem) {
+////                        if selectedItem == .null {
+////                            Text("Select a profile").selectionDisabled()
+////                        }
+//                        ForEach(Array(sourceManager.sources.enumerated(), id: \.element.id)) { index, source in
+//                            if source != .null {
+//                                Text(source.sourceName).tag(index)
+//                            }
+//                        }
+//                    }.frame(width: 200, alignment: .trailing)
                     ForEach(Array(sourceManager.sources.enumerated()), id: \.element.id) { index, source in
                         SourceSidebarSection(
                             settings: source.settings,
@@ -89,12 +111,6 @@ struct SettingsView: View {
                     }
 
                     Section {
-                        Label("Chart", systemImage: "chart.dots.scatter")
-                            .tag(SidebarItem.chart)
-                        if sourceManager.sources.first?.settings.debugMode == true {
-                            Label("Debug", systemImage: "ladybug.fill")
-                                .tag(SidebarItem.debug)
-                        }
                         Label("About", systemImage: "info.circle")
                             .tag(SidebarItem.about)
                     }
@@ -144,10 +160,6 @@ struct SettingsView: View {
                         .padding(.horizontal, 20)
                         .padding(.bottom, 6)
 
-                    LaunchAtLogin.Toggle("Launch at Login")
-                        .font(.footnote)
-                        .padding(.bottom, 6)
-
                     Button("Quit") {
                         NSApplication.shared.terminate(nil)
                     }.padding(.bottom, 10)
@@ -162,8 +174,8 @@ struct SettingsView: View {
         .navigationSplitViewColumnWidth(min: 440, ideal: 440)
         .frame(minWidth: 715, maxWidth: 715, minHeight: 500, maxHeight: .infinity)
         .onAppear {
-            if selectedItem == nil, let first = sourceManager.sources.first {
-                selectedItem = .sourceThresholds(first.id)
+            if selectedItem == nil {
+                selectedItem = .general
             }
         }
         .onChange(of: sourceManager.sources.count) {
@@ -175,7 +187,8 @@ struct SettingsView: View {
             case .sourceMenuBar(let id):    sourceId = id
             case .sourceThresholds(let id): sourceId = id
             case .sourceAID(let id):        sourceId = id
-            case .chart, .debug, .about:    sourceId = nil
+            case .sourceChart(let id):      sourceId = id
+            case .general, .debug, .about:  sourceId = nil
             }
             guard let id = sourceId else { return }
             if !sourceManager.sources.contains(where: { $0.id == id }) {
@@ -209,8 +222,9 @@ struct SettingsView: View {
                 }
             case .sourceThresholds(let id):
                 sourceView(id: id) { source in
-                    GeneralSettingsView()
+                    GlucoseThresholdsView()
                         .environmentObject(source.settings)
+                        .environmentObject(source.glucose)
                 }
             case .sourceAID(let id):
                 sourceView(id: id) { source in
@@ -218,12 +232,15 @@ struct SettingsView: View {
                         .environmentObject(source.settings)
                         .environmentObject(source.glucose)
                 }
-            case .chart:
-                if let source = sourceManager.sources.first {
+            case .sourceChart(let id):
+                sourceView(id: id) { source in
                     ChartSettingsView()
                         .environmentObject(source.settings)
                         .environmentObject(source.glucose)
                 }
+            case .general:
+                GeneralSettingsView()
+                    .environmentObject(uc)
             case .debug:
                 if let source = sourceManager.sources.first {
                     DebugSettingsView()
@@ -231,7 +248,6 @@ struct SettingsView: View {
                 }
             case .about:
                 AboutView()
-                    .environmentObject(uc)
             }
         } else {
             if let source = sourceManager.sources.first {

@@ -15,37 +15,6 @@ struct AboutView: View {
     var body: some View {
         ScrollView {
             VStack {
-                GroupBox {
-                    HStack {
-                        if let image = NSImage(named: "AppIcon") {
-                            Image(nsImage: image)
-                                .aspectRatio(contentMode: .fit)
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                        }
-                        Spacer()
-                        VStack {
-                            Text("Hi,\nI'm GlucoseBar.").font(.title).multilineTextAlignment(.center)
-                            Text(verbatim: "Version: \(Bundle.main.appVersionLong) (\(Bundle.main.appBuild)) ").font(.footnote)
-                            Text(verbatim: uc.channel == .appStore ? "Mac App Store" : uc.channel == .testFlight ? "TestFlight" : "Direct Download").font(.footnote).foregroundStyle(.secondary)
-                            Button(action: {
-                                NSWorkspace.shared.open(URL(string: "https://glucosebar.t1d.tools")!)
-                            }) {
-                                HStack {
-                                    Text(verbatim: "glucosebar.t1d.tools").font(.footnote)
-                                }
-                            }.buttonStyle(.plain).foregroundStyle(.blue).padding(.top, 2)
-                            Button(action: {
-                                NSWorkspace.shared.open(URL(string: "https://github.com/t1dtools/glucosebar")!)
-                            }) {
-                                HStack {
-                                    Text(verbatim: "GitHub").font(.footnote)
-                                }
-                            }.buttonStyle(.plain).foregroundStyle(.blue).padding(.top, 2)
-                        }
-                        Spacer()
-                    }.padding()
-                }
-
                 Text("Acknowledgements").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 10)
                 GroupBox {
                     Group {

@@ -252,8 +252,9 @@ struct MenuBarSettingsView: View {
                 }
 
             }.padding(.horizontal)
+
+            Text("Global Settings").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal).padding(.top)
             GroupBox {
-                Text("Global Settings").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal).padding(.top)
                 HStack {
                     Text("Item Spacing")
                     Spacer()
@@ -265,7 +266,7 @@ struct MenuBarSettingsView: View {
                         Text("Very Wide").tag(CGFloat(18))
                     }.frame(width: 200, alignment: .trailing)
                 }.padding(.horizontal).padding(.vertical, 10)
-            }.padding(.horizontal).padding(.vertical, 10)
+            }.padding(.horizontal)
         }.onAppear {
             loadMenuBarItems()
         }
