@@ -52,14 +52,15 @@ final class DispatchTimer {
     }
 
     deinit {
-        timer.setEventHandler {}
-        timer.cancel()
         /*
          If the timer is suspended, calling cancel without resuming
          triggers a crash. This is documented here
          https://forums.developer.apple.com/thread/15902
          */
+
+        timer.setEventHandler {}
         resume()
+        timer.cancel()
         eventHandler = nil
     }
 }
