@@ -79,7 +79,16 @@ class Provider: ObservableObject, @unchecked Sendable {
     var type: CGMProvider = .null
     var isBaseProvider: Bool = true
     internal var readingInterval: Double = 300 // Seconds between readings
-    internal var logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "provider")
+
+    var sourceName: String = ""
+    let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "provider")
+
+    func plog(_ message: String, category: String, level: OSLogType = .default) {
+        let taggedCategory = sourceName.isEmpty ? category : "\(category)/\(sourceName)"
+        let cat = sourceName.isEmpty ? "provider" : "provider/\(sourceName)"
+        Logger(subsystem: "tools.t1d.GlucoseBar", category: cat)
+            .dlog(message, category: taggedCategory, level: level)
+    }
     @Published var RemoteGlucoseSource: GlucoseSourceDevice = .null
     @Published private var _glucoseEntries: [GlucoseEntry] = []
     private let glucoseEntriesQueue = DispatchQueue(label: "tools.t1d.GlucoseBar.glucoseEntries", attributes: .concurrent)

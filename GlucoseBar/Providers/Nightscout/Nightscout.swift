@@ -122,20 +122,20 @@ class Nightscout: Provider, @unchecked Sendable {
 
     private func registerHandlers() {
         socket.on(clientEvent: .connect) { _, _ in
-            self.logger.dlog("Nightscout socket connected", category: "nightscout", level: .debug)
+            self.plog("Nightscout socket connected", category: "nightscout", level: .debug)
             self.socket.emit("authorize", ["client": "web", "secret": self.token])
         }
 
         socket.on(clientEvent: .disconnect) { _, _ in
-            self.logger.dlog("Nightscout socket disconnected", category: "nightscout", level: .debug)
+            self.plog("Nightscout socket disconnected", category: "nightscout", level: .debug)
         }
 
         socket.on(clientEvent: .error) { _, _ in
-            self.logger.dlog("Nightscout socket error", category: "nightscout", level: .debug)
+            self.plog("Nightscout socket error", category: "nightscout", level: .debug)
         }
 
         socket.on("dataUpdate") { data, _ in
-            self.logger.dlog("Nightscout socket got: dataUpdate", category: "nightscout", level: .debug)
+            self.plog("Nightscout socket got: dataUpdate", category: "nightscout", level: .debug)
 
             // Create a deep, Sendable-safe snapshot of the payload by round-tripping through JSON
             let snapshot: [Any]
@@ -150,7 +150,7 @@ class Nightscout: Provider, @unchecked Sendable {
                     snapshot = []
                 }
             } catch {
-                self.logger.dlog("Failed to snapshot socket payload: \(String(describing: error))", category: "nightscout", level: .error)
+                self.plog("Failed to snapshot socket payload: \(String(describing: error))", category: "nightscout", level: .error)
                 snapshot = []
             }
 
@@ -171,7 +171,7 @@ class Nightscout: Provider, @unchecked Sendable {
     @MainActor
     func handleDataUpdate(_ data: [Any]) async {
         guard let dict = data.first as? [String: Any] else {
-            self.logger.dlog("handleDataUpdate: unexpected format: \(data)", category: "nightscout", level: .error)
+            self.plog("handleDataUpdate: unexpected format: \(data)", category: "nightscout", level: .error)
             return
         }
 
@@ -191,7 +191,7 @@ class Nightscout: Provider, @unchecked Sendable {
                     }
                 }
             } catch {
-                self.logger.dlog("Failed to decode devicestatus: \(error)", category: "nightscout", level: .error)
+                self.plog("Failed to decode devicestatus: \(error)", category: "nightscout", level: .error)
             }
         }
 
@@ -219,15 +219,15 @@ class Nightscout: Provider, @unchecked Sendable {
             }
 
             if uniqueNewEntries.count > 0 {
-                self.logger.dlog("Fetched \(uniqueNewEntries.count) new entries", category: "nightscout", level: .debug)
+                self.plog("Fetched \(uniqueNewEntries.count) new entries", category: "nightscout", level: .debug)
                 var updatedEntries = currentEntries
                 updatedEntries.insert(contentsOf: newEntries, at: 0)
 
                 if updatedEntries.count > 288 {
-                    self.logger.dlog("removing entry from glucoseentries: \(updatedEntries.last!.glucose)", category: "nightscout", level: .debug)
+                    self.plog("removing entry from glucoseentries: \(updatedEntries.last!.glucose)", category: "nightscout", level: .debug)
                     updatedEntries.removeLast()
                 }
-                self.logger.dlog("Latest glucose entry: \(String(describing: updatedEntries.first?.glucose))", category: "nightscout", level: .debug)
+                self.plog("Latest glucose entry: \(String(describing: updatedEntries.first?.glucose))", category: "nightscout", level: .debug)
                 self.setGlucoseEntries(updatedEntries)
             }
         }
@@ -274,7 +274,7 @@ class Nightscout: Provider, @unchecked Sendable {
 
         let date = Date(timeIntervalSince1970: timestamp / 1000)
 
-        self.logger.dlog("SGV: \(mgdl) at \(date)", category: "nightscout", level: .debug)
+        self.plog("SGV: \(mgdl) at \(date)", category: "nightscout", level: .debug)
     }
 
 
@@ -297,12 +297,12 @@ class Nightscout: Provider, @unchecked Sendable {
     }
 
     override internal func fetch() async {
-        logger.dlog("Nightscout.fetch", category: "nightscout", level: .debug)
+        plog("Nightscout.fetch", category: "nightscout", level: .debug)
 
         if self.socket.status == .connected {
             // We're on a socket connection, so the rest of this function is not needed
             lastFetch = Date()
-            logger.dlog("Nightscout.fetch exiting early due to socket being connected", category: "nightscout", level: .debug)
+            plog("Nightscout.fetch exiting early due to socket being connected", category: "nightscout", level: .debug)
             return
         }
 
@@ -332,15 +332,15 @@ class Nightscout: Provider, @unchecked Sendable {
         var limit = 288
         if self.GlucoseEntries.count > 1 {
             limit = 1
-            logger.dlog("Time since last fetch: \(self.lastFetch.timeIntervalSinceNow * -1) seconds", category: "nightscout", level: .info)
+            plog("Time since last fetch: \(self.lastFetch.timeIntervalSinceNow * -1) seconds", category: "nightscout", level: .info)
             if self.lastFetch.timeIntervalSinceNow < -400 {
-                logger.dlog("re-setting limit to full fetch because last fetch was more than 400 seconds ago", category: "nightscout", level: .info)
+                plog("re-setting limit to full fetch because last fetch was more than 400 seconds ago", category: "nightscout", level: .info)
                 limit = 288
             }
 
             // This is a workaround for avoiding gaps in the graph. A better solution should be found so we don't tax the NS server unnecessarily every 15 minutes.
             if self.lastFullFetch.timeIntervalSinceNow < -900 {
-                logger.dlog("full fetch because it's been over 15 minutes since we got all data", category: "nightscout", level: .info)
+                plog("full fetch because it's been over 15 minutes since we got all data", category: "nightscout", level: .info)
                 limit = 288
                 self.lastFullFetch = Date()
             }
@@ -368,7 +368,7 @@ class Nightscout: Provider, @unchecked Sendable {
 
             let res = response as? HTTPURLResponse
             if res == nil {
-                self.logger.dlog("Unable to cast response to HTTPURLResponse", category: "nightscout", level: .error)
+                self.plog("Unable to cast response to HTTPURLResponse", category: "nightscout", level: .error)
                 Task {
                     self.providerIssue = "Unable to get glucose data: Empty response from server."
                 }
@@ -397,15 +397,15 @@ class Nightscout: Provider, @unchecked Sendable {
                             )}
 
                         if uniqueNewEntries.count > 0 {
-                            self.logger.dlog("Fetched \(uniqueNewEntries.count) new entries", category: "nightscout", level: .debug)
+                            self.plog("Fetched \(uniqueNewEntries.count) new entries", category: "nightscout", level: .debug)
                             var updatedEntries = currentEntries
                             updatedEntries.insert(contentsOf: newEntries, at: 0)
 
                             if updatedEntries.count > 288 {
-                                self.logger.dlog("removing entry from glucoseentries: \(updatedEntries.last!.glucose)", category: "nightscout", level: .debug)
+                                self.plog("removing entry from glucoseentries: \(updatedEntries.last!.glucose)", category: "nightscout", level: .debug)
                                 updatedEntries.removeLast()
                             }
-                            self.logger.dlog("Latest glucose entry: \(String(describing: updatedEntries.first?.glucose))", category: "nightscout", level: .debug)
+                            self.plog("Latest glucose entry: \(String(describing: updatedEntries.first?.glucose))", category: "nightscout", level: .debug)
                             self.setGlucoseEntries(updatedEntries)
                         }
                     }
@@ -414,7 +414,7 @@ class Nightscout: Provider, @unchecked Sendable {
                         Task { [weak self] in
                             guard let self = self else { return }
 
-                            let gs = GlucoseSource(baseURL: self.baseURL, token: self.auth?.token ?? "invalid", aidEnabled: self.aidEnabled)
+                            let gs = GlucoseSource(baseURL: self.baseURL, token: self.auth?.token ?? "invalid", aidEnabled: self.aidEnabled, sourceName: self.sourceName)
                             let gse = await gs.getGlucoseSourceExtras()
 
                             self.GlucoseSourceExtras = gse
@@ -441,7 +441,7 @@ class Nightscout: Provider, @unchecked Sendable {
                         self.providerIssue = "Unable to read data from Nightscout: Value type mismatch. Is this a new version of Nightscout?"
                     }
                 } catch {
-                    self.logger.dlog("Error parsing NS response: \(String(describing: error))", category: "nightscout", level: .error)
+                    self.plog("Error parsing NS response: \(String(describing: error))", category: "nightscout", level: .error)
                     Task { [weak self] in
                         guard let self = self else { return }
                         self.providerIssue = "Unable to parse glucose data from nightscout: Error unknown."
@@ -459,7 +459,7 @@ class Nightscout: Provider, @unchecked Sendable {
                         self.providerIssue = "Error from Nightscout: \(result.message)"
                     }
                 } catch {
-                    self.logger.dlog("Error parsing NS error response: \(String(describing: error))", category: "nightscout", level: .error)
+                    self.plog("Error parsing NS error response: \(String(describing: error))", category: "nightscout", level: .error)
                 }
             }
         } catch {
@@ -529,14 +529,14 @@ class Nightscout: Provider, @unchecked Sendable {
 
     override public func isAuthValid() -> Bool {
         if auth == nil {
-            self.logger.dlog("auth was nil", category: "nightscout", level: .debug)
+            self.plog("auth was nil", category: "nightscout", level: .debug)
             return false
         }
 
         if auth!.token != "" {
             let expiryTime = Date(timeIntervalSince1970: auth!.expiry)
 
-            self.logger.dlog("nightscout token expiry: \(expiryTime.formatted())", category: "nightscout", level: .debug)
+            self.plog("nightscout token expiry: \(expiryTime.formatted())", category: "nightscout", level: .debug)
             return expiryTime.timeIntervalSinceNow > 0
         }
 
@@ -546,7 +546,7 @@ class Nightscout: Provider, @unchecked Sendable {
     private func authenticate() async {
 
         if isAuthenticating {
-            self.logger.dlog("Already authenticating actively. Returning.", category: "nightscout", level: .info)
+            self.plog("Already authenticating actively. Returning.", category: "nightscout", level: .info)
             return
         }
 
@@ -562,7 +562,7 @@ class Nightscout: Provider, @unchecked Sendable {
             self.isAuthenticating = true
         }
 
-        self.logger.dlog("Nightscout.authenticate", category: "nightscout", level: .debug)
+        self.plog("Nightscout.authenticate", category: "nightscout", level: .debug)
         var request = URLRequest(url: URL(string: "\(baseURL)/api/v2/authorization/request/\(token)")!, timeoutInterval: httpTimeout)
         request.httpMethod = "GET"
         request.cachePolicy = .reloadIgnoringLocalCacheData
@@ -579,7 +579,7 @@ class Nightscout: Provider, @unchecked Sendable {
             }
             if res.statusCode > 299 {
                 unsuccessfulAuthAttempts += 1
-                self.logger.dlog("status code over 299: \(res.statusCode). Body: \(data)", category: "nightscout", level: .debug)
+                self.plog("status code over 299: \(res.statusCode). Body: \(data)", category: "nightscout", level: .debug)
                 Task { [weak self] in
                     guard let self = self else { return }
 
@@ -594,7 +594,7 @@ class Nightscout: Provider, @unchecked Sendable {
                 }
                 return
             } else {
-                self.logger.dlog("status code under 300: \(res.statusCode). Body: \(data)", category: "nightscout", level: .debug)
+                self.plog("status code under 300: \(res.statusCode). Body: \(data)", category: "nightscout", level: .debug)
                 do {
                     let result = try JSONDecoder().decode(NightscoutAuthResponse.self, from: data)
 
@@ -602,13 +602,13 @@ class Nightscout: Provider, @unchecked Sendable {
                         self.auth = ProviderAuth(token: result.token, expiry: result.exp)
                     }
 
-                    self.logger.dlog("Authentication is successful.", category: "nightscout", level: .debug)
+                    self.plog("Authentication is successful.", category: "nightscout", level: .debug)
                     isAuthenticating = false
                     isAuthenticated = true
                     unsuccessfulAuthAttempts = 0
 
                     // Check glucose source device to see if we support extra features
-                    let gs = GlucoseSource(baseURL: self.baseURL, token: result.token, aidEnabled: aidEnabled)
+                    let gs = GlucoseSource(baseURL: self.baseURL, token: result.token, aidEnabled: aidEnabled, sourceName: self.sourceName)
                     let (source, err) = try await gs.checkDeviceStatusForGSE()
                     if err != nil {
                         self.GlucoseSourceExtras.error = err!
@@ -637,7 +637,7 @@ class Nightscout: Provider, @unchecked Sendable {
     }
 
     override internal func verifyCredentials() async -> Bool {
-        self.logger.dlog("nightscout.verifyCredentials", category: "nightscout", level: .debug)
+        self.plog("nightscout.verifyCredentials", category: "nightscout", level: .debug)
         await self.authenticate()
 
         return self.isAuthenticated
