@@ -80,12 +80,12 @@ class Provider: ObservableObject, @unchecked Sendable {
     var isBaseProvider: Bool = true
     internal var readingInterval: Double = 300 // Seconds between readings
 
-    var sourceName: String = ""
+    var sourceIndex: Int = -1
     let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "provider")
 
     func plog(_ message: String, category: String, level: OSLogType = .default) {
-        let taggedCategory = sourceName.isEmpty ? category : "\(category)/\(sourceName)"
-        let cat = sourceName.isEmpty ? "provider" : "provider/\(sourceName)"
+        let taggedCategory = sourceIndex < 0 ? category : "\(category)/\(sourceIndex)"
+        let cat = sourceIndex < 0 ? "provider" : "provider/\(sourceIndex)"
         Logger(subsystem: "tools.t1d.GlucoseBar", category: cat)
             .dlog(message, category: taggedCategory, level: level)
     }

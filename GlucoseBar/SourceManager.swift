@@ -53,7 +53,7 @@ final class SourceManager: ObservableObject {
     func addSource() -> UUID? {
         guard sources.count < SourceManager.maxSources else { return nil }
         let newId = UUID()
-        let state = SourceState(id: newId)
+        let state = SourceState(id: newId, index: sources.count)
         sources.append(state)
         persistSourceIds()
 
@@ -79,12 +79,12 @@ final class SourceManager: ObservableObject {
 
     private func loadSources() {
         let ids = loadSourceIds()
-        sources = ids.map { SourceState(id: $0) }
+        sources = ids.enumerated().map { SourceState(id: $1, index: $0) }
 
         // Guard: always maintain at least one source.
         if sources.isEmpty {
             let newId = UUID()
-            sources = [SourceState(id: newId)]
+            sources = [SourceState(id: newId, index: 0)]
             persistSourceIds()
         }
     }

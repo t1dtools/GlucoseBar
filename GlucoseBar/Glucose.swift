@@ -33,12 +33,12 @@ class Glucose: ObservableObject, Sendable {
     private let fetchQueue = DispatchQueue(label: "tools.t1d.GlucoseBar.fetchQueue")
     private var notificationObserver: NSObjectProtocol?
 
-    var sourceName: String = ""
+    var sourceIndex: Int = -1
     let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "glucose")
 
     func plog(_ message: String, level: OSLogType = .default) {
-        let taggedCategory = sourceName.isEmpty ? "glucose" : "glucose/\(sourceName)"
-        let cat = sourceName.isEmpty ? "glucose" : "glucose/\(sourceName)"
+        let taggedCategory = sourceIndex < 0 ? "glucose" : "glucose/\(sourceIndex)"
+        let cat = sourceIndex < 0 ? "glucose" : "glucose/\(sourceIndex)"
         Logger(subsystem: "tools.t1d.GlucoseBar", category: cat)
             .dlog(message, category: taggedCategory, level: level)
     }
@@ -145,7 +145,7 @@ class Glucose: ObservableObject, Sendable {
             provider = Simulator("defaulted")
         }
 
-        self.provider.sourceName = settings.sourceName
+        self.provider.sourceIndex = self.sourceIndex
 
         // Re-subscribe to the new provider's changes (was missing before this fix,
         // causing the menu bar to never update after a reset).
@@ -183,7 +183,7 @@ class Glucose: ObservableObject, Sendable {
         guard self.settings !== settings else { return }
 
         self.settings = settings
-        self.sourceName = settings.sourceName
+        self.provider.sourceIndex = self.sourceIndex
 
         switch settings.cgmProvider {
         case .nightscout:
@@ -209,7 +209,7 @@ class Glucose: ObservableObject, Sendable {
                 self.plog("Unknown provider. Please add in setSettings in Glucose.swift", level: .error)
             }
 
-            self.provider.sourceName = settings.sourceName
+            self.provider.sourceIndex = self.sourceIndex
 
             // Subscribe to the newly assigned provider's changes
             subscribeToProvider()
