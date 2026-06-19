@@ -69,14 +69,29 @@ struct GlucoseSource {
     let baseURL: String
     let token: String
     let aidEnabled: Bool
-    private let logger = Logger(subsystem: "tools.t1d.GlucoseBarChart", category: "GlucoseSource")
+    let sourceName: String
+    private let logger: Logger
     private let httpTimeout = 120.0
 
+    init(baseURL: String, token: String, aidEnabled: Bool, sourceName: String) {
+        self.baseURL = baseURL
+        self.token = token
+        self.aidEnabled = aidEnabled
+        self.sourceName = sourceName
+        let cat = sourceName.isEmpty ? "GlucoseSource" : "GlucoseSource/\(sourceName)"
+        self.logger = Logger(subsystem: "tools.t1d.GlucoseBarChart", category: cat)
+    }
+
+    private func plog(_ message: String, level: OSLogType = .default) {
+        let taggedCategory = sourceName.isEmpty ? "GlucoseSource" : "GlucoseSource/\(sourceName)"
+        logger.dlog(message, category: taggedCategory, level: level)
+    }
+
     func checkDeviceStatusForGSE() async throws -> (device: GlucoseSourceDevice, error: String?) {
-        logger.dlog("Nightscout.GlucoseSource.checkDeviceStatusForGSE", category: "GlucoseSource", level: .debug)
+        plog("Nightscout.GlucoseSource.checkDeviceStatusForGSE", level: .debug)
 
         if !aidEnabled {
-            logger.dlog("AID integration not enabled, bailing out.", category: "GlucoseSource", level: .debug)
+            plog("AID integration not enabled, bailing out.", level: .debug)
             return (.null, nil)
         }
 
@@ -95,7 +110,7 @@ struct GlucoseSource {
 
             let res = response as? HTTPURLResponse
             if res == nil {
-                self.logger.dlog("Unable to cast response to HTTPURLResponse", category: "GlucoseSource", level: .error)
+                plog("Unable to cast response to HTTPURLResponse", level: .error)
                 return (.unknown, nil)
             }
 
@@ -112,7 +127,7 @@ struct GlucoseSource {
                 let handled = await handleGSE(result.result.first!)
                 return (handled.device, nil)
             } catch {
-                self.logger.dlog("Unable to decode NS response when checking for GSE: \(String(describing: error))", category: "GlucoseSource", level: .error)
+                plog("Unable to decode NS response when checking for GSE: \(String(describing: error))", level: .error)
                 return (.unknown, String(describing: error))
             }
 
@@ -123,7 +138,7 @@ struct GlucoseSource {
                 err = String(localized: "Unable to get Trio data: Request timed out")
             }
 
-            self.logger.dlog("Error parsing NS response: \(err)", category: "GlucoseSource", level: .error)
+            plog("Error parsing NS response: \(err)", level: .error)
             return (.unknown, err)
         }
     }
@@ -131,7 +146,7 @@ struct GlucoseSource {
     func getGlucoseSourceExtras() async -> GlucoseSourceExtraProperties {
         let empty = GlucoseSourceExtraProperties(aid: .unknown)
 
-        logger.dlog("Nightscout.GlucoseSource.getGlucoseSourceExtras", category: "GlucoseSource", level: .debug)
+        plog("Nightscout.GlucoseSource.getGlucoseSourceExtras", level: .debug)
 
         let url = "\(baseURL)/api/v3/devicestatus?sort%24desc=created_at&limit=1&skip=0&fields=_all"
 
@@ -148,7 +163,7 @@ struct GlucoseSource {
 
             let res = response as? HTTPURLResponse
             if res == nil {
-                self.logger.dlog("Unable to cast response to HTTPURLResponse", category: "GlucoseSource", level: .error)
+                plog("Unable to cast response to HTTPURLResponse", level: .error)
                 return empty
             }
 
@@ -168,7 +183,7 @@ struct GlucoseSource {
 //                }
                 return gse.gse
             } catch {
-                self.logger.dlog("Unable to decode NS response when checking for GSE: \(String(describing: error))", category: "GlucoseSource", level: .error)
+                plog("Unable to decode NS response when checking for GSE: \(String(describing: error))", level: .error)
             }
         } catch {
             var err = String(describing: error)
@@ -176,7 +191,7 @@ struct GlucoseSource {
                 err = String(localized: "Unable to get Trio data: Request timed out")
             }
 
-            self.logger.dlog("Error fetching GlucoseSourceExtra: \(err)", category: "GlucoseSource", level: .error)
+            plog("Error fetching GlucoseSourceExtra: \(err)", level: .error)
         }
 
         return empty

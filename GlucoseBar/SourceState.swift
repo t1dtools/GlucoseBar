@@ -26,6 +26,7 @@ final class SourceState: ObservableObject, Identifiable {
         let settings = SettingsStore(sourceId: id)
         self.settings = settings
         self.glucose = Glucose(settings)
+        self.glucose.sourceName = settings.sourceName
     }
 }
 

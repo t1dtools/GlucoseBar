@@ -33,7 +33,15 @@ class Glucose: ObservableObject, Sendable {
     private let fetchQueue = DispatchQueue(label: "tools.t1d.GlucoseBar.fetchQueue")
     private var notificationObserver: NSObjectProtocol?
 
+    var sourceName: String = ""
     let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "glucose")
+
+    func plog(_ message: String, level: OSLogType = .default) {
+        let taggedCategory = sourceName.isEmpty ? "glucose" : "glucose/\(sourceName)"
+        let cat = sourceName.isEmpty ? "glucose" : "glucose/\(sourceName)"
+        Logger(subsystem: "tools.t1d.GlucoseBar", category: cat)
+            .dlog(message, category: taggedCategory, level: level)
+    }
     let notificationCenter = NotificationCenter.default
 
     public init(_ settingsStore: SettingsStore, viewState: ViewState = ViewState()) {
@@ -70,19 +78,19 @@ class Glucose: ObservableObject, Sendable {
             }
             var shouldFetch: Bool = false
             if !vs.isOnline {
-                self.logger.dlog("Aborting fetch because network is offline", category: "glucose", level: .default)
+                self.plog("Aborting fetch because network is offline", level: .default)
                 return
             }
 
             if self.provider.lastFetch.timeIntervalSinceNow <= -60 {
                 shouldFetch = true
-                self.logger.dlog("Glucose.timer initiating fetch because last fetch was over 1 minute ago", category: "glucose", level: .default)
+                self.plog("Glucose.timer initiating fetch because last fetch was over 1 minute ago", level: .default)
             }
 
             if let entries = self.entries, let firstEntry = entries.first {
                 if firstEntry.date.timeIntervalSinceNow <= -300 && self.provider.lastFetch.timeIntervalSinceNow <= -10 {
                     shouldFetch = true
-                    self.logger.dlog("Glucose.timer initiating fetch because latest reading is over 5 minutes old and last fetch was over 10 seconds ago", category: "glucose", level: .default)
+                    self.plog("Glucose.timer initiating fetch because latest reading is over 5 minutes old and last fetch was over 10 seconds ago", level: .default)
                 }
             }
 
@@ -92,7 +100,7 @@ class Glucose: ObservableObject, Sendable {
                     Task {
                         let alreadyFetching = await MainActor.run { self.isFetching }
                         if alreadyFetching {
-                            await MainActor.run { self.logger.dlog("Skipping fetch - already in progress", category: "glucose", level: .debug) }
+                            await MainActor.run { self.plog("Skipping fetch - already in progress", level: .debug) }
                             return
                         }
                         await MainActor.run { self.isFetching = true }
@@ -137,6 +145,8 @@ class Glucose: ObservableObject, Sendable {
             provider = Simulator("defaulted")
         }
 
+        self.provider.sourceName = settings.sourceName
+
         // Re-subscribe to the new provider's changes (was missing before this fix,
         // causing the menu bar to never update after a reset).
         subscribeToProvider()
@@ -152,7 +162,7 @@ class Glucose: ObservableObject, Sendable {
         }
         registerForNotifications()
 
-        self.logger.dlog("Reset glucose object", category: "glucose", level: .default)
+        self.plog("Reset glucose object", level: .default)
     }
 
     func registerForNotifications() {
@@ -173,6 +183,7 @@ class Glucose: ObservableObject, Sendable {
         guard self.settings !== settings else { return }
 
         self.settings = settings
+        self.sourceName = settings.sourceName
 
         switch settings.cgmProvider {
         case .nightscout:
@@ -183,9 +194,9 @@ class Glucose: ObservableObject, Sendable {
             vs.providerURL = nil
         }
 
-        self.logger.dlog("Current provider before provider comparison: \(String(describing: self.provider))", category: "glucose", level: .debug)
+        self.plog("Current provider before provider comparison: \(String(describing: self.provider))", level: .debug)
         if self.provider.type != settings.cgmProvider {
-            self.logger.dlog("found provider \(self.provider.type.presentable) != \(settings.cgmProvider.presentable)", category: "glucose", level: .debug)
+            self.plog("found provider \(self.provider.type.presentable) != \(settings.cgmProvider.presentable)", level: .debug)
 
             switch settings.cgmProvider {
             case .nightscout:
@@ -195,8 +206,10 @@ class Glucose: ObservableObject, Sendable {
             case .simulator:
                 self.provider = Simulator("simulate")
             default:
-                self.logger.dlog("Unknown provider. Please add in setSettings in Glucose.swift", category: "glucose", level: .error)
+                self.plog("Unknown provider. Please add in setSettings in Glucose.swift", level: .error)
             }
+
+            self.provider.sourceName = settings.sourceName
 
             // Subscribe to the newly assigned provider's changes
             subscribeToProvider()
@@ -206,7 +219,7 @@ class Glucose: ObservableObject, Sendable {
         Task {
             self.getGlucose()
         }
-        self.logger.dlog("Current provider after provider comparison and lookup: \(String(describing: self.provider))", category: "glucose", level: .debug)
+        self.plog("Current provider after provider comparison and lookup: \(String(describing: self.provider))", level: .debug)
     }
 
     func reload() {
@@ -238,7 +251,7 @@ class Glucose: ObservableObject, Sendable {
             guard let self = self else { return }
 
             guard !glucoseEntries.isEmpty else {
-                self.logger.dlog("GlucoseEntries became empty in main dispatch block", category: "glucose", level: .error)
+                self.plog("GlucoseEntries became empty in main dispatch block", level: .error)
                 return
             }
 

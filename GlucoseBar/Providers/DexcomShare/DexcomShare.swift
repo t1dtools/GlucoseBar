@@ -114,14 +114,14 @@ class DexcomShare: Provider, @unchecked Sendable {
     }
 
     override internal func fetch() async {
-        logger.dlog("DexcomShare.fetch", category: "dexcomshare", level: .debug)
+        plog("DexcomShare.fetch", category: "dexcomshare", level: .debug)
 
         // Auto-reset the lockout after the cooling-off period so transient outages
         // don't require the user to manually reset settings.
         if unsuccessfulAuthAttempts > 5 {
             if let failDate = lastAuthFailureDate,
                Date().timeIntervalSince(failDate) > authLockoutDuration {
-                logger.dlog("Auth lockout expired, resetting counter", category: "dexcomshare", level: .default)
+                plog("Auth lockout expired, resetting counter", category: "dexcomshare", level: .default)
                 unsuccessfulAuthAttempts = 0
                 lastAuthFailureDate = nil
                 accountID = ""
@@ -133,7 +133,7 @@ class DexcomShare: Provider, @unchecked Sendable {
         }
 
         if !isAuthValid() {
-            logger.dlog("calling authenticate from fetch", category: "dexcomshare", level: .debug)
+            plog("calling authenticate from fetch", category: "dexcomshare", level: .debug)
             await authenticate()
             // Only proceed if authentication actually succeeded; do not recurse
             // to avoid cascading network calls when auth fails repeatedly.
@@ -154,7 +154,7 @@ class DexcomShare: Provider, @unchecked Sendable {
             let jsonData = try JSONEncoder().encode(requestBody)
             request.httpBody = jsonData
         } catch {
-            logger.dlog("Failed marshalling json, aborting fetch", category: "dexcomshare", level: .info)
+            plog("Failed marshalling json, aborting fetch", category: "dexcomshare", level: .info)
             await self.setProviderIssue(String(localized: "Unable to create request"))
             return
         }
@@ -186,12 +186,12 @@ class DexcomShare: Provider, @unchecked Sendable {
                     providerError = "\(result.Code): \(result.Message)"
                 } catch {
                     providerError = String(localized: "Unknown Dexcom Share Issue: \(res.statusCode)")
-                    self.logger.dlog("Unknown Dexcom Share Issue: \(String(describing: error))", category: "dexcomshare", level: .error)
-                    self.logger.dlog("Request info: Status Code: \(res.statusCode)", category: "dexcomshare", level: .error)
+                    self.plog("Unknown Dexcom Share Issue: \(String(describing: error))", category: "dexcomshare", level: .error)
+                    self.plog("Request info: Status Code: \(res.statusCode)", category: "dexcomshare", level: .error)
                     if let str = String(data: data, encoding: .utf8) {
-                        self.logger.dlog("Request info: Response Body: \(str)", category: "dexcomshare", level: .error)
+                        self.plog("Request info: Response Body: \(str)", category: "dexcomshare", level: .error)
                     } else {
-                        self.logger.dlog("Request info: No response body.", category: "dexcomshare", level: .error)
+                        self.plog("Request info: No response body.", category: "dexcomshare", level: .error)
                     }
                 }
 
@@ -223,7 +223,7 @@ class DexcomShare: Provider, @unchecked Sendable {
                 } catch DecodingError.typeMismatch(_, _) {
                     await self.setProviderIssue(String(localized: "Unable to read data from Dexcom Share: Value type mismatch."))
                 } catch {
-                    self.logger.dlog("\(String(describing: error))", category: "dexcomshare", level: .error)
+                    self.plog("\(String(describing: error))", category: "dexcomshare", level: .error)
                 }
             }
         } catch {
@@ -263,12 +263,12 @@ class DexcomShare: Provider, @unchecked Sendable {
 
     override public func isAuthValid() -> Bool {
         if accountID == "" {
-            self.logger.dlog("accountID was empty string", category: "dexcomshare", level: .debug)
+            self.plog("accountID was empty string", category: "dexcomshare", level: .debug)
             return false
         }
 
         if sessionID == "" {
-            self.logger.dlog("sessionID was empty string", category: "dexcomshare", level: .debug)
+            self.plog("sessionID was empty string", category: "dexcomshare", level: .debug)
             return false
         }
 
@@ -278,7 +278,7 @@ class DexcomShare: Provider, @unchecked Sendable {
 
     // This function gets the accountID from the username and password (used for getting the sessionID)
     private func getAccountID() async {
-        self.logger.dlog("DexcomShare.getAccountID", category: "dexcomshare", level: .debug)
+        self.plog("DexcomShare.getAccountID", category: "dexcomshare", level: .debug)
         await self.setProviderIssue(nil)
 
         let url = "\(self.server.url)/General/AuthenticatePublisherAccount"
@@ -293,7 +293,7 @@ class DexcomShare: Provider, @unchecked Sendable {
             let jsonData = try JSONEncoder().encode(requestBody)
             request.httpBody = jsonData
         } catch {
-            logger.dlog("Failed marshalling json, aborting getAccountId", category: "dexcomshare", level: .info)
+            plog("Failed marshalling json, aborting getAccountId", category: "dexcomshare", level: .info)
             return
         }
 
@@ -314,7 +314,7 @@ class DexcomShare: Provider, @unchecked Sendable {
                 }
                 var providerError: String? = nil
                 let responseString = String(data: data, encoding: .utf8) ?? "Unable to decode response"
-                self.logger.dlog("\(responseString)", category: "dexcomshare", level: .error)
+                self.plog("\(responseString)", category: "dexcomshare", level: .error)
 
                 do {
                     let result = try JSONDecoder().decode(DexcomShareErrorResponse.self, from: data)
@@ -333,13 +333,13 @@ class DexcomShare: Provider, @unchecked Sendable {
                     providerError = String(localized: "Unable to read data from Dexcom Share: Value type mismatch.")
                 } catch {
                     providerError = "Unknown Dexcom Share Issue"
-                    self.logger.dlog("Unknown Dexcom Share Issue: \(String(describing: error))", category: "dexcomshare", level: .error)
+                    self.plog("Unknown Dexcom Share Issue: \(String(describing: error))", category: "dexcomshare", level: .error)
                 }
 
                 await self.setProviderIssue(providerError)
 
             } else {
-                self.logger.dlog("successful auth to Dexcom Share", category: "dexcomshare", level: .debug)
+                self.plog("successful auth to Dexcom Share", category: "dexcomshare", level: .debug)
                 guard let responseString = String(data: data, encoding: .utf8) else {
                     await self.setProviderIssue(String(localized: "Unable to decode account ID from Dexcom Share"))
                     return
@@ -357,7 +357,7 @@ class DexcomShare: Provider, @unchecked Sendable {
 
     // This function gets the sessionID (used for getting glucose entries)
     private func getSessionID() async {
-        self.logger.dlog("DexcomShare.getSessionID", category: "dexcomshare", level: .debug)
+        self.plog("DexcomShare.getSessionID", category: "dexcomshare", level: .debug)
         await self.setProviderIssue(nil)
 
         let url = "\(self.server.url)/General/LoginPublisherAccountById"
@@ -372,7 +372,7 @@ class DexcomShare: Provider, @unchecked Sendable {
             let jsonData = try JSONEncoder().encode(requestBody)
             request.httpBody = jsonData
         } catch {
-            logger.dlog("Failed marshalling json, aborting getSessionID", category: "dexcomshare", level: .info)
+            plog("Failed marshalling json, aborting getSessionID", category: "dexcomshare", level: .info)
             return
         }
 
@@ -391,7 +391,7 @@ class DexcomShare: Provider, @unchecked Sendable {
                 }
                 var providerError = ""
                 let responseString = String(data: data, encoding: .utf8) ?? "Unable to decode response"
-                self.logger.dlog("\(responseString)", category: "dexcomshare", level: .error)
+                self.plog("\(responseString)", category: "dexcomshare", level: .error)
 
                 do {
                     let result = try JSONDecoder().decode(DexcomShareErrorResponse.self, from: data)
@@ -406,12 +406,12 @@ class DexcomShare: Provider, @unchecked Sendable {
                     providerError = String(localized: "Unable to read data from Dexcom Share: Value type mismatch.")
                 } catch {
                     providerError = String(localized: "Unknown Dexcom Share Issue")
-                    self.logger.dlog("Unknown Dexcom Share Issue: \(String(describing: error))", category: "dexcomshare", level: .error)
+                    self.plog("Unknown Dexcom Share Issue: \(String(describing: error))", category: "dexcomshare", level: .error)
                 }
 
                 await self.setProviderIssue(providerError)
             } else {
-                self.logger.dlog("successful session to Dexcom Share", category: "dexcomshare", level: .debug)
+                self.plog("successful session to Dexcom Share", category: "dexcomshare", level: .debug)
                 guard let responseString = String(data: data, encoding: .utf8) else {
                     await self.setProviderIssue(String(localized: "Unable to decode session ID from Dexcom Share"))
                     return
@@ -429,7 +429,7 @@ class DexcomShare: Provider, @unchecked Sendable {
     }
 
     private func authenticate() async {
-        self.logger.dlog("DexcomShare.authenticate", category: "dexcomshare", level: .debug)
+        self.plog("DexcomShare.authenticate", category: "dexcomshare", level: .debug)
 
         if unsuccessfulAuthAttempts > 5 {
             return
@@ -460,7 +460,7 @@ class DexcomShare: Provider, @unchecked Sendable {
     }
 
     override internal func verifyCredentials() async -> Bool {
-        self.logger.dlog("dexcomshare.verifyCredentials", category: "dexcomshare", level: .debug)
+        self.plog("dexcomshare.verifyCredentials", category: "dexcomshare", level: .debug)
 
         await self.getAccountID()
         if self.accountID != "" {
