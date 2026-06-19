@@ -69,21 +69,21 @@ struct GlucoseSource {
     let baseURL: String
     let token: String
     let aidEnabled: Bool
-    let sourceName: String
+    let sourceIndex: Int
     private let logger: Logger
     private let httpTimeout = 120.0
 
-    init(baseURL: String, token: String, aidEnabled: Bool, sourceName: String) {
+    init(baseURL: String, token: String, aidEnabled: Bool, sourceIndex: Int) {
         self.baseURL = baseURL
         self.token = token
         self.aidEnabled = aidEnabled
-        self.sourceName = sourceName
-        let cat = sourceName.isEmpty ? "GlucoseSource" : "GlucoseSource/\(sourceName)"
+        self.sourceIndex = sourceIndex
+        let cat = sourceIndex < 0 ? "GlucoseSource" : "GlucoseSource/\(sourceIndex)"
         self.logger = Logger(subsystem: "tools.t1d.GlucoseBarChart", category: cat)
     }
 
     private func plog(_ message: String, level: OSLogType = .default) {
-        let taggedCategory = sourceName.isEmpty ? "GlucoseSource" : "GlucoseSource/\(sourceName)"
+        let taggedCategory = sourceIndex < 0 ? "GlucoseSource" : "GlucoseSource/\(sourceIndex)"
         logger.dlog(message, category: taggedCategory, level: level)
     }
 

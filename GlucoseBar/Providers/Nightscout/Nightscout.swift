@@ -414,7 +414,7 @@ class Nightscout: Provider, @unchecked Sendable {
                         Task { [weak self] in
                             guard let self = self else { return }
 
-                            let gs = GlucoseSource(baseURL: self.baseURL, token: self.auth?.token ?? "invalid", aidEnabled: self.aidEnabled, sourceName: self.sourceName)
+                            let gs = GlucoseSource(baseURL: self.baseURL, token: self.auth?.token ?? "invalid", aidEnabled: self.aidEnabled, sourceIndex: self.sourceIndex)
                             let gse = await gs.getGlucoseSourceExtras()
 
                             self.GlucoseSourceExtras = gse
@@ -608,7 +608,7 @@ class Nightscout: Provider, @unchecked Sendable {
                     unsuccessfulAuthAttempts = 0
 
                     // Check glucose source device to see if we support extra features
-                    let gs = GlucoseSource(baseURL: self.baseURL, token: result.token, aidEnabled: aidEnabled, sourceName: self.sourceName)
+                    let gs = GlucoseSource(baseURL: self.baseURL, token: result.token, aidEnabled: aidEnabled, sourceIndex: self.sourceIndex)
                     let (source, err) = try await gs.checkDeviceStatusForGSE()
                     if err != nil {
                         self.GlucoseSourceExtras.error = err!

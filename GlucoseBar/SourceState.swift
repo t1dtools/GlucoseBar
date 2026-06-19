@@ -11,6 +11,7 @@ import SwiftUI
 @MainActor
 final class SourceState: ObservableObject, Identifiable {
     let id: UUID
+    let sourceIndex: Int
     /// `nonisolated` so these can be passed to `.environmentObject()` inside
     /// view-builder closures without requiring an explicit `@MainActor` context.
     nonisolated let settings: SettingsStore
@@ -21,12 +22,15 @@ final class SourceState: ObservableObject, Identifiable {
     @Published var isPanePresented: Bool = false
 
     /// Creates a source backed by the given UUID.
-    init(id: UUID) {
+    init(id: UUID, index: Int) {
         self.id = id
+        self.sourceIndex = index
         let settings = SettingsStore(sourceId: id)
         self.settings = settings
         self.glucose = Glucose(settings)
-        self.glucose.sourceName = settings.sourceName
+        self.glucose.sourceIndex = index
+        self.glucose.provider.sourceIndex = index
+        self.glucose.plog("Source \(index) (\(settings.sourceName)) registered", level: .info)
     }
 }
 
