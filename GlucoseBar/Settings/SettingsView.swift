@@ -31,20 +31,14 @@ private enum SidebarItem: Hashable {
 private struct SourceSidebarSection: View {
     @ObservedObject var settings: SettingsStore
     let sourceId: UUID
-    let index: Int
 
-    @State var isExpanded: Bool = true
-
-    init(settings: SettingsStore, sourceId: UUID, index: Int) {
+    init(settings: SettingsStore, sourceId: UUID) {
         self.settings = settings
         self.sourceId = sourceId
-        self.index = index
-
-        self._isExpanded = State(initialValue: index == 0)
     }
 
     var body: some View {
-        Section(isExpanded: $isExpanded) {
+        Section {
             Label("Identity", systemImage: "person.crop.circle")
                 .tag(SidebarItem.sourceIdentity(sourceId))
             Label("CGM", systemImage: "bandage.fill")
@@ -59,13 +53,6 @@ private struct SourceSidebarSection: View {
                 Label("AID Integration", systemImage: "apps.iphone")
                     .tag(SidebarItem.sourceAID(sourceId))
             }
-        } header: {
-            HStack(spacing: 6) {
-                Image(systemName: settings.iconSymbol)
-                    .foregroundStyle(settings.iconColor.color)
-                Text(settings.sourceName)
-                    .font(.headline)
-            }
         }
     }
 }
@@ -77,6 +64,7 @@ struct SettingsView: View {
     @EnvironmentObject var uc: UpdateChecker
 
     @State private var selectedItem: SidebarItem? = nil
+    @State private var selectedSource: SourceState? = nil
 
     var body: some View {
         NavigationSplitView(columnVisibility: .constant(.doubleColumn)) {
@@ -90,54 +78,84 @@ struct SettingsView: View {
                             Label("Debug", systemImage: "ladybug.fill")
                                 .tag(SidebarItem.debug)
                         }
-                    }
-
-//                    Picker("", selection: $selectedItem) {
-////                        if selectedItem == .null {
-////                            Text("Select a profile").selectionDisabled()
-////                        }
-//                        ForEach(Array(sourceManager.sources.enumerated(), id: \.element.id)) { index, source in
-//                            if source != .null {
-//                                Text(source.sourceName).tag(index)
-//                            }
-//                        }
-//                    }.frame(width: 200, alignment: .trailing)
-                    ForEach(Array(sourceManager.sources.enumerated()), id: \.element.id) { index, source in
-                        SourceSidebarSection(
-                            settings: source.settings,
-                            sourceId: source.id,
-                            index: index
-                        )
-                    }
-
-                    Section {
                         Label("About", systemImage: "info.circle")
                             .tag(SidebarItem.about)
                     }
+
+                    Divider()
+
+                    VStack {
+                        HStack {
+                            Label("Profiles", systemImage: "person.2.fill")
+                                .font(.headline)
+                                .frame(maxWidth: 200, alignment: .leading)
+                            Spacer()
+
+                            let atLimit = sourceManager.sources.count >= SourceManager.maxSources
+                            if !atLimit {
+                                Button("+") {
+                                    let newSourceID = sourceManager.addSource()
+                                    selectedSource = sourceManager.sources.first(where: { $0.id == newSourceID })
+                                }
+                            }
+
+                            if atLimit {
+                                Text("\(SourceManager.maxSources) max", comment: "A message shown in the settings sidebar when the maximum number of profiles has been reached")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .padding(.bottom, 4)
+                            }
+                        }
+
+                        let picker = Picker("", selection: $selectedSource) {
+                            ForEach(sourceManager.sources) { source in
+                                Text(source.settings.sourceName)
+                                    .tag(source as SourceState?)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .labelsHidden()
+                        .frame(width: 165)
+
+                        Group {
+                            if #available(macOS 26.0, *) {
+                                AnyView(picker.buttonSizing(.flexible))
+                            } else {
+                                AnyView(picker)
+                            }
+                        }
+                        .onChange(of: selectedSource) { _, newSource in
+                            guard let source = newSource else { return }
+                            selectedItem = .sourceIdentity(source.id)
+                        }
+                        .onChange(of: selectedItem) { _, item in
+                            let sourceId: UUID?
+                            switch item {
+                            case .sourceIdentity(let id):   sourceId = id
+                            case .sourceCGM(let id):        sourceId = id
+                            case .sourceMenuBar(let id):    sourceId = id
+                            case .sourceThresholds(let id): sourceId = id
+                            case .sourceAID(let id):        sourceId = id
+                            case .sourceChart(let id):      sourceId = id
+                            case .none:                     sourceId = nil
+                            case .general, .debug, .about:  sourceId = nil
+                            }
+                            selectedSource = sourceId.flatMap { id in
+                                sourceManager.sources.first(where: { $0.id == id })
+                            }
+                        }
+                    }
+
+                    let source = selectedSource ?? sourceManager.sources.first!
+                    SourceSidebarSection(
+                        settings: source.settings,
+                        sourceId: source.id
+                    )
                 }
                 .toolbar(removing: .sidebarToggle)
                 .listStyle(.sidebar)
                 .frame(width: 200)
                 .padding(.top, 10)
-
-                let atLimit = sourceManager.sources.count >= SourceManager.maxSources
-                if !atLimit {
-                    Button {
-                        sourceManager.addSource()
-                    } label: {
-                        Label("Add Profile", systemImage: "plus.circle")
-                            .font(.footnote)
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.bottom, 4)
-                }
-
-                if atLimit {
-                    Text("\(SourceManager.maxSources) profiles maximum")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .padding(.bottom, 4)
-                }
 
                 Group {
                     if case .outdated(let latestVersion, let latestBuild) = uc.status {
@@ -176,6 +194,10 @@ struct SettingsView: View {
         .onAppear {
             if selectedItem == nil {
                 selectedItem = .general
+            }
+
+            if selectedSource == nil {
+                selectedSource = sourceManager.sources.first
             }
         }
         .onChange(of: sourceManager.sources.count) {

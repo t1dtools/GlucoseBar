@@ -133,11 +133,6 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     private func loadInternal() {
         let defaults = UserDefaults.standard
 
-        // Clear everything for testing purposes
-//        let domain = Bundle.main.bundleIdentifier!
-//        defaults.removePersistentDomain(forName: domain)
-//        UserDefaults.standard.synchronize()
-
         self.validSettings = defaults.bool(forKey: key("validSettings"))
         self.debugMode = defaults.bool(forKey: "debugMode")
 
@@ -151,7 +146,6 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         } else {
             self.iconColor = .white
         }
-
 
         // Nightscout
         self.nsURL = defaults.string(forKey: key("nsURL")) ?? "https://my.nightscout.site"
@@ -194,8 +188,6 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         self.showTimeSince = defaults.bool(forKey: key("showTimeSince"))
         self.showDelta = defaults.bool(forKey: key("showDelta"))
         self.showMenuBarIcon = defaults.bool(forKey: key("showMenuBarIcon"))
-
-//        defaults.removeObject(forKey: key("menuBarItems"))
 
         let jsonMenuBarItems = defaults.string(forKey: key("menuBarItems"))
         if let jsonMenuBarItems = jsonMenuBarItems {

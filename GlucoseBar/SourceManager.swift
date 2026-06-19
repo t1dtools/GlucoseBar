@@ -50,12 +50,14 @@ final class SourceManager: ObservableObject {
 
     /// Adds a new blank source and persists the updated source list.
     /// No-ops silently when already at `maxSources`.
-    func addSource() {
-        guard sources.count < SourceManager.maxSources else { return }
+    func addSource() -> UUID? {
+        guard sources.count < SourceManager.maxSources else { return nil }
         let newId = UUID()
         let state = SourceState(id: newId)
         sources.append(state)
         persistSourceIds()
+
+        return newId
     }
 
     /// Removes the source with the given id.
