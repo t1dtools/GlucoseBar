@@ -28,3 +28,14 @@ final class SourceState: ObservableObject, Identifiable {
         self.glucose = Glucose(settings)
     }
 }
+
+@MainActor
+extension SourceState: Hashable {
+    nonisolated static func == (lhs: SourceState, rhs: SourceState) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    nonisolated func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}
