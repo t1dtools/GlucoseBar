@@ -129,19 +129,21 @@ struct SettingsView: View {
                             selectedItem = .sourceIdentity(source.id)
                         }
                         .onChange(of: selectedItem) { _, item in
-                            let sourceId: UUID?
                             switch item {
-                            case .sourceIdentity(let id):   sourceId = id
-                            case .sourceCGM(let id):        sourceId = id
-                            case .sourceMenuBar(let id):    sourceId = id
-                            case .sourceThresholds(let id): sourceId = id
-                            case .sourceAID(let id):        sourceId = id
-                            case .sourceChart(let id):      sourceId = id
-                            case .none:                     sourceId = nil
-                            case .general, .debug, .about:  sourceId = nil
-                            }
-                            selectedSource = sourceId.flatMap { id in
-                                sourceManager.sources.first(where: { $0.id == id })
+                            case .sourceIdentity(let id):
+                                selectedSource = sourceManager.sources.first(where: { $0.id == id })
+                            case .sourceCGM(let id):
+                                selectedSource = sourceManager.sources.first(where: { $0.id == id })
+                            case .sourceMenuBar(let id):
+                                selectedSource = sourceManager.sources.first(where: { $0.id == id })
+                            case .sourceThresholds(let id):
+                                selectedSource = sourceManager.sources.first(where: { $0.id == id })
+                            case .sourceAID(let id):
+                                selectedSource = sourceManager.sources.first(where: { $0.id == id })
+                            case .sourceChart(let id):
+                                selectedSource = sourceManager.sources.first(where: { $0.id == id })
+                            case .none, .general, .debug, .about:
+                                break
                             }
                         }
                     }
