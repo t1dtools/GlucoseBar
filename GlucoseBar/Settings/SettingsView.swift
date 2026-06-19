@@ -64,7 +64,12 @@ struct SettingsView: View {
     @EnvironmentObject var uc: UpdateChecker
 
     @State private var selectedItem: SidebarItem? = nil
-    @State private var selectedSource: SourceState? = nil
+    @State private var selectedSource: SourceState?
+    @State private var didAppear = false
+
+    init(sourceManager: SourceManager) {
+        _selectedSource = State(initialValue: sourceManager.sources.first)
+    }
 
     var body: some View {
         NavigationSplitView(columnVisibility: .constant(.doubleColumn)) {
@@ -125,7 +130,7 @@ struct SettingsView: View {
                             }
                         }
                         .onChange(of: selectedSource) { _, newSource in
-                            guard let source = newSource else { return }
+                            guard didAppear, let source = newSource else { return }
                             selectedItem = .sourceIdentity(source.id)
                         }
                         .onChange(of: selectedItem) { _, item in
@@ -194,13 +199,9 @@ struct SettingsView: View {
         .navigationSplitViewColumnWidth(min: 440, ideal: 440)
         .frame(minWidth: 715, maxWidth: 715, minHeight: 500, maxHeight: .infinity)
         .onAppear {
-            if selectedItem == nil {
-                selectedItem = .general
-            }
-
-            if selectedSource == nil {
-                selectedSource = sourceManager.sources.first
-            }
+            selectedSource = sourceManager.sources.first
+            selectedItem = .general
+            didAppear = true
         }
         .onChange(of: sourceManager.sources.count) {
             guard let item = selectedItem else { return }
@@ -387,7 +388,8 @@ private struct SourceIdentityView: View {
 }
 
 #Preview {
-    SettingsView()
-        .environmentObject(SourceManager())
+    let sm = SourceManager()
+    SettingsView(sourceManager: sm)
+        .environmentObject(sm)
         .environmentObject(UpdateChecker())
 }
