@@ -15,7 +15,7 @@ struct GlucoseThresholdsView: View {
     var body: some View {
         ScrollView {
             VStack {
-                Text("Glucose Options").font(.headline).frame(maxWidth: .infinity, alignment: .leading)
+                Text("Glucose Options").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.top)
 
                 GroupBox {
                     VStack {
@@ -108,7 +108,7 @@ struct GlucoseThresholdsView: View {
                         }
                     }.padding()
                 }
-            }
+            }.padding(.horizontal).padding(.bottom)
         }
     }
 }
