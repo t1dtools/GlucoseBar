@@ -18,6 +18,8 @@ final class DebugLogger: @unchecked Sendable {
     private var fileHandle: FileHandle?
     private(set) var currentLogURL: URL?
 
+    private let maxLogFiles = 10
+
     private init() {}
 
     // MARK: - Public API
@@ -77,6 +79,8 @@ final class DebugLogger: @unchecked Sendable {
         // Create fresh file
         FileManager.default.createFile(atPath: live.path, contents: nil)
 
+        pruneOldLogs(in: dir)
+
         do {
             let handle = try FileHandle(forWritingTo: live)
             fileHandle = handle
@@ -88,8 +92,25 @@ final class DebugLogger: @unchecked Sendable {
             fileHandle = nil
             currentLogURL = nil
         }
+    }
 
-        // TODO: Attempt cleanup of old stale files (eg keep 10 or so)
+    private func pruneOldLogs(in dir: URL) {
+        guard let contents = try? FileManager.default.contentsOfDirectory(
+            at: dir, includingPropertiesForKeys: [.contentModificationDateKey]
+        ) else { return }
+
+        let archives = contents
+            .filter { $0.lastPathComponent.hasPrefix("debug-") && $0.pathExtension == "log" }
+            .sorted { url1, url2 in
+                let d1 = (try? url1.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate ?? .distantPast
+                let d2 = (try? url2.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate ?? .distantPast
+                return d1 > d2
+            }
+
+        let keep = maxLogFiles - 1
+        for url in archives.dropFirst(keep) {
+            try? FileManager.default.removeItem(at: url)
+        }
     }
 
     private func closeLog() {
