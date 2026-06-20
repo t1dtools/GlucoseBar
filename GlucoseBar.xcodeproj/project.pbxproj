@@ -80,6 +80,7 @@
 		83F888412B1A888000A50E74 /* LibreLinkUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F888402B1A888000A50E74 /* LibreLinkUp.swift */; };
 		AA000001DEBUGLOGGER00001A /* DebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001DEBUGLOGGER00001B /* DebugLogger.swift */; };
 		AA000002DEBUGSETTINGS001A /* DebugSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002DEBUGSETTINGS001B /* DebugSettingsView.swift */; };
+		83E3C8112DFF300300B0F996 /* PreferencesController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E3C8102DFF300000B0F996 /* PreferencesController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -156,6 +157,7 @@
 		83F888402B1A888000A50E74 /* LibreLinkUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibreLinkUp.swift; sourceTree = "<group>"; };
 		AA000001DEBUGLOGGER00001B /* DebugLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogger.swift; sourceTree = "<group>"; };
 		AA000002DEBUGSETTINGS001B /* DebugSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSettingsView.swift; sourceTree = "<group>"; };
+		83E3C8102DFF300000B0F996 /* PreferencesController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -359,6 +361,7 @@
 				83E198102DEE5ECA00B0F995 /* GeneralSettingsView.swift */,
 				83E323802AC21DDD00CB5206 /* Settings.swift */,
 				83CC000B2F0000010000CC00 /* SymbolPickerView.swift */,
+				83E3C8102DFF300000B0F996 /* PreferencesController.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -530,6 +533,7 @@
 				83CC000A2F0000010000CC00 /* SourceMenuBarLabel.swift in Sources */,
 				83CC000C2F0000010000CC00 /* SymbolPickerView.swift in Sources */,
 				83CC000E2F0000010000CC00 /* MenuBarCoordinator.swift in Sources */,
+				83E3C8112DFF300300B0F996 /* PreferencesController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

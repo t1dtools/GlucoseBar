@@ -84,6 +84,7 @@ struct GlucoseBarApp: App {
     @StateObject var vs: ViewState = ViewState()
     @StateObject var uc: UpdateChecker = UpdateChecker()
     @StateObject var coordinator: MenuBarCoordinator = MenuBarCoordinator()
+    private let preferencesController = PreferencesController()
 
     @State var activeSourceIndex: Int? = nil
     @State private var menuBarStatusItems: [Int: NSStatusItem] = [:]
@@ -159,11 +160,6 @@ struct GlucoseBarApp: App {
 
         Settings {
             SettingsView(sourceManager: sourceManager)
-                .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeMainNotification)) { _ in
-                    NSApp.setActivationPolicy(.regular)
-                    NSApp.activate(ignoringOtherApps: true)
-                    NSApp.windows.first?.orderFrontRegardless()
-                }
                 .onDisappear {
                     NSApp.setActivationPolicy(.accessory)
                     NSApp.deactivate()
