@@ -430,7 +430,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         return await provider.verifyCredentials()
     }
 
-    func resetApplication() async -> Bool {
+    func resetApplication() async {
         let installID = UserDefaults.standard.string(forKey: "GlucoseBar.installID")
         if let id = Bundle.main.bundleIdentifier {
             UserDefaults.standard.removePersistentDomain(forName: id)
@@ -439,8 +439,28 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
             UserDefaults.standard.set(installID, forKey: "GlucoseBar.installID")
         }
         UserDefaults.standard.set(true, forKey: "debugMode")
-        load()
-        return true
+        restartApp()
+    }
+
+    // Found at: https://topscrech.medium.com/how-to-programmatically-restart-a-macos-app-in-swift-91cdb02e0ac0
+    private func restartApp() {
+        let bundlePath = Bundle.main.bundlePath
+
+        let command = """
+        sleep 0.1; open "\(bundlePath)"
+        """
+
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/bin/bash")
+        task.arguments = ["-c", command]
+
+        do {
+            try task.run()
+        } catch {
+            self.logger.dlog("Error restarting app: \(error)", category: "settingsstore", level: .default)
+        }
+
+        exit(0)
     }
 
     func disableDebugMode() async -> Bool {

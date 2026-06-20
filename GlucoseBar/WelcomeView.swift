@@ -18,7 +18,6 @@ struct WelcomeView: View {
                 Spacer()
                 if let image = NSImage(named: "AppIcon") {
                     Image(nsImage: image)
-
                         .aspectRatio(contentMode: .fit)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
