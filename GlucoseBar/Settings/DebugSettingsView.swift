@@ -137,7 +137,7 @@ struct DebugSettingsView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This will delete all settings and glucose data. This cannot be undone.")
+            Text("This will delete all settings, and restart the application. This cannot be undone.")
         }.confirmationDialog(
             "Disable Debug Mode",
             isPresented: $showLeaveDebugModeConfirmation,
