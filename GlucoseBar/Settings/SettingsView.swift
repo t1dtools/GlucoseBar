@@ -57,6 +57,13 @@ private struct SourceSidebarSection: View {
     }
 }
 
+// MARK: - SourcePickerLabel
+
+private struct SourcePickerLabel: View {
+    @ObservedObject var settings: SettingsStore
+    var body: some View { Text(settings.sourceName) }
+}
+
 // MARK: - SettingsView
 
 struct SettingsView: View {
@@ -114,7 +121,7 @@ struct SettingsView: View {
 
                         let picker = Picker("", selection: $selectedSource) {
                             ForEach(sourceManager.sources) { source in
-                                Text(source.settings.sourceName)
+                                SourcePickerLabel(settings: source.settings)
                                     .tag(source as SourceState?)
                             }
                         }
