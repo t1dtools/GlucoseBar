@@ -15,6 +15,7 @@ struct MainAppView: View {
     @EnvironmentObject var s: SettingsStore
     @EnvironmentObject var vs: ViewState
     @EnvironmentObject var uc: UpdateChecker
+    @EnvironmentObject var sm: SourceManager
 
     let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "main")
 
@@ -144,12 +145,14 @@ struct MainAppView: View {
         } else if (s.validSettings) {
             ZStack {
                 VStack(spacing: 0) {
-                    HStack {
-                        Image(systemName: s.iconSymbol).foregroundStyle(s.iconColor.color)
-                        Text(s.sourceName).font(.headline)
-                        Spacer()
+                    if sm.sources.count > 1 {
+                        HStack {
+                            Image(systemName: s.iconSymbol).foregroundStyle(s.iconColor.color)
+                            Text(s.sourceName).font(.headline)
+                            Spacer()
+                        }
+                        .padding(.horizontal).padding(.top, 8)
                     }
-                    .padding(.horizontal).padding(.top, 8)
                     GraphView(glucose: g).environmentObject(s).environmentObject(vs)
                     HStack {
                         ZenModeButton().help("Replaces your configured items in the menu bar with a circle that changes color based on glucose levels.")

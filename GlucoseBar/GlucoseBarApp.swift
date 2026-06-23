@@ -179,6 +179,7 @@ struct GlucoseBarApp: App {
             .environmentObject(source.settings)
             .environmentObject(vs)
             .environmentObject(uc)
+            .environmentObject(sourceManager)
             .onAppear   { Task { @MainActor in source.isPanePresented = true  } }
             .onDisappear { Task { @MainActor in source.isPanePresented = false } }
     }
