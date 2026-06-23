@@ -70,6 +70,7 @@
 		83E198152DEEE2A900B0F995 /* ChartSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E198142DEEE2A900B0F995 /* ChartSettingsView.swift */; };
 		83E198172DEF269F00B0F995 /* AidSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E198162DEF269F00B0F995 /* AidSettingsView.swift */; };
 		83E323812AC21DDD00CB5206 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E323802AC21DDD00CB5206 /* Settings.swift */; };
+		83E3C8112DFF300300B0F996 /* PreferencesController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E3C8102DFF300000B0F996 /* PreferencesController.swift */; };
 		83F2FC602FDFEE13000B7ACD /* GlucoseThresholdsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F2FC5F2FDFEE0C000B7ACD /* GlucoseThresholdsView.swift */; };
 		83F850282E429F2A00F8699F /* GlucoseDeltaSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F850272E429F2400F8699F /* GlucoseDeltaSettingsView.swift */; };
 		83F8502A2E42A02400F8699F /* GlucoseTrendSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F850292E42A01F00F8699F /* GlucoseTrendSettingsView.swift */; };
@@ -80,7 +81,6 @@
 		83F888412B1A888000A50E74 /* LibreLinkUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F888402B1A888000A50E74 /* LibreLinkUp.swift */; };
 		AA000001DEBUGLOGGER00001A /* DebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001DEBUGLOGGER00001B /* DebugLogger.swift */; };
 		AA000002DEBUGSETTINGS001A /* DebugSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002DEBUGSETTINGS001B /* DebugSettingsView.swift */; };
-		83E3C8112DFF300300B0F996 /* PreferencesController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E3C8102DFF300000B0F996 /* PreferencesController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -147,6 +147,7 @@
 		83E198142DEEE2A900B0F995 /* ChartSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartSettingsView.swift; sourceTree = "<group>"; };
 		83E198162DEF269F00B0F995 /* AidSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AidSettingsView.swift; sourceTree = "<group>"; };
 		83E323802AC21DDD00CB5206 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
+		83E3C8102DFF300000B0F996 /* PreferencesController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesController.swift; sourceTree = "<group>"; };
 		83F2FC5F2FDFEE0C000B7ACD /* GlucoseThresholdsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseThresholdsView.swift; sourceTree = "<group>"; };
 		83F850272E429F2400F8699F /* GlucoseDeltaSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseDeltaSettingsView.swift; sourceTree = "<group>"; };
 		83F850292E42A01F00F8699F /* GlucoseTrendSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseTrendSettingsView.swift; sourceTree = "<group>"; };
@@ -157,7 +158,6 @@
 		83F888402B1A888000A50E74 /* LibreLinkUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibreLinkUp.swift; sourceTree = "<group>"; };
 		AA000001DEBUGLOGGER00001B /* DebugLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogger.swift; sourceTree = "<group>"; };
 		AA000002DEBUGSETTINGS001B /* DebugSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSettingsView.swift; sourceTree = "<group>"; };
-		83E3C8102DFF300000B0F996 /* PreferencesController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -243,7 +243,6 @@
 				AA000001DEBUGLOGGER00001B /* DebugLogger.swift */,
 				8381599C2BE4257F00A228F3 /* MainAppView.swift */,
 				838B25DE2BF0146F00D10DDA /* WelcomeView.swift */,
-				83CC00012F0000010000CC00 /* CodableColor.swift */,
 				83CC00032F0000010000CC00 /* SourceConfiguration.swift */,
 				83CC00052F0000010000CC00 /* SourceState.swift */,
 				83CC00072F0000010000CC00 /* SourceManager.swift */,
@@ -319,6 +318,7 @@
 				83DB10F02DFF45AC001ADCE7 /* GlucoseOps.swift */,
 				83DB10EE2DFF4118001ADCE7 /* LoopColor.swift */,
 				83DB10EC2DFF40AF001ADCE7 /* RelativeTime.swift */,
+				83CC00012F0000010000CC00 /* CodableColor.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
