@@ -211,6 +211,10 @@ struct SettingsView: View {
             didAppear = true
         }
         .onChange(of: sourceManager.sources.count) {
+            if let sel = selectedSource, !sourceManager.sources.contains(where: { $0.id == sel.id }) {
+                selectedSource = sourceManager.sources.first
+            }
+
             guard let item = selectedItem else { return }
             let sourceId: UUID?
             switch item {
