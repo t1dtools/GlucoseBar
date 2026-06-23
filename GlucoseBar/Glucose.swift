@@ -226,6 +226,15 @@ class Glucose: ObservableObject, Sendable {
         self.getGlucose()
     }
 
+    func stop() {
+        timer.suspend()
+        timer.eventHandler = nil
+        if let observer = notificationObserver {
+            notificationCenter.removeObserver(observer)
+            notificationObserver = nil
+        }
+    }
+
     func getGlucose() {
         self.error = ""
         if let providerIssue = self.provider.providerIssue {

@@ -70,6 +70,7 @@ final class SourceManager: ObservableObject {
             sources.first?.settings.resetToDefaults()
             return
         }
+        sources.first(where: { $0.id == id })?.glucose.stop()
         sources.removeAll { $0.id == id }
         removeUserDefaultsKeys(for: id)
         persistSourceIds()
