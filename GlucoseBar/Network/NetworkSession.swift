@@ -10,9 +10,21 @@ import Foundation
 extension URLSession {
     static let appDefault: URLSession = {
         let config = URLSessionConfiguration.default
-        config.httpAdditionalHeaders = ["User-Agent": URLSession.buildUserAgent()]
+        config.httpAdditionalHeaders = [
+            "User-Agent": URLSession.buildUserAgent(),
+            "Accept-Language": URLSession.buildAcceptLanguage()
+        ]
         return URLSession(configuration: config)
     }()
+
+    private static func buildAcceptLanguage() -> String {
+        let langs = Locale.preferredLanguages
+        let items = langs.enumerated().map { i, lang in
+            if i == 0 { return lang }
+            return "\(lang);q=\(String(format: "%.1f", 1.0 - Double(i) * 0.1))"
+        }
+        return items.joined(separator: ", ")
+    }
 
     private static func buildUserAgent() -> String {
         let version = Bundle.main.appVersionLong
