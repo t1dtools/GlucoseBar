@@ -15,6 +15,8 @@ class ViewState: ObservableObject, @unchecked Sendable {
     private let probeQueue = DispatchQueue(label: "tools.t1d.GlucoseBar.probe")
     private var probeTask: URLSessionDataTask?
     private var probeURLIndex: Int = 0
+    private var retryAttempt = 0
+    private let maxRetries = 5
 
     // Primary probe target: set externally when the CGM provider is configured.
     // Falls back to the app's website, then google.com.
@@ -34,6 +36,7 @@ class ViewState: ObservableObject, @unchecked Sendable {
         networkMonitor.pathUpdateHandler = { [weak self] path in
             guard let self = self else { return }
             if path.status == .satisfied {
+                self.retryAttempt = 0
                 self.probeURLIndex = 0
                 self.startProbe()
             } else {
@@ -48,7 +51,7 @@ class ViewState: ObservableObject, @unchecked Sendable {
         cancelProbe()
         let urls = probeURLs
         let url = urls[probeURLIndex]
-        var request = URLRequest(url: url, timeoutInterval: 10)
+        var request = URLRequest(url: url, timeoutInterval: 5)
         request.httpMethod = "HEAD"
 
         let task = URLSession.shared.dataTask(with: request) { [weak self] _, response, error in
@@ -56,9 +59,13 @@ class ViewState: ObservableObject, @unchecked Sendable {
             if let httpResponse = response as? HTTPURLResponse,
                (200...399).contains(httpResponse.statusCode) {
                 Task { @MainActor in self.isOnline = true }
+                self.retryAttempt = 0
                 self.cancelProbe()
             } else {
-                self.probeQueue.asyncAfter(deadline: .now() + 3) { [weak self] in
+                self.retryAttempt += 1
+                guard self.retryAttempt <= self.maxRetries else { return }
+                let delay = min(5.0 * pow(2.0, Double(self.retryAttempt - 1)), 60.0)
+                self.probeQueue.asyncAfter(deadline: .now() + delay) { [weak self] in
                     guard let self = self else { return }
                     guard self.networkMonitor.currentPath.status == .satisfied else { return }
                     self.probeURLIndex = (self.probeURLIndex + 1) % urls.count
