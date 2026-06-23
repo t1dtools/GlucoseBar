@@ -17,7 +17,7 @@ class ViewState: ObservableObject, @unchecked Sendable {
     private var probeURLIndex: Int = 0
 
     // Primary probe target: set externally when the CGM provider is configured.
-    // Falls back to the app's own version endpoint, then google.com.
+    // Falls back to the app's website, then google.com.
     var providerURL: URL?
 
     private var probeURLs: [URL] {
@@ -25,7 +25,7 @@ class ViewState: ObservableObject, @unchecked Sendable {
         if let url = providerURL {
             urls.append(url)
         }
-        urls.append(URL(string: "https://glucosebar.t1d.tools/version.json")!)
+        urls.append(URL(string: "https://glucosebar.t1d.tools")!)
         urls.append(URL(string: "https://google.com")!)
         return urls
     }
