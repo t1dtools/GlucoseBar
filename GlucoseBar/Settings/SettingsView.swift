@@ -81,6 +81,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationSplitView(columnVisibility: .constant(.doubleColumn)) {
             VStack {
+                let _ = sourceManager.refreshToken
                 List(selection: $selectedItem) {
 
                     Section {
@@ -279,6 +280,7 @@ struct SettingsView: View {
             case .general:
                 GeneralSettingsView()
                     .environmentObject(uc)
+                    .environmentObject(sourceManager)
             case .debug:
                 if let source = sourceManager.sources.first {
                     DebugSettingsView()

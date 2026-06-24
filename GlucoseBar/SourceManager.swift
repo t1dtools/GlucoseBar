@@ -9,6 +9,7 @@ import SwiftUI
 @MainActor
 final class SourceManager: ObservableObject {
     @Published var sources: [SourceState] = []
+    @Published var refreshToken = UUID()
 
     private let defaults = UserDefaults.standard
     private let sourceIdsKey = "sourceIds"

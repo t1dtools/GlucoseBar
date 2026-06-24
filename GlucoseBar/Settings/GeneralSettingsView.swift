@@ -11,6 +11,9 @@ import LaunchAtLogin
 
 struct GeneralSettingsView: View {
     @EnvironmentObject var uc: UpdateChecker
+    @EnvironmentObject var sourceManager: SourceManager
+
+    @State private var showDebugConfirmation = false
 
     var body: some View {
         ScrollView {
@@ -21,6 +24,19 @@ struct GeneralSettingsView: View {
                             Image(nsImage: image)
                                 .aspectRatio(contentMode: .fit)
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .onTapGesture(count: 4) {
+                                    guard sourceManager.sources.first?.settings.debugMode != true else { return }
+                                    showDebugConfirmation = true
+                                }
+                                .alert("Enable Debug Mode?", isPresented: $showDebugConfirmation) {
+                                    Button("Enable") {
+                                        sourceManager.sources.first?.settings.setDebugMode(true)
+                                        sourceManager.refreshToken = UUID()
+                                    }
+                                    Button("Cancel", role: .cancel) {}
+                                } message: {
+                                    Text("Debug mode logs additional information for troubleshooting purposes.")
+                                }
                         }
                         Spacer()
                         VStack {
