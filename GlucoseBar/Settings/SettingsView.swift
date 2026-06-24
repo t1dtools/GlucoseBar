@@ -43,12 +43,12 @@ private struct SourceSidebarSection: View {
                 .tag(SidebarItem.sourceIdentity(sourceId))
             Label("CGM", systemImage: "bandage.fill")
                 .tag(SidebarItem.sourceCGM(sourceId))
+            Label("Glucose", systemImage: "drop.fill")
+                .tag(SidebarItem.sourceThresholds(sourceId))
             Label("Menu Bar", systemImage: "menubar.rectangle")
                 .tag(SidebarItem.sourceMenuBar(sourceId))
             Label("Chart", systemImage: "chart.dots.scatter")
                 .tag(SidebarItem.sourceChart(sourceId))
-            Label("Thresholds & Display", systemImage: "gear")
-                .tag(SidebarItem.sourceThresholds(sourceId))
             if settings.aidEnableIntegration && settings.cgmProvider == .nightscout {
                 Label("AID Integration", systemImage: "apps.iphone")
                     .tag(SidebarItem.sourceAID(sourceId))
@@ -105,10 +105,12 @@ struct SettingsView: View {
 
                             let atLimit = sourceManager.sources.count >= SourceManager.maxSources
                             if !atLimit {
-                                Button("+") {
+                                Button {
                                     let newSourceID = sourceManager.addSource()
                                     selectedSource = sourceManager.sources.first(where: { $0.id == newSourceID })
-                                }
+                                } label: {
+                                    Image(systemName: "plus").fontWeight(.heavy)
+                                }.help("Add additional profile")
                             }
 
                             if atLimit {
