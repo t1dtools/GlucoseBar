@@ -113,6 +113,7 @@ class DexcomShare: Provider, @unchecked Sendable {
         let applicationId: String
     }
 
+    @MainActor
     override internal func fetch() async {
         plog("DexcomShare.fetch", category: "dexcomshare", level: .debug)
 
@@ -127,7 +128,9 @@ class DexcomShare: Provider, @unchecked Sendable {
                 accountID = ""
                 sessionID = ""
             } else {
-                self.providerIssue = "Unable to connect to Dexcom Share after 5 attempts. Please check your credentials and if Dexcom is asking to send a code to your email or phone, please go through that flow on your device."
+                await MainActor.run {
+                    self.providerIssue = "Unable to connect to Dexcom Share after 5 attempts. Please check your credentials and if Dexcom is asking to send a code to your email or phone, please go through that flow on your device."
+                }
                 return
             }
         }
@@ -171,15 +174,10 @@ class DexcomShare: Provider, @unchecked Sendable {
                 do {
                     let result = try JSONDecoder().decode(DexcomShareErrorResponse.self, from: data)
 
-                    // If session expired, clear auth data and re-authenticate inline
-                    // (one level only — no recursive fetch to avoid cascading calls).
                     if result.Code == "SessionIdNotFound" || result.Code == "SessionNotValid" {
                         self.accountID = ""
                         self.sessionID = ""
                         await authenticate()
-                        guard isAuthValid() else { return }
-                        // Re-attempt the data fetch now that we have a fresh session.
-                        await self.fetch()
                         return
                     }
 
@@ -213,7 +211,9 @@ class DexcomShare: Provider, @unchecked Sendable {
                     } else {
                         self.setGlucoseEntries(newEntries)
                     }
-                    self.lastFetch = Date()
+                    await MainActor.run {
+                        self.lastFetch = Date()
+                    }
                 } catch DecodingError.dataCorrupted(_) {
                     await self.setProviderIssue(String(localized: "Unable to read data from Dexcom Share: Data corrupted."))
                 } catch let DecodingError.keyNotFound(key, _) {

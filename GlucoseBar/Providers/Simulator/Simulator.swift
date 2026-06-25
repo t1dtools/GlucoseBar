@@ -14,6 +14,7 @@ class Simulator: Provider, @unchecked Sendable {
         self.type = .simulator
     }
 
+    @MainActor
     override internal func fetch() async {
 
         self.lastFetch = Date()

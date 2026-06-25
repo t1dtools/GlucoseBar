@@ -91,7 +91,7 @@ class Provider: ObservableObject, @unchecked Sendable {
     }
     @Published var RemoteGlucoseSource: GlucoseSourceDevice = .null
     @Published private var _glucoseEntries: [GlucoseEntry] = []
-    private let glucoseEntriesQueue = DispatchQueue(label: "tools.t1d.GlucoseBar.glucoseEntries", attributes: .concurrent)
+
     @Published var GlucoseSourceExtras: GlucoseSourceExtraProperties = GlucoseSourceExtraProperties()
     @Published public var providerIssue: String?
     @Published public var lastFetch: Date = Date().addingTimeInterval(TimeInterval(-5*60))
@@ -110,32 +110,15 @@ class Provider: ObservableObject, @unchecked Sendable {
 
     // Thread-safe getter for GlucoseEntries
     var GlucoseEntries: [GlucoseEntry] {
-        get {
-            return glucoseEntriesQueue.sync {
-                return _glucoseEntries
-            }
-        }
+        _glucoseEntries
     }
 
-    // Thread-safe setter for GlucoseEntries - must be called from main thread for UI updates
     func setGlucoseEntries(_ entries: [GlucoseEntry]) {
-        glucoseEntriesQueue.async(flags: .barrier) { [weak self] in
-            guard let self = self else { return }
-            self._glucoseEntries = entries
-        }
-
-        // Update UI on main thread
-        Task { [weak self] in
-            guard let self = self else { return }
-            self.objectWillChange.send()
-        }
+        _glucoseEntries = entries
     }
 
-    // Thread-safe method to get a safe copy of entries for UI use
     func getSafeGlucoseEntries() -> [GlucoseEntry] {
-        return glucoseEntriesQueue.sync {
-            return Array(_glucoseEntries) // Create a copy
-        }
+        return _glucoseEntries
     }
 
     internal func startTimer() {
@@ -159,6 +142,7 @@ class Provider: ObservableObject, @unchecked Sendable {
         return false
     }
 
+    @MainActor
     internal func fetch() async {
         self.logger.dlog("Base fetch function called. This should not happen. Occurrences of this message means that your CGM provider implementation does not have it's own `fetch` implementation, or that no provider is configured.", category: "provider", level: .error)
         // Should be implemented in the discrete providers

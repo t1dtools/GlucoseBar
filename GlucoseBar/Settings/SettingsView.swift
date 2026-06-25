@@ -114,7 +114,12 @@ struct SettingsView: View {
                                 }.help("Add additional profile")
                             }
 
-Text(String.localizedStringWithFormat(NSLocalizedString("%lld max", comment: "A message shown in the settings sidebar when the maximum number of profiles has been reached"), SourceManager.maxSources))
+                            if atLimit {
+                                Text(String.localizedStringWithFormat(NSLocalizedString("%lld max", comment: "A message shown in the settings sidebar when the maximum number of profiles has been reached"), SourceManager.maxSources))
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .padding(.bottom, 4)
+                            }
                         }
 
                         let picker = Picker("", selection: $selectedSource) {
@@ -239,7 +244,9 @@ Text(String.localizedStringWithFormat(NSLocalizedString("%lld max", comment: "A 
             switch item {
             case .sourceIdentity(let id):
                 sourceView(id: id) { source in
-                    SourceIdentityView()
+                    SourceIdentityView(onRemove: {
+                        selectedSource = sourceManager.sources.first(where: { $0.id != source.id })
+                    })
                         .environmentObject(source.settings)
                 }
             case .sourceCGM(let id):
@@ -314,6 +321,8 @@ private struct SourceIdentityView: View {
     @EnvironmentObject var s: SettingsStore
     @EnvironmentObject var sourceManager: SourceManager
 
+    let onRemove: (() -> Void)?
+
     @State private var showRemoveConfirmation = false
 
     var body: some View {
@@ -383,6 +392,7 @@ private struct SourceIdentityView: View {
                     ) {
                         Button("Remove Profile", role: .destructive) {
                             if let source = sourceManager.sources.first(where: { $0.settings === s }) {
+                                onRemove?()
                                 sourceManager.removeSource(id: source.id)
                             }
                         }

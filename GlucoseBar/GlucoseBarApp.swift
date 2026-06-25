@@ -63,7 +63,16 @@ class ViewState: ObservableObject, @unchecked Sendable {
                 self.cancelProbe()
             } else {
                 self.retryAttempt += 1
-                guard self.retryAttempt <= self.maxRetries else { return }
+                guard self.retryAttempt <= self.maxRetries else {
+                    self.probeQueue.asyncAfter(deadline: .now() + 300) { [weak self] in
+                        guard let self = self else { return }
+                        guard self.networkMonitor.currentPath.status == .satisfied else { return }
+                        self.retryAttempt = 0
+                        self.probeURLIndex = 0
+                        self.startProbe()
+                    }
+                    return
+                }
                 let delay = min(5.0 * pow(2.0, Double(self.retryAttempt - 1)), 60.0)
                 self.probeQueue.asyncAfter(deadline: .now() + delay) { [weak self] in
                     guard let self = self else { return }

@@ -296,23 +296,30 @@ class Nightscout: Provider, @unchecked Sendable {
         let trendRate: Double?
     }
 
+    @MainActor
     override internal func fetch() async {
         plog("Nightscout.fetch", category: "nightscout", level: .debug)
 
         if self.socket.status == .connected {
             // We're on a socket connection, so the rest of this function is not needed
-            lastFetch = Date()
+            await MainActor.run {
+                lastFetch = Date()
+            }
             plog("Nightscout.fetch exiting early due to socket being connected", category: "nightscout", level: .debug)
             return
         }
 
         if !baseURL.hasPrefix("http://") && !baseURL.hasPrefix("https://") {
-            self.providerIssue = "Invalid Nightscout URL. It must start with http:// or https://"
+            await MainActor.run {
+                self.providerIssue = "Invalid Nightscout URL. It must start with http:// or https://"
+            }
             return
         }
 
         if unsuccessfulAuthAttempts > 5 {
-            self.providerIssue = "Unable to connect to Nightscout after 5 attempts. Please check your credentials."
+            await MainActor.run {
+                self.providerIssue = "Unable to connect to Nightscout after 5 attempts. Please check your credentials."
+            }
             return
         }
 
@@ -321,11 +328,15 @@ class Nightscout: Provider, @unchecked Sendable {
         }
 
         if !isAuthValid() {
-            self.providerIssue = "Unable to fetch due to unknown issue. Please ensure the Nightscout Server URL is correct and begins with http:// or https://"
+            await MainActor.run {
+                self.providerIssue = "Unable to fetch due to unknown issue. Please ensure the Nightscout Server URL is correct and begins with http:// or https://"
+            }
             return
         }
 
-        self.providerIssue = nil
+        await MainActor.run {
+            self.providerIssue = nil
+        }
 
         var url = "\(baseURL)/api/v3/entries?sort%24desc=date&fields=sgv%2Ctrend%2Cdirection%2Cdate%2Cidentifier"
 
@@ -342,7 +353,9 @@ class Nightscout: Provider, @unchecked Sendable {
             if self.lastFullFetch.timeIntervalSinceNow < -900 {
                 plog("full fetch because it's been over 15 minutes since we got all data", category: "nightscout", level: .info)
                 limit = 288
-                self.lastFullFetch = Date()
+                await MainActor.run {
+                    self.lastFullFetch = Date()
+                }
             }
 
         }
@@ -369,7 +382,7 @@ class Nightscout: Provider, @unchecked Sendable {
             let res = response as? HTTPURLResponse
             if res == nil {
                 self.plog("Unable to cast response to HTTPURLResponse", category: "nightscout", level: .error)
-                Task {
+                Task { @MainActor in
                     self.providerIssue = "Unable to get glucose data: Empty response from server."
                 }
                 return
@@ -411,7 +424,7 @@ class Nightscout: Provider, @unchecked Sendable {
                     }
 
                     if aidEnabled && RemoteGlucoseSource != .null {
-                        Task { [weak self] in
+                        Task { @MainActor [weak self] in
                             guard let self = self else { return }
 
                             let gs = GlucoseSource(baseURL: self.baseURL, token: self.auth?.token ?? "invalid", aidEnabled: self.aidEnabled, sourceIndex: self.sourceIndex)
@@ -421,40 +434,42 @@ class Nightscout: Provider, @unchecked Sendable {
                         }
                     }
                 } catch DecodingError.dataCorrupted(_) {
-                    Task { [weak self] in
+                    Task { @MainActor [weak self] in
                         guard let self = self else { return }
                         self.providerIssue = "Unable to read data from Nightscout: Data corrupted."
                     }
                 } catch let DecodingError.keyNotFound(key, _) {
-                    Task { [weak self] in
+                    Task { @MainActor [weak self] in
                         guard let self = self else { return }
                         self.providerIssue = "Unable to read data from Nightscout: Missing key \(key)"
                     }
                 } catch DecodingError.valueNotFound(_, _) {
-                    Task { [weak self] in
+                    Task { @MainActor [weak self] in
                         guard let self = self else { return }
                         self.providerIssue = "Unable to read data from Nightscout: Missing required value"
                     }
                 } catch DecodingError.typeMismatch(_, _) {
-                    Task { [weak self] in
+                    Task { @MainActor [weak self] in
                         guard let self = self else { return }
                         self.providerIssue = "Unable to read data from Nightscout: Value type mismatch. Is this a new version of Nightscout?"
                     }
                 } catch {
                     self.plog("Error parsing NS response: \(String(describing: error))", category: "nightscout", level: .error)
-                    Task { [weak self] in
+                    Task { @MainActor [weak self] in
                         guard let self = self else { return }
                         self.providerIssue = "Unable to parse glucose data from nightscout: Error unknown."
                     }
                 }
             } else if res!.statusCode == 401 {
-                self.auth = nil
+                await MainActor.run {
+                    self.auth = nil
+                }
 
                 return
             } else {
                 do {
                     let result = try JSONDecoder().decode(NightscoutEntriesErrorResponse.self, from: data)
-                    Task { [weak self] in
+                    Task { @MainActor [weak self] in
                         guard let self = self else { return }
                         self.providerIssue = "Error from Nightscout: \(result.message)"
                     }
@@ -463,7 +478,7 @@ class Nightscout: Provider, @unchecked Sendable {
                 }
             }
         } catch {
-            Task { [weak self] in
+            Task { @MainActor [weak self] in
                 guard let self = self else { return }
 
                 var err = String(describing: error)
@@ -550,14 +565,18 @@ class Nightscout: Provider, @unchecked Sendable {
             return
         }
 
-        isAuthenticating = true
+        await MainActor.run {
+            isAuthenticating = true
+        }
 
         if !baseURL.hasPrefix("https://") && !baseURL.hasPrefix("http://") {
-            self.providerIssue = "Invalid Nightscout URL. Must start with either http:// or https://"
+            await MainActor.run {
+                self.providerIssue = "Invalid Nightscout URL. Must start with either http:// or https://"
+            }
             return
         }
 
-        Task {
+        await MainActor.run {
             self.providerIssue = nil
             self.isAuthenticating = true
         }
@@ -571,8 +590,7 @@ class Nightscout: Provider, @unchecked Sendable {
             let (data, response) = try await URLSession.appDefault.data(for: request)
 
             guard let res = response as? HTTPURLResponse else {
-                Task { [weak self] in
-                    guard let self = self else { return }
+                await MainActor.run {
                     self.providerIssue = "Invalid response from Nightscout"
                 }
                 return
@@ -580,16 +598,14 @@ class Nightscout: Provider, @unchecked Sendable {
             if res.statusCode > 299 {
                 unsuccessfulAuthAttempts += 1
                 self.plog("status code over 299: \(res.statusCode). Body: \(data)", category: "nightscout", level: .debug)
-                Task { [weak self] in
-                    guard let self = self else { return }
-
-                    var providerError = ""
-                    do {
-                        let result = try JSONDecoder().decode(NightscoutAuthErrorResponse.self, from: data)
-                        providerError = "\(result.message): \(result.description)"
-                    } catch {
-                        providerError = "Unknown Nightscout Issue"
-                    }
+                var providerError = ""
+                do {
+                    let result = try JSONDecoder().decode(NightscoutAuthErrorResponse.self, from: data)
+                    providerError = "\(result.message): \(result.description)"
+                } catch {
+                    providerError = "Unknown Nightscout Issue"
+                }
+                await MainActor.run {
                     self.providerIssue = providerError
                 }
                 return
@@ -598,12 +614,14 @@ class Nightscout: Provider, @unchecked Sendable {
                 do {
                     let result = try JSONDecoder().decode(NightscoutAuthResponse.self, from: data)
 
-                    Task {
+                    await MainActor.run {
                         self.auth = ProviderAuth(token: result.token, expiry: result.exp)
                     }
 
                     self.plog("Authentication is successful.", category: "nightscout", level: .debug)
-                    isAuthenticating = false
+                    await MainActor.run {
+                        isAuthenticating = false
+                    }
                     isAuthenticated = true
                     unsuccessfulAuthAttempts = 0
 
@@ -611,16 +629,23 @@ class Nightscout: Provider, @unchecked Sendable {
                     let gs = GlucoseSource(baseURL: self.baseURL, token: result.token, aidEnabled: aidEnabled, sourceIndex: self.sourceIndex)
                     let (source, err) = try await gs.checkDeviceStatusForGSE()
                     if err != nil {
-                        self.GlucoseSourceExtras.error = err!
+                        await MainActor.run {
+                            self.GlucoseSourceExtras.error = err!
+                        }
                     }
                     if source != GlucoseSourceDevice.null {
-                        RemoteGlucoseSource = source
+                        await MainActor.run {
+                            RemoteGlucoseSource = source
+                        }
                     }
 
                     return
                 } catch {
-                    self.providerIssue = "Unable to parse response from Nightscout: \(String(describing: error))"
-                    isAuthenticating = false
+                    self.plog("Unable to parse response from Nightscout: \(String(describing: error))", category: "nightscout", level: .error)
+                    await MainActor.run {
+                        self.providerIssue = "Unable to parse response from Nightscout: \(String(describing: error))"
+                        isAuthenticating = false
+                    }
                     return
                 }
             }
@@ -630,10 +655,14 @@ class Nightscout: Provider, @unchecked Sendable {
                 err = "Request timed out"
             }
             self.unsuccessfulAuthAttempts += 1
-            self.providerIssue = err
+            await MainActor.run {
+                self.providerIssue = err
+            }
         }
 
-        isAuthenticating = false
+        await MainActor.run {
+            isAuthenticating = false
+        }
     }
 
     override internal func verifyCredentials() async -> Bool {
