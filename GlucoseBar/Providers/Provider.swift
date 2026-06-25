@@ -14,6 +14,7 @@ public enum CGMProvider: String, CaseIterable, Identifiable {
     case simulator
     case nightscout
     case dexcomshare
+    case librelinkup
     public var id: String { self.rawValue }
     public var presentable: String {
         switch self {
@@ -25,6 +26,8 @@ public enum CGMProvider: String, CaseIterable, Identifiable {
             return String(localized: "Nightscout", comment: "The name for the Nightscout CGM data provider")
         case .dexcomshare:
             return String(localized: "Dexcom Share", comment: "The name for the Dexcom Share CGM data provider")
+        case .librelinkup:
+            return String(localized: "LibreLinkUp", comment: "The name for the LibreLinkUp CGM data provider")
         }
     }
 }

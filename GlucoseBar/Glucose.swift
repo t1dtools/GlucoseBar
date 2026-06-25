@@ -141,6 +141,8 @@ class Glucose: ObservableObject, Sendable {
             provider = DexcomShare(username: settings.dxEmail, password: settings.dxPassword, server: settings.dxServer)
         case .nightscout:
             provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.aidEnableIntegration)
+        case .librelinkup:
+            provider = LibreLinkUp(username: settings.libreUsername, password: settings.librePassword, server: settings.libreServer, connectionID: settings.libreConnectionID)
         default:
             provider = Simulator("defaulted")
         }
@@ -190,6 +192,8 @@ class Glucose: ObservableObject, Sendable {
             vs.providerURL = URL(string: settings.nsURL)
         case .dexcomshare:
             vs.providerURL = URL(string: settings.dxServer.url)
+        case .librelinkup:
+            vs.providerURL = URL(string: settings.libreServer.url)
         default:
             vs.providerURL = nil
         }
@@ -203,6 +207,8 @@ class Glucose: ObservableObject, Sendable {
                 self.provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.aidEnableIntegration)
             case .dexcomshare:
                 self.provider = DexcomShare(username: settings.dxEmail, password: settings.dxPassword, server: settings.dxServer)
+            case .librelinkup:
+                self.provider = LibreLinkUp(username: settings.libreUsername, password: settings.librePassword, server: settings.libreServer, connectionID: settings.libreConnectionID)
             case .simulator:
                 self.provider = Simulator("simulate")
             default:

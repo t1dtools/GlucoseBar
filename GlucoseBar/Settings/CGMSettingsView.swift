@@ -133,6 +133,115 @@ struct CGMSettingsView: View {
         }
     }
 
+    struct LibreLinkUpView: View {
+        @EnvironmentObject var s: SettingsStore
+        @EnvironmentObject var g: Glucose
+
+        @State var isLoggingIn: Bool = false
+        @State var loggedIn: Bool? = nil
+        @State var connections: [LibreLinkUp.LibreLinkUpConnectionsResponse] = []
+
+        var body: some View {
+            VStack {
+                HStack {
+                    Text("Region").frame(width: 130, alignment: .leading)
+                    Spacer()
+                    Picker("", selection: $s.libreServer) {
+                        ForEach(LibreServer.allCases) { server in
+                            Text(server.presentable).tag(server)
+                        }
+                    }
+                }
+                HStack {
+                    Text("Email").frame(width: 130, alignment: .leading)
+                    Spacer()
+                    TextField("", text: $s.libreUsername).autocorrectionDisabled(true)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                }
+                HStack {
+                    Text("Password").frame(width: 130, alignment: .leading)
+                    Spacer()
+                    SecureField("", text: $s.librePassword).textFieldStyle(RoundedBorderTextFieldStyle())
+                }
+
+                HStack {
+                    Button(action: loginAction) {
+                        HStack {
+                            if isLoggingIn {
+                                ProgressView().controlSize(.small).scaleEffect(0.8)
+                            }
+                            Text("Login")
+                        }
+                    }
+                    .disabled(isLoggingIn || s.libreUsername.isEmpty || s.librePassword.isEmpty)
+
+                    if loggedIn == true {
+                        Image(systemName: "checkmark.circle").foregroundColor(.green)
+                    } else if loggedIn == false {
+                        Image(systemName: "exclamationmark.triangle").foregroundColor(.orange)
+                    }
+                    Spacer()
+                }
+
+                if loggedIn == false {
+                    HStack {
+                        Text("Invalid credentials. Check your email, password, and region.").foregroundColor(.orange).font(.footnote)
+                        Spacer()
+                    }
+                }
+
+                if loggedIn == true {
+                    if connections.isEmpty {
+                        HStack {
+                            Text("No LibreLinkUp connections found. Ensure you are following at least one FreeStyle Libre user in the LibreLinkUp app.").foregroundColor(.orange).font(.footnote)
+                            Spacer()
+                        }
+                    } else {
+                        VStack {
+                            Text("Connection").frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.top, 8)
+                            Picker("", selection: $s.libreConnectionID) {
+                                Text("Select a patient").tag("").selectionDisabled()
+                                ForEach(connections, id: \.patientID) { conn in
+                                    Text("\(conn.firstName) \(conn.lastName)").tag(conn.patientID)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Text("These credentials are the ones from your LibreLinkUp account. You must be following at least one FreeStyle Libre user in the LibreLinkUp app.").font(.footnote).fixedSize(horizontal: false, vertical: true)
+            }
+        }
+
+        func loginAction() {
+            isLoggingIn = true
+            loggedIn = nil
+            connections = []
+
+            Task {
+                let temp = LibreLinkUp(
+                    username: s.libreUsername,
+                    password: s.librePassword,
+                    server: s.libreServer,
+                    connectionID: s.libreConnectionID
+                )
+
+                let success = await temp.login()
+
+                if success {
+                    connections = temp.patientConnections
+                    if let firstId = connections.first?.patientID, s.libreConnectionID.isEmpty {
+                        s.libreConnectionID = firstId
+                    }
+                }
+
+                loggedIn = success
+                isLoggingIn = false
+            }
+        }
+    }
+
     struct Validation: View {
         @EnvironmentObject var s: SettingsStore
         @EnvironmentObject var g: Glucose
@@ -270,6 +379,10 @@ struct CGMSettingsView: View {
 
                             if s.cgmProvider == .dexcomshare {
                                 DexcomShareView(s: _s).padding()
+                            }
+
+                            if s.cgmProvider == .librelinkup {
+                                LibreLinkUpView().padding()
                             }
                         }.padding(.horizontal).padding(.bottom)
 

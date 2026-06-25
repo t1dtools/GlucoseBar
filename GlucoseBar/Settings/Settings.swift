@@ -43,7 +43,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     @Published var dxPassword: String = ""
 
     // Libre LinkUp
-    @Published var libreServer: String = ""
+    @Published var libreServer: LibreServer = .eu
     @Published var libreUsername: String = "your@email.com"
     @Published var librePassword: String = ""
     @Published var libreConnectionID: String = ""
@@ -168,7 +168,8 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         self.libreUsername = defaults.string(forKey: key("libreUsername")) ?? "your@email.com"
         self.librePassword = defaults.string(forKey: key("librePassword")) ?? ""
         self.libreConnectionID = defaults.string(forKey: key("libreConnectionID")) ?? ""
-        self.libreServer = defaults.string(forKey: key("libreServer")) ?? ""
+        let libreSrv = defaults.string(forKey: key("libreServer")) ?? LibreServer.eu.url
+        self.libreServer = LibreServer.allCases.first(where: { $0.url == libreSrv }) ?? .eu
 
         self.highThreshold = defaults.double(forKey: key("highThreshold"))
         if (self.highThreshold == 0.0) {
@@ -222,6 +223,9 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         case CGMProvider.dexcomshare.presentable:
             self.cgmProvider = .dexcomshare
             self.logger.dlog("cgmProvider was dexcomshare", category: "settingsstore", level: .default)
+        case CGMProvider.librelinkup.presentable:
+            self.cgmProvider = .librelinkup
+            self.logger.dlog("cgmProvider was librelinkup", category: "settingsstore", level: .default)
         default:
             self.cgmProvider = .null
             self.logger.dlog("cgmProvider was default", category: "settingsstore", level: .default)
@@ -331,7 +335,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         defaults.set(self.dxPassword, forKey: key("dxPassword"))
 
         // Libre LinkUp
-        defaults.set(self.libreServer, forKey: key("libreServer"))
+        defaults.set(self.libreServer.url, forKey: key("libreServer"))
         defaults.set(self.libreUsername, forKey: key("libreUsername"))
         defaults.set(self.librePassword, forKey: key("librePassword"))
         defaults.set(self.libreConnectionID, forKey: key("libreConnectionID"))
@@ -406,6 +410,15 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
             defaults.removeObject(forKey: key("dxServer"))
             defaults.removeObject(forKey: key("dxEmail"))
             defaults.removeObject(forKey: key("dxPassword"))
+        case .librelinkup:
+            self.libreUsername = "your@email.com"
+            self.librePassword = ""
+            self.libreServer = .eu
+            self.libreConnectionID = ""
+            defaults.removeObject(forKey: key("libreUsername"))
+            defaults.removeObject(forKey: key("librePassword"))
+            defaults.removeObject(forKey: key("libreServer"))
+            defaults.removeObject(forKey: key("libreConnectionID"))
         default:
             // noop
             return
@@ -422,6 +435,8 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
             provider = Nightscout(baseURL: self.nsURL, token: self.nsSecret, aidEnabled: false)
         case .dexcomshare:
             provider = DexcomShare(username: self.dxEmail, password: self.dxPassword, server: self.dxServer)
+        case .librelinkup:
+            provider = LibreLinkUp(username: self.libreUsername, password: self.librePassword, server: self.libreServer)
         default:
             provider = Simulator("")
         }
