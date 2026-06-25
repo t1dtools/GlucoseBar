@@ -19,11 +19,11 @@ extension URLSession {
 
     private static func buildAcceptLanguage() -> String {
         let langs = Locale.preferredLanguages
-let items = langs.prefix(10).enumerated().map { i, lang in
-    if i == 0 { return lang }
-    let q = max(0.1, 1.0 - Double(i) * 0.1)
-    return "\(lang);q=\(String(format: \"%.1f\", q))"
-}
+        let items = langs.prefix(10).enumerated().map { i, lang in
+            if i == 0 { return lang }
+            let q = max(0.1, 1.0 - Double(i) * 0.1)
+            return "\(lang);q=\(String(format: "%.1f", q))"
+        }
         return items.joined(separator: ", ")
     }
 

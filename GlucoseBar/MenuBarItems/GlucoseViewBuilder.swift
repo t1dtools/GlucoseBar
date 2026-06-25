@@ -133,27 +133,20 @@ struct MenuBarView: View {
                 }
             }
             .onReceive(g.$glucose.combineLatest(g.$trend)) { _, _ in
-                // Refresh zen mode image when glucose or trend changes
-                Task {
-                    await MainActor.run {
-                        self.cachedZenImage = generateZenModeImage()
-                    }
+                Task { @MainActor in
+                    self.cachedZenImage = generateZenModeImage()
                 }
             }            .onReceive(g.provider.objectWillChange) { _ in
-                let now = Date()
-                if now.timeIntervalSince(lastUpdateTime) > 1.0 {
-                    lastUpdateTime = now
-                    Task {
-                        await MainActor.run {
-                            self.cachedZenImage = generateZenModeImage()
-                        }
+                Task { @MainActor in
+                    let now = Date()
+                    if now.timeIntervalSince(lastUpdateTime) > 1.0 {
+                        lastUpdateTime = now
+                        self.cachedZenImage = generateZenModeImage()
                     }
                 }
             }.onReceive(s.$menuBarItemSpacing) { _ in
-                Task {
-                    await MainActor.run {
-                        self.cachedZenImage = generateZenModeImage()
-                    }
+                Task { @MainActor in
+                    self.cachedZenImage = generateZenModeImage()
                 }
             }
         } else {
@@ -173,23 +166,32 @@ struct MenuBarView: View {
                 }
             }
             .onReceive(s.$menuBarItems) { _ in
-                loadMenuBarItems()
-                Task {
-                    await MainActor.run {
+                Task { @MainActor in
+                    loadMenuBarItems()
+                    self.cachedMenuImage = generateMenuBarImage()
+                }
+            }
+            .onReceive(g.$glucose.combineLatest(g.$delta, g.$trend)) { _, _, _ in
+                Task { @MainActor in
+                    let now = Date()
+                    if now.timeIntervalSince(lastUpdateTime) > 1.0 {
+                        lastUpdateTime = now
                         self.cachedMenuImage = generateMenuBarImage()
                     }
                 }
             }
-            .onReceive(g.$glucose.combineLatest(g.$delta, g.$trend)) { _, _, _ in
-                // Refresh menu image when glucose data changes
-                let now = Date()
-                if now.timeIntervalSince(lastUpdateTime) > 1.0 { // Throttle updates to max 1 per second
-                    lastUpdateTime = now
-                    Task {
-                        await MainActor.run {
-                            self.cachedMenuImage = generateMenuBarImage()
-                        }
+            .onReceive(g.provider.objectWillChange) { _ in
+                Task { @MainActor in
+                    let now = Date()
+                    if now.timeIntervalSince(lastUpdateTime) > 1.0 {
+                        lastUpdateTime = now
+                        self.cachedMenuImage = generateMenuBarImage()
                     }
+                }
+            }
+            .onReceive(s.$menuBarItemSpacing) { _ in
+                Task { @MainActor in
+                    self.cachedMenuImage = generateMenuBarImage()
                 }
             }
         }
