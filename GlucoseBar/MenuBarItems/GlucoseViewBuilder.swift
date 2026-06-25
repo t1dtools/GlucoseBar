@@ -149,6 +149,11 @@ struct MenuBarView: View {
                     self.cachedZenImage = generateZenModeImage()
                 }
             }
+            .onReceive(g.objectWillChange) { _ in
+                Task { @MainActor in
+                    self.cachedZenImage = generateZenModeImage()
+                }
+            }
         } else {
             Group {
                 if let cachedMenuImage = cachedMenuImage {
@@ -190,6 +195,11 @@ struct MenuBarView: View {
                 }
             }
             .onReceive(s.$menuBarItemSpacing) { _ in
+                Task { @MainActor in
+                    self.cachedMenuImage = generateMenuBarImage()
+                }
+            }
+            .onReceive(g.objectWillChange) { _ in
                 Task { @MainActor in
                     self.cachedMenuImage = generateMenuBarImage()
                 }
