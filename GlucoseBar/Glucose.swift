@@ -68,7 +68,7 @@ class Glucose: ObservableObject, Sendable {
         }
     }
 
-    func timerEventHandler() {
+    nonisolated func timerEventHandler() {
         // This handler is invoked from the background CGMQueue DispatchQueue, but
         // Glucose is @MainActor-isolated. Hop to the main actor before touching any
         // published or stored properties to eliminate the data race.

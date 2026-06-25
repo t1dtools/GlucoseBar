@@ -108,7 +108,6 @@ class Provider: ObservableObject, @unchecked Sendable {
         startTimer()
     }
 
-    // Thread-safe getter for GlucoseEntries
     var GlucoseEntries: [GlucoseEntry] {
         _glucoseEntries
     }
