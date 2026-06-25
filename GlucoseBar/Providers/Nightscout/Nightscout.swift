@@ -186,9 +186,7 @@ class Nightscout: Provider, @unchecked Sendable {
                 if sortedStatuses.count > 0 {
                     let gse = await handleGSE(sortedStatuses.first!)
 
-                    await MainActor.run {
-                        self.GlucoseSourceExtras = gse.gse
-                    }
+                    self.GlucoseSourceExtras = gse.gse
                 }
             } catch {
                 self.plog("Failed to decode devicestatus: \(error)", category: "nightscout", level: .error)
@@ -302,24 +300,18 @@ class Nightscout: Provider, @unchecked Sendable {
 
         if self.socket.status == .connected {
             // We're on a socket connection, so the rest of this function is not needed
-            await MainActor.run {
-                lastFetch = Date()
-            }
+            lastFetch = Date()
             plog("Nightscout.fetch exiting early due to socket being connected", category: "nightscout", level: .debug)
             return
         }
 
         if !baseURL.hasPrefix("http://") && !baseURL.hasPrefix("https://") {
-            await MainActor.run {
-                self.providerIssue = "Invalid Nightscout URL. It must start with http:// or https://"
-            }
+            self.providerIssue = "Invalid Nightscout URL. It must start with http:// or https://"
             return
         }
 
         if unsuccessfulAuthAttempts > 5 {
-            await MainActor.run {
-                self.providerIssue = "Unable to connect to Nightscout after 5 attempts. Please check your credentials."
-            }
+            self.providerIssue = "Unable to connect to Nightscout after 5 attempts. Please check your credentials."
             return
         }
 
@@ -328,15 +320,11 @@ class Nightscout: Provider, @unchecked Sendable {
         }
 
         if !isAuthValid() {
-            await MainActor.run {
-                self.providerIssue = "Unable to fetch due to unknown issue. Please ensure the Nightscout Server URL is correct and begins with http:// or https://"
-            }
+            self.providerIssue = "Unable to fetch due to unknown issue. Please ensure the Nightscout Server URL is correct and begins with http:// or https://"
             return
         }
 
-        await MainActor.run {
-            self.providerIssue = nil
-        }
+        self.providerIssue = nil
 
         var url = "\(baseURL)/api/v3/entries?sort%24desc=date&fields=sgv%2Ctrend%2Cdirection%2Cdate%2Cidentifier"
 
@@ -353,9 +341,7 @@ class Nightscout: Provider, @unchecked Sendable {
             if self.lastFullFetch.timeIntervalSinceNow < -900 {
                 plog("full fetch because it's been over 15 minutes since we got all data", category: "nightscout", level: .info)
                 limit = 288
-                await MainActor.run {
-                    self.lastFullFetch = Date()
-                }
+                self.lastFullFetch = Date()
             }
 
         }
@@ -461,9 +447,7 @@ class Nightscout: Provider, @unchecked Sendable {
                     }
                 }
             } else if res!.statusCode == 401 {
-                await MainActor.run {
-                    self.auth = nil
-                }
+                self.auth = nil
 
                 return
             } else {
@@ -558,6 +542,7 @@ class Nightscout: Provider, @unchecked Sendable {
         return false
     }
 
+    @MainActor
     private func authenticate() async {
 
         if isAuthenticating {
@@ -565,21 +550,15 @@ class Nightscout: Provider, @unchecked Sendable {
             return
         }
 
-        await MainActor.run {
-            isAuthenticating = true
-        }
+        isAuthenticating = true
 
         if !baseURL.hasPrefix("https://") && !baseURL.hasPrefix("http://") {
-            await MainActor.run {
-                self.providerIssue = "Invalid Nightscout URL. Must start with either http:// or https://"
-            }
+            self.providerIssue = "Invalid Nightscout URL. Must start with either http:// or https://"
             return
         }
 
-        await MainActor.run {
-            self.providerIssue = nil
-            self.isAuthenticating = true
-        }
+        self.providerIssue = nil
+        self.isAuthenticating = true
 
         self.plog("Nightscout.authenticate", category: "nightscout", level: .debug)
         var request = URLRequest(url: URL(string: "\(baseURL)/api/v2/authorization/request/\(token)")!, timeoutInterval: httpTimeout)
@@ -590,9 +569,7 @@ class Nightscout: Provider, @unchecked Sendable {
             let (data, response) = try await URLSession.appDefault.data(for: request)
 
             guard let res = response as? HTTPURLResponse else {
-                await MainActor.run {
-                    self.providerIssue = "Invalid response from Nightscout"
-                }
+                self.providerIssue = "Invalid response from Nightscout"
                 return
             }
             if res.statusCode > 299 {
@@ -605,23 +582,17 @@ class Nightscout: Provider, @unchecked Sendable {
                 } catch {
                     providerError = "Unknown Nightscout Issue"
                 }
-                await MainActor.run {
-                    self.providerIssue = providerError
-                }
+                self.providerIssue = providerError
                 return
             } else {
                 self.plog("status code under 300: \(res.statusCode). Body: \(data)", category: "nightscout", level: .debug)
                 do {
                     let result = try JSONDecoder().decode(NightscoutAuthResponse.self, from: data)
 
-                    await MainActor.run {
-                        self.auth = ProviderAuth(token: result.token, expiry: result.exp)
-                    }
+                    self.auth = ProviderAuth(token: result.token, expiry: result.exp)
 
                     self.plog("Authentication is successful.", category: "nightscout", level: .debug)
-                    await MainActor.run {
-                        isAuthenticating = false
-                    }
+                    isAuthenticating = false
                     isAuthenticated = true
                     unsuccessfulAuthAttempts = 0
 
@@ -629,23 +600,17 @@ class Nightscout: Provider, @unchecked Sendable {
                     let gs = GlucoseSource(baseURL: self.baseURL, token: result.token, aidEnabled: aidEnabled, sourceIndex: self.sourceIndex)
                     let (source, err) = try await gs.checkDeviceStatusForGSE()
                     if err != nil {
-                        await MainActor.run {
-                            self.GlucoseSourceExtras.error = err!
-                        }
+                        self.GlucoseSourceExtras.error = err!
                     }
                     if source != GlucoseSourceDevice.null {
-                        await MainActor.run {
-                            RemoteGlucoseSource = source
-                        }
+                        RemoteGlucoseSource = source
                     }
 
                     return
                 } catch {
                     self.plog("Unable to parse response from Nightscout: \(String(describing: error))", category: "nightscout", level: .error)
-                    await MainActor.run {
-                        self.providerIssue = "Unable to parse response from Nightscout: \(String(describing: error))"
-                        isAuthenticating = false
-                    }
+                    self.providerIssue = "Unable to parse response from Nightscout: \(String(describing: error))"
+                    isAuthenticating = false
                     return
                 }
             }
@@ -655,14 +620,10 @@ class Nightscout: Provider, @unchecked Sendable {
                 err = "Request timed out"
             }
             self.unsuccessfulAuthAttempts += 1
-            await MainActor.run {
-                self.providerIssue = err
-            }
+            self.providerIssue = err
         }
 
-        await MainActor.run {
-            isAuthenticating = false
-        }
+        isAuthenticating = false
     }
 
     override internal func verifyCredentials() async -> Bool {
