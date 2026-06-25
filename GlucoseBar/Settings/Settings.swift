@@ -456,11 +456,11 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 
         do {
             try task.run()
+            exit(0)
         } catch {
             self.logger.dlog("Error restarting app: \(error)", category: "settingsstore", level: .default)
+            return
         }
-
-        exit(0)
     }
 
     func disableDebugMode() async -> Bool {
