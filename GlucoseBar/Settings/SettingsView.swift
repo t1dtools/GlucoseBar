@@ -114,12 +114,7 @@ struct SettingsView: View {
                                 }.help("Add additional profile")
                             }
 
-                            if atLimit {
-                                Text("\(SourceManager.maxSources) max", comment: "A message shown in the settings sidebar when the maximum number of profiles has been reached")
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .padding(.bottom, 4)
-                            }
+Text(String.localizedStringWithFormat(NSLocalizedString("%lld max", comment: "A message shown in the settings sidebar when the maximum number of profiles has been reached"), SourceManager.maxSources))
                         }
 
                         let picker = Picker("", selection: $selectedSource) {
