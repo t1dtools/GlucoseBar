@@ -50,13 +50,20 @@ struct MenuBarSettingsView: View {
         self.menuBarItemsInverse.removeAll()
         let currentTypes: Set<MenuBarItem> = Set(self.menuBarItems.map { $0.type })
         for p in MenuBarItem.allCases where p != .separator {
-            // Filter out fields we don't have if aid integration or nightscout is false
-            if (!s.aidEnableIntegration || s.cgmProvider != .nightscout) && [.loopstatus, .eventualglucose, .cob, .iob].contains(p) {
+            let hasAIDData = (s.cgmProvider == .nightscout && s.aidEnableIntegration)
+                || s.cgmProvider == .tandemsource
+                || s.aidSource == .tandemSource
+                || g.provider.GlucoseSourceExtras.aid != .null
+
+            if !hasAIDData && [.loopstatus, .eventualglucose, .cob, .iob].contains(p) {
                 continue
             }
 
-            // Filter out fields we don't know about from Loop
             if g.provider.GlucoseSourceExtras.aid == .loop && [.loopstatus, .eventualglucose].contains(p) {
+                continue
+            }
+
+            if g.provider.GlucoseSourceExtras.aid == .controliq && [.eventualglucose].contains(p) {
                 continue
             }
 

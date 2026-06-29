@@ -8,6 +8,24 @@
 import Foundation
 import OSLog
 
+public enum AIDSource: String, CaseIterable, Identifiable {
+    case none
+    case autoDetect
+    case tandemSource
+
+    public var id: String { self.rawValue }
+    public var presentable: String {
+        switch self {
+        case .none:
+            return String(localized: "None")
+        case .autoDetect:
+            return String(localized: "Auto-detect (from CGM provider)")
+        case .tandemSource:
+            return String(localized: "Tandem Source")
+        }
+    }
+}
+
 @MainActor
 class SettingsStore: ObservableObject, @unchecked Sendable {
 
@@ -47,6 +65,13 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     @Published var libreUsername: String = "your@email.com"
     @Published var librePassword: String = ""
     @Published var libreConnectionID: String = ""
+
+    // Tandem Source
+    @Published var tandemEmail: String = "your@email.com"
+    @Published var tandemPassword: String = ""
+
+    // AID Source
+    @Published var aidSource: AIDSource = .none
 
     @Published var showTimeSince: Bool = false
     @Published var showDelta: Bool = true
@@ -277,6 +302,28 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         self.aidChartShowCOB = defaults.bool(forKey: key("trioChartShowCOB"))
         self.aidChartShowEventualGlucose = defaults.bool(forKey: key("trioChartShowEventualGlucose"))
         self.aidChartShowLoopStatus = defaults.bool(forKey: key("trioChartShowLoopStatus"))
+
+        // Tandem Source
+        self.tandemEmail = defaults.string(forKey: key("tandemEmail")) ?? "your@email.com"
+        self.tandemPassword = defaults.string(forKey: key("tandemPassword")) ?? ""
+
+        // AID Source
+        let previousAid = defaults.string(forKey: key("aidSource"))
+        let aidSrc: String
+        if previousAid == nil && defaults.bool(forKey: key("trioEnableIntegration")) {
+            // Migration: legacy aidEnableIntegration was on, default to auto-detect
+            aidSrc = AIDSource.autoDetect.presentable
+        } else {
+            aidSrc = previousAid ?? AIDSource.none.presentable
+        }
+        switch aidSrc {
+        case AIDSource.autoDetect.presentable:
+            self.aidSource = .autoDetect
+        case AIDSource.tandemSource.presentable:
+            self.aidSource = .tandemSource
+        default:
+            self.aidSource = .none
+        }
     }
 
     func save() {
@@ -353,6 +400,13 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         defaults.set(self.aidChartShowEventualGlucose, forKey: key("trioChartShowEventualGlucose"))
         defaults.set(self.aidChartShowLoopStatus, forKey: key("trioChartShowLoopStatus"))
 
+        // Tandem Source
+        defaults.set(self.tandemEmail, forKey: key("tandemEmail"))
+        defaults.set(self.tandemPassword, forKey: key("tandemPassword"))
+
+        // AID Source
+        defaults.set(self.aidSource.presentable, forKey: key("aidSource"))
+
         // Identity
         defaults.set(self.sourceName, forKey: key("sourceName"))
         defaults.set(self.iconSymbol, forKey: key("iconSymbol"))
@@ -406,6 +460,11 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
             defaults.removeObject(forKey: key("dxServer"))
             defaults.removeObject(forKey: key("dxEmail"))
             defaults.removeObject(forKey: key("dxPassword"))
+        case .tandemsource:
+            self.tandemEmail = ""
+            self.tandemPassword = ""
+            defaults.removeObject(forKey: key("tandemEmail"))
+            defaults.removeObject(forKey: key("tandemPassword"))
         default:
             // noop
             return
@@ -422,6 +481,8 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
             provider = Nightscout(baseURL: self.nsURL, token: self.nsSecret, aidEnabled: false)
         case .dexcomshare:
             provider = DexcomShare(username: self.dxEmail, password: self.dxPassword, server: self.dxServer)
+        case .tandemsource:
+            provider = TandemSource(email: self.tandemEmail, password: self.tandemPassword)
         default:
             provider = Simulator("")
         }

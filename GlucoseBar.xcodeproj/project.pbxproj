@@ -81,6 +81,9 @@
 		83F888412B1A888000A50E74 /* LibreLinkUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F888402B1A888000A50E74 /* LibreLinkUp.swift */; };
 		AA000001DEBUGLOGGER00001A /* DebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001DEBUGLOGGER00001B /* DebugLogger.swift */; };
 		AA000002DEBUGSETTINGS001A /* DebugSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002DEBUGSETTINGS001B /* DebugSettingsView.swift */; };
+		83DEAD0126DEAD0100000000 /* TandemSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DEAD0426DEAD0400000000 /* TandemSource.swift */; };
+		83DEAD0226DEAD0200000000 /* TandemLogin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DEAD0526DEAD0500000000 /* TandemLogin.swift */; };
+		83DEAD0326DEAD0300000000 /* TandemResponseModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DEAD0626DEAD0600000000 /* TandemResponseModels.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -158,6 +161,9 @@
 		83F888402B1A888000A50E74 /* LibreLinkUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibreLinkUp.swift; sourceTree = "<group>"; };
 		AA000001DEBUGLOGGER00001B /* DebugLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogger.swift; sourceTree = "<group>"; };
 		AA000002DEBUGSETTINGS001B /* DebugSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSettingsView.swift; sourceTree = "<group>"; };
+		83DEAD0426DEAD0400000000 /* TandemSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TandemSource.swift; sourceTree = "<group>"; };
+		83DEAD0526DEAD0500000000 /* TandemLogin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TandemLogin.swift; sourceTree = "<group>"; };
+		83DEAD0626DEAD0600000000 /* TandemResponseModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TandemResponseModels.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -182,9 +188,20 @@
 			path = DexcomShare;
 			sourceTree = "<group>";
 		};
+		83DEAD0026DEAD0000000000 /* TandemSource */ = {
+			isa = PBXGroup;
+			children = (
+				83DEAD0426DEAD0400000000 /* TandemSource.swift */,
+				83DEAD0526DEAD0500000000 /* TandemLogin.swift */,
+				83DEAD0626DEAD0600000000 /* TandemResponseModels.swift */,
+			);
+			path = TandemSource;
+			sourceTree = "<group>";
+		};
 		834621252ADDAC930024048E /* Providers */ = {
 			isa = PBXGroup;
 			children = (
+				83DEAD0026DEAD0000000000 /* TandemSource */,
 				83F8883F2B1A86BA00A50E74 /* LibreLinkUp */,
 				830C4D032B0166E0000A0E87 /* DexcomShare */,
 				83DF71B02AEDA9DD00FC0566 /* Nightscout */,
@@ -534,6 +551,9 @@
 				83CC000C2F0000010000CC00 /* SymbolPickerView.swift in Sources */,
 				83CC000E2F0000010000CC00 /* MenuBarCoordinator.swift in Sources */,
 				83E3C8112DFF300300B0F996 /* PreferencesController.swift in Sources */,
+				83DEAD0126DEAD0100000000 /* TandemSource.swift in Sources */,
+				83DEAD0226DEAD0200000000 /* TandemLogin.swift in Sources */,
+				83DEAD0326DEAD0300000000 /* TandemResponseModels.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

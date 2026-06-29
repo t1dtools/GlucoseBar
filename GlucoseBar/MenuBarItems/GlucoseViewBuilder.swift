@@ -83,11 +83,17 @@ struct MenuBarView: View {
             }
             updateNotice()
             ForEach(menuBarItems, id: \.id) { item in
-                // aid integration only works with nightscout, so don't draw it's views for other providers
-                if (s.cgmProvider != .nightscout || !s.aidEnableIntegration) && [.loopstatus, .eventualglucose, .cob, .iob].contains(item.type) {
+                let aid = g.provider.GlucoseSourceExtras.aid
+                let hasAIDData = (s.cgmProvider == .nightscout && s.aidEnableIntegration)
+                    || s.cgmProvider == .tandemsource
+                    || s.aidSource == .tandemSource
+                    || aid != .null
+
+                if !hasAIDData && [.loopstatus, .eventualglucose, .cob, .iob].contains(item.type) {
                     EmptyView()
-                // loop doesn't have quite as many bells and whistles as oref, so filter out the things we can't render
-                } else if (s.cgmProvider == .nightscout && s.aidEnableIntegration && g.provider.GlucoseSourceExtras.aid == .loop && [.loopstatus, .eventualglucose].contains(item.type)) {
+                } else if hasAIDData && aid == .loop && [.eventualglucose].contains(item.type) {
+                    EmptyView()
+                } else if hasAIDData && aid == .controliq && [.eventualglucose].contains(item.type) {
                     EmptyView()
                 } else {
                     drawMenuBarItem(item)

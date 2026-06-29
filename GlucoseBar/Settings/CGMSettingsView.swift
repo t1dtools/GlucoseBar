@@ -36,7 +36,6 @@ struct CGMSettingsView: View {
 
         @FocusState var nsSecretFailedValidationFocus: Bool
         @State var nsSecretFailedValidation: Bool = false
-        @State var aidEnabled: Bool
 
         var body: some View {
             VStack {
@@ -67,38 +66,6 @@ struct CGMSettingsView: View {
                     Text("This token needs to have the permission \"readable\" in Nightscout.").font(.footnote)
                     Spacer()
                 }
-
-                VStack {
-                    HStack {
-                        Text("Enable AID Integration")
-                        Spacer()
-                        Picker("", selection: $aidEnabled) {
-                            Text("Yes").tag(true)
-                            Text("No").tag(false)
-                        }.pickerStyle(SegmentedPickerStyle()).frame(width: 200, alignment: .trailing)
-                        .onChange(of: aidEnabled) {
-                            s.aidEnableIntegration = aidEnabled
-                            s.save()
-                        }
-                    }
-                    HStack {
-                        Text("AID stands for Automated Insulin Delivery system. Such systems can provide extra information, like Loop Status, IOB, COB, Eventual Glucose, prediction lines and more.").font(.footnote)
-                        Spacer()
-                    }
-                    HStack {
-                        Text("Supported AIDs are AAPS, Loop, OpenAPS, and Trio.").font(.footnote)
-                        Spacer()
-                    }
-                    HStack {
-                        Text("Not seeing your AID of choice here? Open an issue on GitHub and lets see if we get it implemented.").font(.footnote)
-                        Spacer()
-                        Button(action: {
-                            NSWorkspace.shared.open(URL(string: "https://github.com/t1dtools/GlucoseBar/issues?q=sort%3Aupdated-desc%20state%3Aopen%20label%3Aaid-integration")!)
-                        }) {
-                            Text("Open GitHub Issues")
-                        }
-                    }.padding(.top, 20)
-                }.padding(.top, 10)
             }
         }
     }
@@ -133,6 +100,27 @@ struct CGMSettingsView: View {
         }
     }
 
+    struct TandemSourceView: View {
+        @EnvironmentObject var s: SettingsStore
+
+        var body: some View {
+            VStack {
+                HStack {
+                    Text("Email").frame(width: 130, alignment: .leading)
+                    Spacer()
+                    TextField("", text: $s.tandemEmail).autocorrectionDisabled(true)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                }
+                HStack {
+                    Text("Password").frame(width: 130, alignment: .leading)
+                    Spacer()
+                    SecureField("", text: $s.tandemPassword).textFieldStyle(RoundedBorderTextFieldStyle())
+                }
+                Text("Your Tandem Source (t:connect) login credentials. CGM data from the pump has a significant delay (~30 minutes) and should not be your primary glucose source.").font(.footnote).fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
     struct Validation: View {
         @EnvironmentObject var s: SettingsStore
         @EnvironmentObject var g: Glucose
@@ -156,7 +144,7 @@ struct CGMSettingsView: View {
                         isDeletingCGMProvider = true
                     }) {
                         Image(systemName: "trash.fill").foregroundColor(.red)
-                    }.disabled(isValidating || ![.nightscout, .dexcomshare].contains(s.cgmProvider)).help("Delete data for \(s.cgmProvider.presentable)?").confirmationDialog(
+                    }.disabled(isValidating || ![.nightscout, .dexcomshare, .tandemsource].contains(s.cgmProvider)).help("Delete data for \(s.cgmProvider.presentable)?").confirmationDialog(
                         "Are you sure you want to remove data for \(s.cgmProvider.presentable)?",
                         isPresented: $isDeletingCGMProvider
                     ) {
@@ -240,7 +228,7 @@ struct CGMSettingsView: View {
                             Text(provider.presentable).tag(provider)
                         }
                     }
-                }.frame(width: 200, alignment: .trailing).onChange(of: s.aidChartForecastDisplay) {
+                }.frame(width: 200, alignment: .trailing).onChange(of: s.cgmProvider) {
                     s.save()
                 }
             }.padding()
@@ -265,11 +253,15 @@ struct CGMSettingsView: View {
                             }
 
                             if s.cgmProvider == .nightscout {
-                                NightscoutView(aidEnabled: s.aidEnableIntegration).padding()
+                                NightscoutView().padding()
                             }
 
                             if s.cgmProvider == .dexcomshare {
                                 DexcomShareView(s: _s).padding()
+                            }
+
+                            if s.cgmProvider == .tandemsource {
+                                TandemSourceView().padding()
                             }
                         }.padding(.horizontal).padding(.bottom)
 

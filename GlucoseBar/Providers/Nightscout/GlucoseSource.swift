@@ -15,6 +15,7 @@ public enum GlucoseSourceDevice: String, CaseIterable, Identifiable, Sendable {
     case openaps
     case aaps
     case loop
+    case controliq
     public var id: String { self.rawValue }
     public var presentable: String {
         switch self {
@@ -30,6 +31,8 @@ public enum GlucoseSourceDevice: String, CaseIterable, Identifiable, Sendable {
             return "AAPS"
         case .loop:
             return "Loop"
+        case .controliq:
+            return "Control-IQ"
         }
     }
     

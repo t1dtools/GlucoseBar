@@ -33,6 +33,8 @@ class Glucose: ObservableObject, Sendable {
     private let fetchQueue = DispatchQueue(label: "tools.t1d.GlucoseBar.fetchQueue")
     private var notificationObserver: NSObjectProtocol?
 
+    private var aidProvider: TandemSource?
+
     var sourceIndex: Int = -1
     let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "glucose")
 
@@ -55,6 +57,8 @@ class Glucose: ObservableObject, Sendable {
         timer.resume()
 
         setSettings(settingsStore)
+
+        configureAIDProvider(settingsStore)
 
         registerForNotifications()
     }
@@ -95,6 +99,7 @@ class Glucose: ObservableObject, Sendable {
             }
 
             if shouldFetch {
+                let aid = self.aidProvider
                 fetchQueue.async { [weak self] in
                     guard let self = self else { return }
                     Task {
@@ -106,6 +111,12 @@ class Glucose: ObservableObject, Sendable {
                         await MainActor.run { self.isFetching = true }
                         defer { Task { await MainActor.run { self.isFetching = false } } }
                         await self.provider.fetch()
+                        if aid != nil {
+                            await aid!.fetch()
+                            await MainActor.run {
+                                self.provider.GlucoseSourceExtras = aid!.GlucoseSourceExtras
+                            }
+                        }
                     }
                 }
             }
@@ -140,7 +151,9 @@ class Glucose: ObservableObject, Sendable {
             case .dexcomshare:
             provider = DexcomShare(username: settings.dxEmail, password: settings.dxPassword, server: settings.dxServer)
         case .nightscout:
-            provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.aidEnableIntegration)
+            provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.aidSource == .autoDetect)
+        case .tandemsource:
+            provider = TandemSource(email: settings.tandemEmail, password: settings.tandemPassword)
         default:
             provider = Simulator("defaulted")
         }
@@ -150,6 +163,8 @@ class Glucose: ObservableObject, Sendable {
         // Re-subscribe to the new provider's changes (was missing before this fix,
         // causing the menu bar to never update after a reset).
         subscribeToProvider()
+
+        configureAIDProvider(settings)
 
         timer = DispatchTimer(timeInterval: 15, queue: DispatchQueue(label: "tools.t1d.GlucoseBar.CGMQueue"))
         timer.suspend()
@@ -190,6 +205,8 @@ class Glucose: ObservableObject, Sendable {
             vs.providerURL = URL(string: settings.nsURL)
         case .dexcomshare:
             vs.providerURL = URL(string: settings.dxServer.url)
+        case .tandemsource:
+            vs.providerURL = URL(string: "https://tconnect.tandemdiabetes.com")
         default:
             vs.providerURL = nil
         }
@@ -200,11 +217,13 @@ class Glucose: ObservableObject, Sendable {
 
             switch settings.cgmProvider {
             case .nightscout:
-                self.provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.aidEnableIntegration)
+                self.provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.aidSource == .autoDetect)
             case .dexcomshare:
                 self.provider = DexcomShare(username: settings.dxEmail, password: settings.dxPassword, server: settings.dxServer)
             case .simulator:
                 self.provider = Simulator("simulate")
+            case .tandemsource:
+                self.provider = TandemSource(email: settings.tandemEmail, password: settings.tandemPassword)
             default:
                 self.plog("Unknown provider. Please add in setSettings in Glucose.swift", level: .error)
             }
@@ -215,6 +234,8 @@ class Glucose: ObservableObject, Sendable {
             subscribeToProvider()
 
         }
+
+        configureAIDProvider(settings)
 
         Task {
             self.getGlucose()
@@ -300,6 +321,22 @@ class Glucose: ObservableObject, Sendable {
             if !self.fetchedGlucose {
                 self.fetchedGlucose = true
             }
+        }
+    }
+
+    private func configureAIDProvider(_ settings: SettingsStore) {
+        if settings.aidSource == .tandemSource,
+           !settings.tandemEmail.isEmpty,
+           settings.tandemPassword.count > 0 {
+            let tandem = TandemSource(email: settings.tandemEmail, password: settings.tandemPassword)
+            tandem.sourceIndex = sourceIndex
+            aidProvider = tandem
+            provider.GlucoseSourceExtras.aid = .controliq
+        } else if settings.aidSource == .autoDetect {
+            aidProvider = nil
+            // Provider handles AID detection itself (e.g. Nightscout devicestatus)
+        } else {
+            aidProvider = nil
         }
     }
 }

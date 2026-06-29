@@ -49,10 +49,8 @@ private struct SourceSidebarSection: View {
                 .tag(SidebarItem.sourceMenuBar(sourceId))
             Label("Chart", systemImage: "chart.dots.scatter")
                 .tag(SidebarItem.sourceChart(sourceId))
-            if settings.aidEnableIntegration && settings.cgmProvider == .nightscout {
-                Label("AID Integration", systemImage: "apps.iphone")
-                    .tag(SidebarItem.sourceAID(sourceId))
-            }
+            Label("AID Integration", systemImage: "apps.iphone")
+                .tag(SidebarItem.sourceAID(sourceId))
         }
     }
 }
