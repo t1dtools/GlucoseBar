@@ -12,9 +12,6 @@ struct AidSettingsView: View {
     @EnvironmentObject var s: SettingsStore
     @EnvironmentObject var g: Glucose
 
-    @State private var isTesting: Bool = false
-    @State private var testResult: Bool? = nil
-
     func loadingView() -> some View {
         VStack {
             ProgressView().scaleEffect(1.0, anchor: .center).frame(width: 32, height: 32).padding(.vertical)
@@ -37,98 +34,89 @@ struct AidSettingsView: View {
     func aidView() -> some View {
         VStack {
             Text("AID System: \(g.provider.GlucoseSourceExtras.aid.presentable)", comment: "Heading for the detected AID system in the AID integration settings view").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 10)
-            if s.aidSource == .tandemSource {
-                Text("Connected via Tandem Source", comment: "Explaining text that AID data comes from Tandem Source").font(.footnote).frame(maxWidth: .infinity, alignment: .leading)
+            if s.cgmProvider == .tandemsource {
+                Text("Provided by Tandem Source CGM provider", comment: "Explaining text that AID data comes from the Tandem Source CGM provider").font(.footnote).frame(maxWidth: .infinity, alignment: .leading)
             } else {
                 Text("Automatically detected by GlucoseBar", comment: "Explaining text that GlucoseBar automatically detects the AID system in use").font(.footnote).frame(maxWidth: .infinity, alignment: .leading)
             }
         }.padding(.horizontal)
     }
 
-    // MARK: - AID Source Configuration
-
-    func aidSourceSection() -> some View {
+    func aidToggleSection() -> some View {
         VStack {
-            Text("AID Data Source")
-                .font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal).padding(.top)
             GroupBox {
-                HStack {
-                    Text("Select Source")
-                    Spacer()
-                    Picker("", selection: $s.aidSource) {
-                        ForEach(AIDSource.allCases) { source in
-                            Text(source.presentable).tag(source)
-                        }
-                    }.frame(width: 300, alignment: .trailing).onChange(of: s.aidSource) {
-                        s.save()
-                        g.reset(s)
+                VStack(spacing: 0) {
+                    HStack {
+                        Text("Enable AID Integration")
+                        Spacer()
+                        Toggle("", isOn: $s.aidEnableAID)
+                            .toggleStyle(.switch)
+                            .tint(.blue)
+                            .fixedSize()
+                            .scaleEffect(0.7, anchor: .trailing)
+                            .onChange(of: s.aidEnableAID) {
+                                s.save()
+                                g.reset(s)
+                            }
                     }
-                }.padding()
+                    .padding(.vertical, 6)
+                }
+                .padding()
             }.padding(.horizontal)
 
-
-            if s.aidSource == .tandemSource {
-                GroupBox {
-                    VStack(spacing: 0) {
-                        HStack {
-                            Text("Email").frame(width: 130, alignment: .leading)
-                            Spacer()
-                            TextField("", text: $s.tandemEmail).autocorrectionDisabled(true)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                        }
-                        .padding(.vertical, 4)
-                        HStack {
-                            Text("Password").frame(width: 130, alignment: .leading)
-                            Spacer()
-                            SecureField("", text: $s.tandemPassword).textFieldStyle(RoundedBorderTextFieldStyle())
-                        }
-                        .padding(.vertical, 4)
-
-                        HStack {
-                            Spacer()
-                            if testResult == true {
-                                HStack {
-                                    Text("Connection OK").foregroundColor(.green)
-                                    Image(systemName: "checkmark.circle").foregroundColor(.green)
-                                }
-                            }
-                            if testResult == false {
-                                HStack {
-                                    Text("Invalid credentials or service unreachable").foregroundColor(.orange)
-                                    Image(systemName: "exclamationmark.triangle").foregroundColor(.orange)
-                                }
-                            }
-                            if isTesting {
-                                ProgressView()
-                                    .controlSize(.small)
-                                    .progressViewStyle(CircularProgressViewStyle())
-                                    .padding(.leading, 2)
-                            }
-                            Button("Test Connection") {
-                                isTesting = true
-                                testResult = nil
-                                Task {
-                                    let ok = await s.testCGMProvider()
-                                    testResult = ok
-                                    isTesting = false
-                                }
-                            }.disabled(isTesting)
-                        }
-                        .padding(.top, 8)
-                    }
-                    .padding()
-                }.padding(.horizontal).padding(.bottom)
-            }
-
-            if s.aidSource == .autoDetect && s.cgmProvider != .nightscout {
+            if !s.aidEnableAID {
                 VStack {
-                    Text("Auto-detect only works with Nightscout CGM provider. No AID data will be available with the current provider.").font(.footnote).foregroundColor(.orange)
-                }.padding(.horizontal).padding(.bottom)
+                    Text("Enable AID integration to see extra data like IOB, COB, Loop Status, and predictions from your Automated Insulin Delivery system.")
+                        .font(.footnote)
+                }.padding(.horizontal)
+            } else {
+                if s.cgmProvider == .nightscout {
+                    VStack {
+                        Text("Supported AIDs are AAPS, Loop, OpenAPS, and Trio.").font(.footnote)
+                        Text("Not seeing your AID? Open an issue on GitHub.").font(.footnote)
+                        Button(action: {
+                            NSWorkspace.shared.open(URL(string: "https://github.com/t1dtools/GlucoseBar/issues?q=sort%3Aupdated-desc%20state%3Aopen%20label%3Aaid-integration")!)
+                        }) {
+                            Text("Open GitHub Issues")
+                        }
+                    }.padding(.horizontal)
+                }
+
+                if s.cgmProvider == .tandemsource {
+                    VStack {
+                        Text("Tandem Source provides AID data automatically. IOB, COB, basal rate, and pump status are included.").font(.footnote)
+                    }.padding(.horizontal)
+                }
+
+                if s.cgmProvider != .nightscout && s.cgmProvider != .tandemsource {
+                    VStack {
+                        Text("Auto-detect requires a Nightscout or Tandem Source CGM provider. No AID data will be available with the current provider.").font(.footnote).foregroundColor(.orange)
+                    }.padding(.horizontal)
+                }
             }
         }
     }
 
-    // MARK: - Chart Data
+    @ViewBuilder
+    func detectedAIDView() -> some View {
+        let aid = g.provider.GlucoseSourceExtras.aid
+        if aid == .null {
+            if s.aidEnableAID && s.cgmProvider != .nightscout && s.cgmProvider != .tandemsource {
+                VStack {
+                    Text("Auto-detect requires a Nightscout or Tandem Source CGM provider.")
+                        .foregroundColor(.orange)
+                        .padding(.horizontal)
+                }
+            } else {
+                loadingView()
+            }
+        } else if aid == .unknown {
+            unknownView()
+        } else {
+            aidView()
+            chartDataView()
+        }
+    }
 
     @ViewBuilder
     func chartDataView() -> some View {
@@ -188,7 +176,29 @@ struct AidSettingsView: View {
                             .scaleEffect(0.7, anchor: .trailing)
                     }
 
-                    if [.trio, .openaps, .aaps].contains(g.provider.GlucoseSourceExtras.aid) {
+                    if [.controliq].contains(g.provider.GlucoseSourceExtras.aid) {
+                        Divider()
+                        HStack {
+                            Text("Show Basal Rate")
+                            Spacer()
+                            Toggle(isOn: $s.aidChartShowBasalRate, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowBasalRate, initial: false) {
+                                s.save()
+                            }.fixedSize()
+                                .scaleEffect(0.7, anchor: .trailing)
+                        }
+
+                        Divider()
+                        HStack {
+                            Text("Show Basal Overlay")
+                            Spacer()
+                            Toggle(isOn: $s.aidChartShowBasalOverlay, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowBasalOverlay, initial: false) {
+                                s.save()
+                            }.fixedSize()
+                                .scaleEffect(0.7, anchor: .trailing)
+                        }
+                    }
+
+                    if [.trio, .openaps, .aaps, .controliq].contains(g.provider.GlucoseSourceExtras.aid) {
                         Divider()
                         HStack {
                             Text("Show Loop Status")
@@ -199,6 +209,7 @@ struct AidSettingsView: View {
                                 .scaleEffect(0.7, anchor: .trailing)
                         }
 
+                        if [.trio, .openaps, .aaps].contains(g.provider.GlucoseSourceExtras.aid) {
                         Divider()
                         HStack {
                             Text("Show Eventual Glucose")
@@ -207,6 +218,7 @@ struct AidSettingsView: View {
                                 s.save()
                             }.fixedSize()
                                 .scaleEffect(0.7, anchor: .trailing)
+                        }
                         }
                     }
                 }.padding()
@@ -221,19 +233,11 @@ struct AidSettingsView: View {
                 Text("Configure Automated Insulin Delivery data. AID systems can provide extra information like IOB, COB, Loop Status, predictions and more.", comment: "subheader for AID integration settings view").font(.footnote).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 2)
             }.padding(.horizontal).padding(.top)
 
-            aidSourceSection()
+            aidToggleSection()
 
-            if s.aidSource != .none {
+            if s.aidEnableAID || s.cgmProvider == .tandemsource {
                 Divider().padding(.horizontal).padding(.vertical, 10)
-
-                if g.provider.GlucoseSourceExtras.aid == .null {
-                    loadingView()
-                } else if g.provider.GlucoseSourceExtras.aid == .unknown {
-                    unknownView()
-                } else {
-                    aidView()
-                    chartDataView()
-                }
+                detectedAIDView()
             }
         }
     }

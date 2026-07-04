@@ -8,24 +8,6 @@
 import Foundation
 import OSLog
 
-public enum AIDSource: String, CaseIterable, Identifiable {
-    case none
-    case autoDetect
-    case tandemSource
-
-    public var id: String { self.rawValue }
-    public var presentable: String {
-        switch self {
-        case .none:
-            return String(localized: "None")
-        case .autoDetect:
-            return String(localized: "Auto-detect (from CGM provider)")
-        case .tandemSource:
-            return String(localized: "Tandem Source")
-        }
-    }
-}
-
 @MainActor
 class SettingsStore: ObservableObject, @unchecked Sendable {
 
@@ -69,9 +51,12 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     // Tandem Source
     @Published var tandemEmail: String = "your@email.com"
     @Published var tandemPassword: String = ""
+    @Published var tandemVerified: Bool = false
+    @Published var tandemRegion: TandemRegion = .us
+    @Published var tandemPumpAssignmentId: String = ""
 
-    // AID Source
-    @Published var aidSource: AIDSource = .none
+    // AID
+    @Published var aidEnableAID: Bool = false
 
     @Published var showTimeSince: Bool = false
     @Published var showDelta: Bool = true
@@ -101,6 +86,8 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     @Published var aidChartShowCOB: Bool = true
     @Published var aidChartShowEventualGlucose: Bool = true
     @Published var aidChartShowLoopStatus: Bool = true
+    @Published var aidChartShowBasalRate: Bool = true
+    @Published var aidChartShowBasalOverlay: Bool = true
 
     @Published var validSettings: Bool = false
     @Published var debugMode: Bool = false
@@ -247,6 +234,9 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         case CGMProvider.dexcomshare.presentable:
             self.cgmProvider = .dexcomshare
             self.logger.dlog("cgmProvider was dexcomshare", category: "settingsstore", level: .default)
+        case CGMProvider.tandemsource.presentable:
+            self.cgmProvider = .tandemsource
+            self.logger.dlog("cgmProvider was tandemsource", category: "settingsstore", level: .default)
         default:
             self.cgmProvider = .null
             self.logger.dlog("cgmProvider was default", category: "settingsstore", level: .default)
@@ -302,27 +292,23 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         self.aidChartShowCOB = defaults.bool(forKey: key("trioChartShowCOB"))
         self.aidChartShowEventualGlucose = defaults.bool(forKey: key("trioChartShowEventualGlucose"))
         self.aidChartShowLoopStatus = defaults.bool(forKey: key("trioChartShowLoopStatus"))
+        self.aidChartShowBasalRate = defaults.bool(forKey: key("aidChartShowBasalRate"))
+        self.aidChartShowBasalOverlay = defaults.bool(forKey: key("aidChartShowBasalOverlay"))
 
         // Tandem Source
         self.tandemEmail = defaults.string(forKey: key("tandemEmail")) ?? "your@email.com"
         self.tandemPassword = defaults.string(forKey: key("tandemPassword")) ?? ""
+        self.tandemVerified = defaults.bool(forKey: key("tandemVerified"))
+        let tdmRgn = defaults.string(forKey: key("tandemRegion")) ?? TandemRegion.us.rawValue
+        self.tandemRegion = tdmRgn == TandemRegion.eu.rawValue ? .eu : .us
+        self.tandemPumpAssignmentId = defaults.string(forKey: key("tandemPumpAssignmentId")) ?? ""
 
-        // AID Source
-        let previousAid = defaults.string(forKey: key("aidSource"))
-        let aidSrc: String
-        if previousAid == nil && defaults.bool(forKey: key("trioEnableIntegration")) {
-            // Migration: legacy aidEnableIntegration was on, default to auto-detect
-            aidSrc = AIDSource.autoDetect.presentable
+        // AID Source - migrate from legacy aidSource enum if present
+        if let oldAidSource = defaults.string(forKey: key("aidSource")) {
+            self.aidEnableAID = oldAidSource != "None"
         } else {
-            aidSrc = previousAid ?? AIDSource.none.presentable
-        }
-        switch aidSrc {
-        case AIDSource.autoDetect.presentable:
-            self.aidSource = .autoDetect
-        case AIDSource.tandemSource.presentable:
-            self.aidSource = .tandemSource
-        default:
-            self.aidSource = .none
+            self.aidEnableAID = defaults.bool(forKey: key("aidEnableAID"))
+                || (defaults.bool(forKey: key("trioEnableIntegration")) && defaults.string(forKey: key("aidSource")) == nil)
         }
     }
 
@@ -399,13 +385,18 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         defaults.set(self.aidChartShowCOB, forKey: key("trioChartShowCOB"))
         defaults.set(self.aidChartShowEventualGlucose, forKey: key("trioChartShowEventualGlucose"))
         defaults.set(self.aidChartShowLoopStatus, forKey: key("trioChartShowLoopStatus"))
+        defaults.set(self.aidChartShowBasalRate, forKey: key("aidChartShowBasalRate"))
+        defaults.set(self.aidChartShowBasalOverlay, forKey: key("aidChartShowBasalOverlay"))
 
         // Tandem Source
         defaults.set(self.tandemEmail, forKey: key("tandemEmail"))
         defaults.set(self.tandemPassword, forKey: key("tandemPassword"))
+        defaults.set(self.tandemVerified, forKey: key("tandemVerified"))
+        defaults.set(self.tandemRegion.rawValue, forKey: key("tandemRegion"))
+        defaults.set(self.tandemPumpAssignmentId, forKey: key("tandemPumpAssignmentId"))
 
         // AID Source
-        defaults.set(self.aidSource.presentable, forKey: key("aidSource"))
+        defaults.set(self.aidEnableAID, forKey: key("aidEnableAID"))
 
         // Identity
         defaults.set(self.sourceName, forKey: key("sourceName"))
@@ -463,8 +454,10 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         case .tandemsource:
             self.tandemEmail = ""
             self.tandemPassword = ""
+            self.tandemVerified = false
             defaults.removeObject(forKey: key("tandemEmail"))
             defaults.removeObject(forKey: key("tandemPassword"))
+            defaults.removeObject(forKey: key("tandemVerified"))
         default:
             // noop
             return
@@ -482,7 +475,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         case .dexcomshare:
             provider = DexcomShare(username: self.dxEmail, password: self.dxPassword, server: self.dxServer)
         case .tandemsource:
-            provider = TandemSource(email: self.tandemEmail, password: self.tandemPassword)
+            provider = TandemSource(email: self.tandemEmail, password: self.tandemPassword, region: self.tandemRegion)
         default:
             provider = Simulator("")
         }

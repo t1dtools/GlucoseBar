@@ -207,7 +207,13 @@ struct SettingsView: View {
         .navigationSplitViewColumnWidth(min: 440, ideal: 440)
         .frame(minWidth: 715, maxWidth: 715, minHeight: 500, maxHeight: .infinity)
         .onAppear {
-            selectedSource = sourceManager.sources.first
+            if let pendingId = sourceManager.pendingSelectedSourceId,
+               let source = sourceManager.sources.first(where: { $0.id == pendingId }) {
+                selectedSource = source
+                sourceManager.pendingSelectedSourceId = nil
+            } else {
+                selectedSource = sourceManager.sources.first
+            }
             selectedItem = .general
             didAppear = true
         }

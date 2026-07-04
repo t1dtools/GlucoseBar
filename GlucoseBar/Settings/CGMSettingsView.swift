@@ -116,7 +116,16 @@ struct CGMSettingsView: View {
                     Spacer()
                     SecureField("", text: $s.tandemPassword).textFieldStyle(RoundedBorderTextFieldStyle())
                 }
-                Text("Your Tandem Source (t:connect) login credentials. CGM data from the pump has a significant delay (~30 minutes) and should not be your primary glucose source.").font(.footnote).fixedSize(horizontal: false, vertical: true)
+                HStack {
+                    Text("Region").frame(width: 130, alignment: .leading)
+                    Spacer()
+                    Picker("", selection: $s.tandemRegion) {
+                        ForEach(TandemRegion.allCases) { r in
+                            Text(r.presentable).tag(r)
+                        }
+                    }.pickerStyle(SegmentedPickerStyle()).frame(width: 130)
+                }
+                Text("Your Tandem Source (t:connect) login credentials.").font(.footnote).fixedSize(horizontal: false, vertical: true)
             }
         }
     }
