@@ -7,38 +7,97 @@
 
 import Foundation
 import OSLog
+import CryptoKit
 
 enum TandemLoginError: Error, LocalizedError {
     case invalidCredentials
-    case missingCookies
     case parseError(String)
-    case rateLimited
     case httpError(Int)
     case noAccessToken
+    case noPumperId
+    case noSessionCookies
 
     var errorDescription: String? {
         switch self {
         case .invalidCredentials:
             return "Invalid Tandem Source credentials"
-        case .missingCookies:
-            return "Unable to retrieve session cookies"
         case .parseError(let detail):
-            return "Error parsing Tandem login page: \(detail)"
-        case .rateLimited:
-            return "Tandem login is rate-limited. Please try again later."
+            return "Tandem login error: \(detail)"
         case .httpError(let status):
             return "Tandem login HTTP error: \(status)"
         case .noAccessToken:
             return "Unable to obtain access token from Tandem"
+        case .noPumperId:
+            return "Unable to find pump ID in Tandem account"
+        case .noSessionCookies:
+            return "Unable to establish session with Tandem"
+        }
+    }
+}
+
+public enum TandemRegion: String, CaseIterable, Identifiable {
+    case us
+    case eu
+
+    public var id: String { self.rawValue }
+    public var presentable: String {
+        switch self {
+        case .us: return "US"
+        case .eu: return "EU"
+        }
+    }
+
+    var loginPageURL: URL { URL(string: "https://sso.tandemdiabetes.com/")! }
+
+    var loginAPIURL: URL {
+        switch self {
+        case .us: return URL(string: "https://tdcservices.tandemdiabetes.com/accounts/api/login")!
+        case .eu: return URL(string: "https://tdcservices.eu.tandemdiabetes.com/accounts/api/login")!
+        }
+    }
+
+    var authorizeURL: URL {
+        switch self {
+        case .us: return URL(string: "https://tdcservices.tandemdiabetes.com/accounts/api/connect/authorize")!
+        case .eu: return URL(string: "https://tdcservices.eu.tandemdiabetes.com/accounts/api/connect/authorize")!
+        }
+    }
+
+    var tokenURL: URL {
+        switch self {
+        case .us: return URL(string: "https://tdcservices.tandemdiabetes.com/accounts/api/connect/token")!
+        case .eu: return URL(string: "https://tdcservices.eu.tandemdiabetes.com/accounts/api/connect/token")!
+        }
+    }
+
+    var oidcClientID: String {
+        switch self {
+        case .us: return "0oa4wnbvtladeyVZX4h7"
+        case .eu: return "1519e414-eeec-492e-8c5e-97bea4815a10"
+        }
+    }
+
+    var redirectURI: String {
+        switch self {
+        case .us: return "https://sso.tandemdiabetes.com/auth/callback"
+        case .eu: return "https://source.eu.tandemdiabetes.com/authorize/callback"
+        }
+    }
+
+    var sourceURL: URL {
+        switch self {
+        case .us: return URL(string: "https://source.tandemdiabetes.com/")!
+        case .eu: return URL(string: "https://source.eu.tandemdiabetes.com/")!
         }
     }
 }
 
 struct TandemLoginSession {
-    let userGuid: String
+    let pumperId: String
+    let accountId: String
     let accessToken: String
     let accessTokenExpiresAt: Date
-    let loginCookies: [HTTPCookie]
+    let region: TandemRegion
 
     var isExpired: Bool {
         accessTokenExpiresAt.timeIntervalSinceNow <= 300
@@ -47,246 +106,247 @@ struct TandemLoginSession {
 
 final class TandemLoginHelper {
 
-    private let loginURL = URL(string: "https://tconnect.tandemdiabetes.com/login.aspx?ReturnUrl=%2f")!
-    private let baseURL = URL(string: "https://tdcservices.tandemdiabetes.com")!
-    private let oauthTokenPath = "cloud/oauth2/token"
-    private let oauthScopes = "cloud.account cloud.upload cloud.accepttcpp cloud.email cloud.password"
-
-    private let clientId = "C2331CD6-D450-495E-9C19-67215230C85D"
-    private let clientSecret = "tz433KW5QDC9V7f!z6@^2o&Y6SGGYh"
+    private let region: TandemRegion
+    private let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "tandem-login")
     private let httpTimeout: Double = 120.0
 
-    private let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "tandem-login")
-
     private let session: URLSession
+    private let apiSession: URLSession
 
-    init() {
+    init(region: TandemRegion) {
+        self.region = region
+
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = httpTimeout
         config.timeoutIntervalForResource = httpTimeout
         config.httpCookieAcceptPolicy = .always
         session = URLSession(configuration: config)
+
+        let apiConfig = URLSessionConfiguration.default
+        apiConfig.timeoutIntervalForRequest = httpTimeout
+        apiConfig.timeoutIntervalForResource = httpTimeout
+        apiConfig.httpAdditionalHeaders = ["User-Agent": TandemLoginHelper.randomUserAgent()]
+        apiSession = URLSession(configuration: apiConfig)
     }
+
+    func browserSession() -> URLSession { apiSession }
+    func loginSession() -> URLSession { session }
 
     func login(email: String, password: String) async throws -> TandemLoginSession {
-        logger.debug("TandemLoginHelper.login: starting")
+        logger.info("TandemLogin (\(self.region.presentable, privacy: .public)): starting login for \(email, privacy: .private)")
 
-        let (loginCookies, userGuid) = try await formsLogin(email: email, password: password)
-        logger.debug("TandemLoginHelper.login: forms login success, userGuid=\(userGuid)")
+        try await establishSession(email: email, password: password)
 
-        let (accessToken, accessTokenExpiresAt) = try await oauthLogin(email: email, password: password)
-        logger.debug("TandemLoginHelper.login: oauth success, expires=\(accessTokenExpiresAt)")
+        logger.info("TandemLogin: session established, starting OIDC flow")
+
+        let code = try await oidcAuthorize()
+
+        let (accessToken, idToken, expiresIn) = try await oidcToken(code: code)
+
+        let (pumperId, accountId) = try parseJWT(idToken)
+
+        let expiresAt = Date().addingTimeInterval(TimeInterval(expiresIn))
+        logger.info("TandemLogin: OIDC complete, pumperId=\(pumperId.prefix(8), privacy: .public)..., token expires in \(expiresIn)s")
 
         return TandemLoginSession(
-            userGuid: userGuid,
+            pumperId: pumperId,
+            accountId: accountId,
             accessToken: accessToken,
-            accessTokenExpiresAt: accessTokenExpiresAt,
-            loginCookies: loginCookies
+            accessTokenExpiresAt: expiresAt,
+            region: region
         )
     }
 
-    // MARK: - Forms Login
+    // MARK: - Session Establishment
 
-    private func formsLogin(email: String, password: String) async throws -> ([HTTPCookie], String) {
-        var request = URLRequest(url: loginURL)
-        request.httpMethod = "GET"
-        request.setValue(randomUserAgent(), forHTTPHeaderField: "User-Agent")
-        request.cachePolicy = .reloadIgnoringLocalCacheData
+    private func establishSession(email: String, password: String) async throws {
+        logger.info("TandemLogin: GET \(self.region.loginPageURL.absoluteString, privacy: .public)...")
+        var initialReq = URLRequest(url: region.loginPageURL)
+        initialReq.setValue(TandemLoginHelper.randomUserAgent(), forHTTPHeaderField: "User-Agent")
+        initialReq.cachePolicy = .reloadIgnoringLocalCacheData
 
-        let (data, response) = try await session.data(for: request)
+        let _ = try await session.data(for: initialReq)
 
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw TandemLoginError.parseError("No HTTP response")
-        }
+        var loginReq = URLRequest(url: region.loginAPIURL)
+        loginReq.httpMethod = "POST"
+        loginReq.timeoutInterval = 30
+        loginReq.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        loginReq.setValue(TandemLoginHelper.randomUserAgent(), forHTTPHeaderField: "User-Agent")
+        loginReq.setValue(region.loginPageURL.absoluteString, forHTTPHeaderField: "Referer")
 
-        if httpResponse.statusCode == 200 {
-            if let body = String(data: data, encoding: .utf8),
-               body.contains("Web Page Blocked!") || body.contains("Attack ID:") {
-                throw TandemLoginError.rateLimited
-            }
-        }
+        let body: [String: String] = ["username": email, "password": password]
+        loginReq.httpBody = try JSONSerialization.data(withJSONObject: body)
 
-        guard let html = String(data: data, encoding: .utf8) else {
-            throw TandemLoginError.parseError("Unable to read login page")
-        }
-
-        guard let viewState = extractHiddenField(named: "__VIEWSTATE", from: html),
-              let viewStateGenerator = extractHiddenField(named: "__VIEWSTATEGENERATOR", from: html),
-              let eventValidation = extractHiddenField(named: "__EVENTVALIDATION", from: html) else {
-            throw TandemLoginError.parseError("Missing ASP.NET form fields")
-        }
-
-        let postBody = buildLoginBody(
-            email: email,
-            password: password,
-            viewState: viewState,
-            viewStateGenerator: viewStateGenerator,
-            eventValidation: eventValidation
-        )
-
-        var postRequest = URLRequest(url: loginURL)
-        postRequest.httpMethod = "POST"
-        postRequest.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-        postRequest.setValue(randomUserAgent(), forHTTPHeaderField: "User-Agent")
-        postRequest.setValue(loginURL.absoluteString, forHTTPHeaderField: "Referer")
-        postRequest.httpBody = postBody.data(using: .utf8)
-        postRequest.cachePolicy = .reloadIgnoringLocalCacheData
-
-        let (postData, postResponse) = try await session.data(for: postRequest)
-
-        guard let postHTTPResponse = postResponse as? HTTPURLResponse else {
-            throw TandemLoginError.parseError("No HTTP response from login POST")
-        }
-
-        // HTTP 200 with .notice_error means bad credentials
-        if postHTTPResponse.statusCode == 200 {
-            if let body = String(data: postData, encoding: .utf8),
-               let errorStart = body.range(of: "notice_error"),
-               let closeSpan = body[errorStart.upperBound...].range(of: "</span>") {
-                let errorStartIdx = body[errorStart.upperBound...].range(of: ">")
-                let startIdx = errorStartIdx?.upperBound ?? errorStart.upperBound
-                let errorText = String(body[startIdx..<closeSpan.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
-                throw TandemLoginError.parseError(errorText.isEmpty ? "Check your login credentials." : errorText)
-            }
-            // Might be a redirect in body
-            if let body = String(data: postData, encoding: .utf8), !body.contains("LoginControl") {
-                // Login succeeded but we got a 200 (unusual but handled)
-            } else {
-                throw TandemLoginError.invalidCredentials
-            }
-        }
-
-        if postHTTPResponse.statusCode != 302 && postHTTPResponse.statusCode != 200 {
-            throw TandemLoginError.httpError(postHTTPResponse.statusCode)
-        }
-
-        guard let fields = postHTTPResponse.allHeaderFields as? [String: String] else {
-            throw TandemLoginError.parseError("No response headers from login")
-        }
-
-        let url = postHTTPResponse.url ?? loginURL
-
-        let cookies = HTTPCookie.cookies(withResponseHeaderFields: fields, for: url)
-
-        guard let userGuidCookie = cookies.first(where: { $0.name == "UserGUID" }) else {
-            throw TandemLoginError.missingCookies
-        }
-
-        // Follow redirect if HTTP 302
-        if postHTTPResponse.statusCode == 302,
-           let location = fields["Location"] {
-            var followURL = URL(string: location, relativeTo: url) ?? url
-            if location.starts(with: "/") {
-                followURL = URL(string: "https://tconnect.tandemdiabetes.com\(location)")!
-            }
-
-            var followRequest = URLRequest(url: followURL)
-            followRequest.httpMethod = "POST"
-            followRequest.setValue(randomUserAgent(), forHTTPHeaderField: "User-Agent")
-            followRequest.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-
-            let _ = try? await session.data(for: followRequest)
-        }
-
-        return (cookies, userGuidCookie.value)
-    }
-
-    // MARK: - OAuth2 Login
-
-    private func oauthLogin(email: String, password: String) async throws -> (String, Date) {
-        let tokenURL = baseURL.appendingPathComponent(oauthTokenPath)
-
-        var request = URLRequest(url: tokenURL)
-        request.httpMethod = "POST"
-        request.setValue("application/x-www-form-urlencoded; charset=UTF-8", forHTTPHeaderField: "Content-Type")
-        request.setValue("Dalvik/2.1.0 (Linux; U; Android 12; Pixel 4a Build/SP2A.220305.012)", forHTTPHeaderField: "User-Agent")
-
-        let authString = "\(clientId):\(clientSecret)"
-        let authData = authString.data(using: .utf8)!
-        let base64Auth = authData.base64EncodedString()
-        request.setValue("Basic \(base64Auth)", forHTTPHeaderField: "Authorization")
-
-        let params: [String: String] = [
-            "username": email,
-            "password": password,
-            "grant_type": "password",
-            "scope": oauthScopes
-        ]
-
-        let bodyString = params.map { "\($0.key)=\(percentEncode($0.value))" }.joined(separator: "&")
-        request.httpBody = bodyString.data(using: .utf8)
-
-        let (data, response) = try await URLSession.appDefault.data(for: request)
+        let (data, response) = try await session.data(for: loginReq)
 
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw TandemLoginError.noAccessToken
+            throw TandemLoginError.parseError("No HTTP response from login API")
         }
 
         if httpResponse.statusCode != 200 {
+            let body = String(data: data, encoding: .utf8)?.prefix(500) ?? ""
+            logger.error("TandemLogin: login API returned HTTP \(httpResponse.statusCode, privacy: .public), body: \(body, privacy: .public)")
             throw TandemLoginError.httpError(httpResponse.statusCode)
         }
 
-        let authResponse = try JSONDecoder().decode(TandemOAuthResponse.self, from: data)
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let status = json["status"] as? String,
+              status == "SUCCESS" else {
+            let body = String(data: data, encoding: .utf8) ?? ""
+            logger.error("TandemLogin: login API unexpected response: \(body, privacy: .public)")
+            throw TandemLoginError.invalidCredentials
+        }
 
-        guard let token = authResponse.accessToken.nilIfEmpty else {
+        logger.info("TandemLogin: login API OK")
+    }
+
+    // MARK: - OIDC Authorization
+
+    private func oidcAuthorize() async throws -> String {
+        let verifier = generateCodeVerifier()
+        let challenge = generateCodeChallenge(verifier)
+
+        let params: [String: String] = [
+            "client_id": region.oidcClientID,
+            "response_type": "code",
+            "scope": "openid profile email",
+            "redirect_uri": region.redirectURI,
+            "code_challenge": challenge,
+            "code_challenge_method": "S256"
+        ]
+
+        var components = URLComponents(url: region.authorizeURL, resolvingAgainstBaseURL: false)!
+        components.queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }
+
+        var authReq = URLRequest(url: components.url!)
+        authReq.timeoutInterval = 30
+        authReq.setValue(TandemLoginHelper.randomUserAgent(), forHTTPHeaderField: "User-Agent")
+        authReq.setValue(region.loginPageURL.absoluteString, forHTTPHeaderField: "Referer")
+
+        logger.info("TandemLogin: OIDC authorize request...")
+
+        let (data, response) = try await session.data(for: authReq)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode / 100 == 2 else {
+            let body = String(data: data, encoding: .utf8)?.prefix(500) ?? ""
+            let status = (response as? HTTPURLResponse)?.statusCode ?? -1
+            logger.error("TandemLogin: OIDC authorize returned HTTP \(status, privacy: .public), body: \(body, privacy: .public)")
+            throw TandemLoginError.parseError("OIDC authorize failed")
+        }
+
+        guard let finalURL = httpResponse.url,
+              let components = URLComponents(url: finalURL, resolvingAgainstBaseURL: false),
+              let code = components.queryItems?.first(where: { $0.name == "code" })?.value else {
+            logger.error("TandemLogin: no code in OIDC redirect URL: \(httpResponse.url?.absoluteString ?? "nil", privacy: .public)")
+            throw TandemLoginError.parseError("No authorization code in OIDC response")
+        }
+
+        logger.info("TandemLogin: OIDC authorize OK, got code")
+        self.codeVerifier = verifier
+        return code
+    }
+
+    private var codeVerifier: String = ""
+
+    // MARK: - OIDC Token Exchange
+
+    private func oidcToken(code: String) async throws -> (String, String, Int) {
+        let tokenParams: [String: String] = [
+            "grant_type": "authorization_code",
+            "client_id": region.oidcClientID,
+            "code": code,
+            "redirect_uri": region.redirectURI,
+            "code_verifier": codeVerifier
+        ]
+
+        let bodyString = tokenParams
+            .map { "\($0.key)=\(percentEncode($0.value))" }
+            .joined(separator: "&")
+
+        var tokenReq = URLRequest(url: region.tokenURL)
+        tokenReq.httpMethod = "POST"
+        tokenReq.timeoutInterval = 30
+        tokenReq.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        tokenReq.setValue(TandemLoginHelper.randomUserAgent(), forHTTPHeaderField: "User-Agent")
+        tokenReq.httpBody = bodyString.data(using: .utf8)
+
+        logger.info("TandemLogin: OIDC token exchange...")
+        let (data, response) = try await session.data(for: tokenReq)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode / 100 == 2 else {
+            let body = String(data: data, encoding: .utf8)?.prefix(500) ?? ""
+            let status = (response as? HTTPURLResponse)?.statusCode ?? -1
+            logger.error("TandemLogin: OIDC token returned HTTP \(status, privacy: .public), body: \(body, privacy: .public)")
+            throw TandemLoginError.parseError("OIDC token exchange failed")
+        }
+
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let accessToken = json["access_token"] as? String,
+              let idToken = json["id_token"] as? String,
+              let expiresIn = json["expires_in"] as? Int else {
+            let body = String(data: data, encoding: .utf8) ?? ""
+            logger.error("TandemLogin: OIDC token response missing fields: \(body, privacy: .public)")
             throw TandemLoginError.noAccessToken
         }
 
-        let expiry = parseISO8601(authResponse.accessTokenExpiresAt) ?? Date().addingTimeInterval(3600)
-
-        return (token, expiry)
+        logger.info("TandemLogin: OIDC token exchange OK")
+        codeVerifier = ""
+        return (accessToken, idToken, expiresIn)
     }
 
-    // MARK: - Helpers
+    // MARK: - JWT Parsing
 
-    private func percentEncode(_ value: String) -> String {
-        return value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? value
-    }
-
-    private func extractHiddenField(named name: String, from html: String) -> String? {
-        let patterns: [String] = [
-            "id=\"\(name)\"[^>]*value=\"([^\"]+)\"",
-            "id=\(name)\\s[^>]*value=\"([^\"]+)\"",
-            "name=\"\(name)\"[^>]*value=\"([^\"]+)\""
-        ]
-
-        for pattern in patterns {
-            guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else { continue }
-            let range = NSRange(html.startIndex..<html.endIndex, in: html)
-            if let match = regex.firstMatch(in: html, options: [], range: range),
-               let valueRange = Range(match.range(at: 1), in: html) {
-                return String(html[valueRange])
-            }
+    private func parseJWT(_ idToken: String) throws -> (String, String) {
+        let segments = idToken.split(separator: ".")
+        guard segments.count == 3 else {
+            throw TandemLoginError.parseError("Invalid JWT format")
         }
 
-        return nil
+        let payloadSegment = String(segments[1])
+        let padded = payloadSegment.paddedBase64
+
+        guard let payloadData = Data(base64Encoded: padded),
+              let payload = try? JSONSerialization.jsonObject(with: payloadData) as? [String: Any] else {
+            throw TandemLoginError.parseError("Unable to decode JWT payload")
+        }
+
+        guard let pumperId = payload["pumperId"] as? String else {
+            logger.error("TandemLogin: JWT missing pumperId. Claims: \(payload.keys.joined(separator: ", "), privacy: .public)")
+            throw TandemLoginError.noPumperId
+        }
+
+        let accountId = payload["accountId"] as? String ?? ""
+        logger.info("TandemLogin: JWT decoded, pumperId=\(pumperId.prefix(8), privacy: .public)..., accountId=\(accountId.prefix(8), privacy: .public)...")
+        return (pumperId, accountId)
     }
 
-    private func buildLoginBody(email: String, password: String,
-                                 viewState: String, viewStateGenerator: String,
-                                 eventValidation: String) -> String {
-        let fields: [(String, String)] = [
-            ("__LASTFOCUS", ""),
-            ("__EVENTTARGET", "ctl00$ContentBody$LoginControl$linkLogin"),
-            ("__EVENTARGUMENT", ""),
-            ("__VIEWSTATE", percentEncode(viewState)),
-            ("__VIEWSTATEGENERATOR", percentEncode(viewStateGenerator)),
-            ("__EVENTVALIDATION", percentEncode(eventValidation)),
-            ("ctl00$ContentBody$LoginControl$txtLoginEmailAddress", percentEncode(email)),
-            ("ctl00$ContentBody$LoginControl$txtLoginPassword", percentEncode(password)),
-        ]
+    // MARK: - PKCE Helpers
 
-        return fields.map { "\($0.0)=\($0.1)" }.joined(separator: "&")
+    private func generateCodeVerifier() -> String {
+        let bytes = (0..<64).map { _ in UInt8.random(in: 0...255) }
+        let data = Data(bytes)
+        return data.base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
     }
 
-    private func parseISO8601(_ dateString: String?) -> Date? {
-        guard let dateString = dateString?.nilIfEmpty else { return nil }
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return formatter.date(from: dateString) ?? ISO8601DateFormatter().date(from: dateString)
+    private func generateCodeChallenge(_ verifier: String) -> String {
+        let data = Data(verifier.utf8)
+        let hash = SHA256.hash(data: data)
+        return Data(hash).base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
     }
 
-    private func randomUserAgent() -> String {
+    private func percentEncode(_ value: String) -> String {
+        value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? value
+    }
+
+    static func randomUserAgent() -> String {
         let agents = [
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36",
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.115 Safari/537.36",
@@ -302,6 +362,17 @@ final class TandemLoginHelper {
 }
 
 extension String {
+    var paddedBase64: String {
+        var base64 = self
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+        let remainder = base64.count % 4
+        if remainder > 0 {
+            base64 += String(repeating: "=", count: 4 - remainder)
+        }
+        return base64
+    }
+
     var nilIfEmpty: String? {
         isEmpty ? nil : self
     }

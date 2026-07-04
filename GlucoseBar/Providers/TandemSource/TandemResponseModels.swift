@@ -6,191 +6,134 @@
 
 import Foundation
 
-// MARK: - Android API OAuth2
+// MARK: - BFF Pumper
 
-struct TandemOAuthResponse: Codable {
-    let accessToken: String
-    let accessTokenExpiresAt: String
-    let refreshToken: String?
-    let refreshTokenExpiresAt: String?
-    let user: TandemOAuthUser?
-    let patientObjectId: String?
-    let userGuid: String?
-}
-
-struct TandemOAuthUser: Codable {
-    let id: String?
+struct BffPumper: Codable {
     let firstName: String?
     let lastName: String?
-    let emailAddress: String?
+    let name: String?
+    let lowGlucoseThreshold: Int?
+    let highGlucoseThreshold: Int?
+    let pumps: [BffPump]?
 }
 
-// MARK: - User Profile
-
-struct TandemUserProfile: Codable {
-    let userID: String?
-    let targetBgHigh: Int?
-    let targetBgLow: Int?
-    let hypoThreshold: Int?
-    let hyperThreshold: Int?
-    let hasCGM: Bool?
-    let hasBASALIQ: Bool?
-    let hasControlIQ: Bool?
-    let patientFullName: String?
-}
-
-// MARK: - Therapy Thresholds
-
-struct TandemTherapyThresholds: Codable {
-    let targetBGHigh: Int?
-    let targetBGLow: Int?
-    let hypoThreshold: Int?
-    let hyperThreshold: Int?
-    let siteChangeThreshold: Int?
-    let cartridgeChangeThreshold: Int?
-    let tubingChangeThreshold: Int?
-}
-
-// MARK: - Pump Features
-
-struct TandemPumpFeatures: Codable {
+struct BffPump: Codable {
+    let assignmentId: String?
     let serialNumber: String?
-    let features: TandemPumpFeaturesDetail?
+    let modelNumber: String?
+    let modelName: String?
+    let softwareVersion: String?
+    let algorithm: String?
+    let glucoseUnit: String?
+    let lastUploadDate: String?
+    let maxDateOfEvents: String?
+    let partNumber: String?
+    let lastUploadClientType: String?
+    let availableDataRange: BffAvailableDataRange?
+    let settings: BffPumpSettings?
 }
 
-struct TandemPumpFeaturesDetail: Codable {
-    let controlIQ: TandemControlIQFeature?
+struct BffAvailableDataRange: Codable {
+    let start: String?
+    let end: String?
 }
 
-struct TandemControlIQFeature: Codable {
-    let feature: Int?
-    let dateTimeFirstDetected: String?
-    let unixTimestamp: Int?
+struct BffPumpSettings: Codable {
+    let id: String?
+    let deviceAssignmentId: String?
+    let uploadedTimeStamp: String?
+    let settingsHash: String?
+    let uploadId: String?
+    let details: BffPumpSettingsDetails?
 }
 
-// MARK: - Last Event Uploaded
+struct BffPumpSettingsDetails: Codable {
+    private var storage: [String: PumpLogProperty] = [:]
 
-struct TandemLastEventUploaded: Codable {
-    let maxPumpEventIndex: Int?
-    let processingStatus: Int?
-}
-
-// MARK: - Dashboard Summary
-
-struct TandemDashboardSummary: Codable {
-    let averageReading: Int?
-    let timeInUseMinutes: Int?
-    let controlIqSetToOffMinutes: Int?
-    let cgmInactiveMinutes: Int?
-    let pumpInactiveMinutes: Int?
-    let averageDailySleepMinutes: Int?
-    let weeklyExerciseEvents: Int?
-    let timeInUsePercent: Int?
-    let controlIqOffPercent: Int?
-    let cgmInactivePercent: Int?
-    let pumpInactivePercent: Int?
-    let totalDays: Int?
-}
-
-// MARK: - ControlIQ Therapy Timeline (basal events)
-
-struct TandemTherapyTimelineResponse: Codable {
-    let event: [TandemTherapyTimelineEvent]?
-}
-
-struct TandemTherapyTimelineEvent: Codable {
-    let type: String?
-    let x: Int?
-    let y: Double?
-    let duration: Int?
-    let basalRate: Double?
-    let egv: Int?
-    let eventId: Int?
-    let eventType: Int?
-    let continuation: Bool?
-    let suspendReason: String?
-    let standard: TandemBolusEvent?
-    let insulinDelivered: Double?
-    let requestedInsulin: Double?
-    let carbSize: Double?
-    let bg: String?
-    let userOverride: String?
-    let description: String?
-    let completionStatus: String?
-
-    enum CodingKeys: String, CodingKey {
-        case type, x, y, duration, basalRate, egv, eventId, eventType
-        case continuation, suspendReason, standard, insulinDelivered
-        case requestedInsulin, carbSize, bg, userOverride, description
-        case completionStatus
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        storage = try container.decode([String: PumpLogProperty].self)
     }
-}
 
-struct TandemBolusEvent: Codable {
-    let bolusId: String?
-    let requestDateTime: String?
-    let completionDateTime: String?
-    let insulinDelivered: Double?
-    let actualTotalBolusRequested: Double?
-    let carbSize: Double?
-    let bg: String?
-    let userOverride: String?
-    let extendedBolus: Bool?
-    let bolexCompletionDateTime: String?
-    let bolexStartDateTime: String?
-    let completionStatus: String?
-    let description: String?
-}
-
-// MARK: - Therapy Events response (CIQ)
-
-struct TandemTherapyEventsResponse: Codable {
-    let event: [TandemTherapyEvent]?
-}
-
-struct TandemTherapyEvent: Codable {
-    let type: String?
-    let eventDateTime: String?
-    let egv: Int?
-    let basalRate: Double?
-    let insulinDelivered: Double?
-    let requestedInsulin: Double?
-    let carbSize: Double?
-    let bg: String?
-    let userOverride: String?
-    let description: String?
-    let completionStatus: String?
-    let extendedBolus: Bool?
-    let bolexCompletionDateTime: String?
-    let bolexStartDateTime: String?
-}
-
-// MARK: - WS2 CSV Therapy Timeline
-
-struct TandemWS2TherapyTimeline {
-    let readingData: [[String: String]]
-    let iobData: [[String: String]]
-    let basalData: [[String: String]]
-    let bolusData: [[String: String]]
-
-    init(reading: [[String: String]] = [],
-         iob: [[String: String]] = [],
-         basal: [[String: String]] = [],
-         bolus: [[String: String]] = []) {
-        self.readingData = reading
-        self.iobData = iob
-        self.basalData = basal
-        self.bolusData = bolus
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(storage)
     }
+
+    subscript(key: String) -> PumpLogProperty? { storage[key] }
+
+    var dda: Double? { storage["dda"]?.doubleValue }
+    var basalRate: Double? { storage["maxBasalRate"]?.doubleValue }
+    var pumpId: String? { storage["pumpId"]?.stringValue }
 }
 
-// MARK: - Basal Suspension (WS2)
+// MARK: - Pump Logs
 
-struct TandemBasalSuspensionResponse: Codable {
-    let BasalSuspension: [TandemBasalSuspensionEvent]?
+struct PumpLogsResponse: Codable {
+    let events: [PumpLogEvent]?
+    let clockChanges: [PumpLogEvent]?
 }
 
-struct TandemBasalSuspensionEvent: Codable {
-    let EventDateTime: String?
-    let SuspendReason: String?
+struct PumpLogEvent: Codable {
+    let deviceAssignmentId: String?
+    let eventCode: Int?
+    let sequenceGroup: Int?
+    let sequenceNumber: Int?
+    let pumpDateTime: String?
+    let estimatedDateTime: String?
+    let eventProperties: [String: PumpLogProperty]?
+}
+
+enum PumpLogProperty: Codable {
+    case int(Int)
+    case double(Double)
+    case string(String)
+    case bool(Bool)
+    case array([PumpLogProperty])
+    case null
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let intVal = try? container.decode(Int.self) {
+            self = .int(intVal)
+        } else if let doubleVal = try? container.decode(Double.self) {
+            self = .double(doubleVal)
+        } else if let boolVal = try? container.decode(Bool.self) {
+            self = .bool(boolVal)
+        } else if let stringVal = try? container.decode(String.self) {
+            self = .string(stringVal)
+        } else if let arrayVal = try? container.decode([PumpLogProperty].self) {
+            self = .array(arrayVal)
+        } else if container.decodeNil() {
+            self = .null
+        } else {
+            self = .null
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .int(let v): try container.encode(v)
+        case .double(let v): try container.encode(v)
+        case .string(let v): try container.encode(v)
+        case .bool(let v): try container.encode(v)
+        case .array(let v): try container.encode(v)
+        case .null: try container.encodeNil()
+        }
+    }
+
+    var intValue: Int? { if case .int(let v) = self { return v }; if case .double(let v) = self { return Int(v) }; return nil }
+    var doubleValue: Double? { if case .double(let v) = self { return v }; if case .int(let v) = self { return Double(v) }; return nil }
+    var stringValue: String? { if case .string(let v) = self { return v }; return nil }
+    var boolValue: Bool? { if case .bool(let v) = self { return v }; return nil }
+}
+
+// MARK: - Basal Chart Data
+
+struct BasalSegment: Identifiable, Sendable {
+    var id = UUID()
+    let date: Date
+    let profileRate: Double  // scheduled basal (profile rate / 1000 U/hr)
+    let actualRate: Double   // delivered basal (commanded rate / 1000 U/hr)
 }

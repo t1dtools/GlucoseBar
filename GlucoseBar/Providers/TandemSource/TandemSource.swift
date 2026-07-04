@@ -13,42 +13,63 @@ class TandemSource: Provider {
 
     private let email: String
     private let password: String
+    private let region: TandemRegion
 
-    private let loginHelper = TandemLoginHelper()
-    private let baseURL = URL(string: "https://tdcservices.tandemdiabetes.com")!
+    private let loginHelper: TandemLoginHelper
+    private let networkSession: URLSession
 
     private var loginSession: TandemLoginSession?
-    private var userId: String?
-    private var userGuid: String?
+    private var pumperId: String?
+    private var pumpAssignmentId: String?
+    private var hasControlIQ: Bool = false
+    private var lowThreshold: Int = 110
+    private var highThreshold: Int = 180
     private var unsuccessfulAuthAttempts: Int = 0
     private let maxAuthAttempts: Int = 5
+    private var nextFetchAllowedAt: Date = .distantPast
 
     private let httpTimeout: Double = 120.0
 
-    init(email: String, password: String) {
+    var availablePumps: [TandemPumpInfo] = []
+    var selectedPumpAssignmentIdOverride: String? = nil
+    @Published var basalSegments: [BasalSegment] = []
+
+    struct TandemPumpInfo: Identifiable, Sendable {
+        let id: String
+        let serialNumber: String
+        let modelName: String
+        let hasData: Bool
+        let lastDataDate: String?
+    }
+
+    init(email: String, password: String, region: TandemRegion) {
         self.email = email
         self.password = password
+        self.region = region
+        self.loginHelper = TandemLoginHelper(region: region)
+        networkSession = loginHelper.browserSession()
         super.init()
-        self.type = CGMProvider.tandemsource
-        self.isBaseProvider = false
+        self.type = .tandemsource
     }
 
     // MARK: - Auth
 
     nonisolated private func hasValidAuth() -> Bool {
-        // loginSession is @MainActor; use _auth proxy
         return false
     }
 
     @MainActor
     private func hasValidAuthMain() -> Bool {
         guard let session = loginSession else { return false }
-        return !session.isExpired
+        let valid = !session.isExpired
+        if !valid { plog("Token expired, needs re-auth", category: "tandem", level: .info) }
+        return valid
     }
 
     @MainActor
     private func ensureAuth() async -> Bool {
         if !hasValidAuthMain() {
+            plog("Auth invalid or expired, authenticating...", category: "tandem", level: .info)
             return await authenticate()
         }
         return true
@@ -58,25 +79,29 @@ class TandemSource: Provider {
     private func authenticate() async -> Bool {
         if isAuthenticating { return false }
         if unsuccessfulAuthAttempts > maxAuthAttempts {
+            plog("Auth locked: \(unsuccessfulAuthAttempts) failed attempts", category: "tandem", level: .error)
             providerIssue = "Unable to connect to Tandem Source after \(maxAuthAttempts) attempts. Please check your credentials."
             return false
         }
 
         isAuthenticating = true
         providerIssue = nil
+        plog("Authenticating (attempt \(unsuccessfulAuthAttempts + 1))...", category: "tandem", level: .info)
 
         do {
             let session = try await loginHelper.login(email: email, password: password)
             loginSession = session
-            userId = nil // will be set from user_profile
-            userGuid = session.userGuid
+            pumperId = session.pumperId
+            pumpAssignmentId = nil
             auth = ProviderAuth(token: session.accessToken, expiry: session.accessTokenExpiresAt.timeIntervalSince1970)
             unsuccessfulAuthAttempts = 0
             isAuthenticating = false
             GlucoseSourceExtras.aid = .controliq
+            RemoteGlucoseSource = .controliq
+            plog("Authentication successful, pumperId=\(session.pumperId.prefix(8))..., token valid for \(String(format:"%.0f", session.accessTokenExpiresAt.timeIntervalSinceNow))s", category: "tandem", level: .info)
             return true
         } catch {
-            plog("TandemSource.auth failed: \(error.localizedDescription)", category: "tandem", level: .error)
+            plog("Authentication failed: \(error.localizedDescription)", category: "tandem", level: .error)
             unsuccessfulAuthAttempts += 1
             if unsuccessfulAuthAttempts > maxAuthAttempts {
                 providerIssue = "Unable to connect to Tandem Source after \(maxAuthAttempts) attempts. Please check your credentials."
@@ -96,276 +121,329 @@ class TandemSource: Provider {
 
     @MainActor
     override internal func fetch() async {
-        plog("TandemSource.fetch", category: "tandem", level: .debug)
+        if Date() < nextFetchAllowedAt {
+            plog("Fetch skipped: cooldown until \(nextFetchAllowedAt.formatted())", category: "tandem", level: .info)
+            return
+        }
 
-        guard await ensureAuth() else { return }
+        plog("Fetch cycle starting", category: "tandem", level: .info)
+
+        guard await ensureAuth() else {
+            plog("Fetch skipped: not authenticated", category: "tandem", level: .info)
+            return
+        }
+
+        var didTimeout = false
 
         do {
-            try await fetchTherapyEvents()
+            try await fetchPumperInfo()
         } catch {
-            plog("TandemSource.fetch error: \(error.localizedDescription)", category: "tandem", level: .error)
+            plog("Pumper info fetch failed: \(error.localizedDescription)", category: "tandem", level: .error)
             providerIssue = "Tandem fetch error: \(error.localizedDescription)"
+            didTimeout = isTimeout(error)
         }
 
         do {
-            try await fetchAIDData()
+            try await fetchPumpLogs()
         } catch {
-            plog("TandemSource.fetchAIDData error: \(error.localizedDescription)", category: "tandem", level: .error)
+            plog("Pump logs fetch failed: \(error.localizedDescription)", category: "tandem", level: .error)
+            didTimeout = didTimeout || isTimeout(error)
+        }
+
+        if didTimeout {
+            nextFetchAllowedAt = Date().addingTimeInterval(60)
+            plog("Cooldown set for 60s due to timeout", category: "tandem", level: .info)
         }
 
         lastFetch = Date()
     }
 
-    // MARK: - CGM Fetch
-
-    private func fetchTherapyEvents() async throws {
-        guard let token = loginSession?.accessToken else { return }
-
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MM-dd-yyyy"
-
-        let endDate = Date()
-        let startDate = endDate.addingTimeInterval(-86400)
-
-        let startStr = formatter.string(from: startDate)
-        let endStr = formatter.string(from: endDate)
-
-        guard let userId = try? await fetchUserId(token: token) else {
-            plog("Unable to fetch userId", category: "tandem", level: .error)
-            return
-        }
-
-        let url = baseURL.appendingPathComponent("tconnect/therapyevents/api/TherapyEvents/\(startStr)/\(endStr)/false")
-        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
-        components?.queryItems = [URLQueryItem(name: "userId", value: userId)]
-
-        guard let requestURL = components?.url else { return }
-
-        var request = URLRequest(url: requestURL)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setValue("https://tconnect.tandemdiabetes.com/", forHTTPHeaderField: "Origin")
-        request.setValue("https://tconnect.tandemdiabetes.com/", forHTTPHeaderField: "Referer")
-        request.cachePolicy = .reloadIgnoringLocalCacheData
-        request.timeoutInterval = httpTimeout
-
-        let (data, response) = try await URLSession.appDefault.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 401 {
-                loginSession = nil
-            }
-            return
-        }
-
-        let therapyResponse = try JSONDecoder().decode(TandemTherapyEventsResponse.self, from: data)
-        guard let events = therapyResponse.event else { return }
-
-        let entries = eventsToGlucoseEntries(events)
-        if !entries.isEmpty {
-            setGlucoseEntries(entries)
-        }
+    private func isTimeout(_ error: Error) -> Bool {
+        let nsError = error as NSError
+        return nsError.domain == NSURLErrorDomain && nsError.code == NSURLErrorTimedOut
     }
 
-    private func fetchUserId(token: String) async throws -> String? {
-        if let id = userId { return id }
+    // MARK: - Pumper Info
 
-        let url = baseURL.appendingPathComponent("cloud/usersettings/api/UserProfile")
-        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+    private func fetchPumperInfo() async throws {
+        guard let token = loginSession?.accessToken,
+              let pid = pumperId else { return }
 
-        guard let requestURL = components?.url else { return nil }
-
-        var request = URLRequest(url: requestURL)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.cachePolicy = .reloadIgnoringLocalCacheData
-        request.timeoutInterval = httpTimeout
-
-        let (data, response) = try await URLSession.appDefault.data(for: request)
-
-        guard let _ = response as? HTTPURLResponse else { return nil }
-
-        let profile = try JSONDecoder().decode(TandemUserProfile.self, from: data)
-        userId = profile.userID
-        return profile.userID
-    }
-
-    // MARK: - AID Data Fetch
-
-    private func fetchAIDData() async throws {
-        guard loginSession != nil else { return }
-
-        var extras = GlucoseSourceExtraProperties(aid: .controliq)
-
-        if let iob = try? await fetchIOB() {
-            extras.iob = iob
-        }
-
-        if let thresholds = try? await fetchThresholds() {
-            extras.glucoseTarget = Double(thresholds.targetBGLow ?? 110)
-        }
-
-        if let pumpInfo = try? await fetchPumpFeatures() {
-            extras.reason = pumpInfo
-        }
-
-        GlucoseSourceExtras = extras
-    }
-
-    private func fetchIOB() async throws -> Double? {
-        guard let guid = userGuid,
-              let token = loginSession?.accessToken else { return nil }
-
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MM-dd-yyyy"
-        let today = formatter.string(from: Date())
-
-        let ws2URL = URL(string: "https://tconnectws2.tandemdiabetes.com/therapytimeline2csv/\(guid)/\(today)/\(today)?format=csv")!
-
-        var request = URLRequest(url: ws2URL)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        request.cachePolicy = .reloadIgnoringLocalCacheData
-        request.timeoutInterval = 30
-
-        do {
-            let (data, response) = try await URLSession.appDefault.data(for: request)
-
-            guard let httpResponse = response as? HTTPURLResponse,
-                  httpResponse.statusCode == 200,
-                  let csv = String(data: data, encoding: .utf8) else { return nil }
-
-            let iob = parseIOBFromCSV(csv)
-            return iob
-        } catch {
-            plog("IOB fetch error: \(error.localizedDescription)", category: "tandem", level: .debug)
-            return nil
-        }
-    }
-
-    private func fetchThresholds() async throws -> TandemTherapyThresholds? {
-        guard let token = loginSession?.accessToken else { return nil }
-        let uid: String
-        if let existing = userId {
-            uid = existing
-        } else if let fetched = try? await fetchUserId(token: token) {
-            uid = fetched
-        } else {
-            return nil
-        }
-
-        let url = baseURL.appendingPathComponent("cloud/usersettings/api/therapythresholds")
-        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
-        components?.queryItems = [URLQueryItem(name: "userId", value: uid)]
-
-        guard let requestURL = components?.url else { return nil }
-
-        var request = URLRequest(url: requestURL)
-        request.httpMethod = "GET"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.cachePolicy = .reloadIgnoringLocalCacheData
-        request.timeoutInterval = httpTimeout
-
-        let (data, _) = try await URLSession.appDefault.data(for: request)
-        return try JSONDecoder().decode(TandemTherapyThresholds.self, from: data)
-    }
-
-    private func fetchPumpFeatures() async throws -> String? {
-        guard let token = loginSession?.accessToken else { return nil }
-        let uid: String
-        if let existing = userId {
-            uid = existing
-        } else if let fetched = try? await fetchUserId(token: token) {
-            uid = fetched
-        } else {
-            return nil
-        }
-
-        let url = baseURL.appendingPathComponent("tconnect/controliq/api/pumpfeatures/users/\(uid)")
+        let url = region.sourceURL.appendingPathComponent("api/reports/bff/pumper/\(pid)")
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setValue("https://tconnect.tandemdiabetes.com/", forHTTPHeaderField: "Origin")
-        request.setValue("https://tconnect.tandemdiabetes.com/", forHTTPHeaderField: "Referer")
+        request.setValue(region.sourceURL.absoluteString.dropSuffix("/"), forHTTPHeaderField: "Origin")
+        request.setValue(region.sourceURL.absoluteString, forHTTPHeaderField: "Referer")
         request.cachePolicy = .reloadIgnoringLocalCacheData
         request.timeoutInterval = httpTimeout
 
-        let (data, _) = try await URLSession.appDefault.data(for: request)
+        plog("fetchPumperInfo: requesting...", category: "tandem", level: .debug)
 
-        let features = try JSONDecoder().decode([TandemPumpFeatures].self, from: data)
+        let (data, response) = try await networkSession.data(for: request)
 
-        if let first = features.first,
-           let ciq = first.features?.controlIQ,
-           ciq.feature == 1 {
-            return "Control-IQ active"
-        }
-
-        if let first = features.first {
-            if let firstName = first.serialNumber {
-                return "Pump SN: \(firstName)"
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            let status = (response as? HTTPURLResponse)?.statusCode ?? -1
+            logResponse("fetchPumperInfo", status: status, body: data)
+            if status == 401 {
+                plog("fetchPumperInfo: token expired, clearing session", category: "tandem", level: .info)
+                loginSession = nil
             }
+            return
         }
 
-        return nil
+        plog("fetchPumperInfo: response received, parsing...", category: "tandem", level: .debug)
+
+        let rawJSON = String(data: data, encoding: .utf8)?.prefix(1000) ?? "<binary>"
+        plog("fetchPumperInfo: raw JSON: \(rawJSON)", category: "tandem", level: .info)
+
+        let pumper: BffPumper
+        do {
+            pumper = try JSONDecoder().decode(BffPumper.self, from: data)
+        } catch {
+            plog("fetchPumperInfo: decode failed: \(error)", category: "tandem", level: .error)
+            return
+        }
+
+        if let pumps = pumper.pumps, !pumps.isEmpty {
+            // Build pump info list for UI selector
+            let infos: [TandemPumpInfo] = pumps.map { pump in
+                let hasData = pump.availableDataRange?.end != nil
+                return TandemPumpInfo(
+                    id: pump.assignmentId ?? UUID().uuidString,
+                    serialNumber: pump.serialNumber ?? "?",
+                    modelName: pump.modelName ?? "?",
+                    hasData: hasData,
+                    lastDataDate: pump.availableDataRange?.end
+                )
+            }
+            availablePumps = infos
+
+            // Select best pump: user override > most recent data > first
+            let selected: BffPump
+            if let overrideId = selectedPumpAssignmentIdOverride,
+               let match = pumps.first(where: { $0.assignmentId == overrideId }) {
+                selected = match
+                plog("Pumper: using user-selected pump \(match.serialNumber ?? "?")", category: "tandem", level: .info)
+            } else {
+                selected = pumps.max(by: { a, b in
+                    (a.availableDataRange?.end ?? "") < (b.availableDataRange?.end ?? "")
+                }) ?? pumps.first!
+                plog("Pumper: auto-selected pump \(selected.serialNumber ?? "?"), \(pumps.count) pumps on account", category: "tandem", level: .info)
+            }
+
+            pumpAssignmentId = selected.assignmentId
+            hasControlIQ = selected.algorithm == "Control-IQ"
+            lowThreshold = pumper.lowGlucoseThreshold ?? 110
+            highThreshold = pumper.highGlucoseThreshold ?? 180
+            let dataEnd = selected.availableDataRange?.end ?? "never uploaded"
+            plog("Pumper: serial=\(selected.serialNumber ?? "?"), model=\(selected.modelName ?? "?"), CIQ=\(hasControlIQ), targets=\(lowThreshold)-\(highThreshold), data till \(dataEnd)", category: "tandem", level: .info)
+        } else {
+            availablePumps = []
+        }
     }
 
-    // MARK: - Data Parsing
+    // MARK: - Pump Logs
 
-    private func eventsToGlucoseEntries(_ events: [TandemTherapyEvent]) -> [GlucoseEntry] {
-        return events.compactMap { event in
-            guard event.type == "CGM", let egv = event.egv, egv > 0 else { return nil }
+    private func fetchPumpLogs() async throws {
+        guard let token = loginSession?.accessToken,
+              let pid = pumperId,
+              let deviceId = pumpAssignmentId else {
+            plog("fetchPumpLogs: missing pumperId or pumpAssignmentId", category: "tandem", level: .debug)
+            return
+        }
+
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        let endDate = Date()
+        let startDate = endDate.addingTimeInterval(-86400)
+        let startStr = formatter.string(from: startDate).prefix(10) // YYYY-MM-DD
+        let endStr = formatter.string(from: endDate).prefix(10)
+
+        let eventIds = "229,5,28,4,26,99,279,3,16,59,21,55,20,280,64,65,66,61,33,371,171,369,460,172,370,461,372,480,399,256,213,406,477,394,212,404,214,405,486,447,313,60,14,6,90,230,140,12,11,53,13,63,203,307,191"
+
+        var components = URLComponents(url: region.sourceURL.appendingPathComponent("api/reports/bff/pump-logs/\(deviceId)"), resolvingAgainstBaseURL: false)!
+        components.queryItems = [
+            URLQueryItem(name: "pumperId", value: pid),
+            URLQueryItem(name: "startDate", value: "\(startStr)T00:00:00Z"),
+            URLQueryItem(name: "endDate", value: "\(endStr)T23:59:59Z"),
+            URLQueryItem(name: "eventIds", value: eventIds)
+        ]
+
+        guard let requestURL = components.url else { return }
+
+        var request = URLRequest(url: requestURL)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue(region.sourceURL.absoluteString.dropSuffix("/"), forHTTPHeaderField: "Origin")
+        request.setValue(region.sourceURL.absoluteString, forHTTPHeaderField: "Referer")
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+        request.timeoutInterval = httpTimeout
+
+        plog("fetchPumpLogs: requesting events for device=\(deviceId.prefix(8))..., range=\(startStr) to \(endStr)", category: "tandem", level: .debug)
+
+        let (data, response) = try await networkSession.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            let status = (response as? HTTPURLResponse)?.statusCode ?? -1
+            logResponse("fetchPumpLogs", status: status, body: data)
+            if status == 401 {
+                loginSession = nil
+            }
+            return
+        }
+
+        let logs = try JSONDecoder().decode(PumpLogsResponse.self, from: data)
+        let events = logs.events ?? []
+        plog("fetchPumpLogs: received \(events.count) events", category: "tandem", level: .info)
+
+        if events.isEmpty { return }
+
+        parsePumpEvents(events)
+    }
+
+    // MARK: - Event Parsing
+
+    private func parsePumpEvents(_ events: [PumpLogEvent]) {
+        var cgmEntries: [GlucoseEntry] = []
+        var iobValue: Double? = nil
+        var newestIOBDate: Date = .distantPast
+        var basalRate: Double? = nil
+        var newestBasalDate: Date = .distantPast
+        var cobValue: Double? = nil
+        var newestCOBDate: Date = .distantPast
+        var newestCIQDate: Date = .distantPast
+        var segments: [BasalSegment] = []
+        var lastSegmentDate: Date = .distantPast
+
+        for event in events {
+            guard let code = event.eventCode, let props = event.eventProperties else { continue }
 
             let date: Date = {
-                if let dt = event.eventDateTime {
-                    let formatter = ISO8601DateFormatter()
-                    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-                    return formatter.date(from: dt) ?? Date()
+                if let ds = event.pumpDateTime, !ds.isEmpty {
+                    let fmt = DateFormatter()
+                    fmt.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+                    return fmt.date(from: ds) ?? Date()
                 }
                 return Date()
             }()
 
-            return GlucoseEntry(glucose: Double(egv), date: date, changeRate: 0.0)
-        }.sorted(by: { $0.date > $1.date })
-    }
-
-    private func parseIOBFromCSV(_ csv: String) -> Double? {
-        let lines = csv.components(separatedBy: .newlines)
-
-        var inIOB = false
-        for line in lines {
-            let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-
-            if trimmed.starts(with: "IOB") {
-                inIOB = true
-                continue
-            }
-
-            if inIOB && trimmed.contains(",") && !trimmed.isEmpty {
-                let columns = trimmed.components(separatedBy: ",")
-                if columns.count >= 2,
-                   let iobVal = Double(columns[1].replacingOccurrences(of: "\"", with: "")) {
-                    return iobVal
+            // Code 16: BG entry (calibration) with IOB
+            if code == 16, let bg = props["bg"]?.intValue, bg > 0 {
+                cgmEntries.append(GlucoseEntry(glucose: Double(bg), date: date, changeRate: 0.0))
+                if let iob = props["iob"]?.doubleValue, date > newestIOBDate {
+                    iobValue = iob; newestIOBDate = date
                 }
-                break
             }
 
-            if inIOB && trimmed.isEmpty {
-                break
+            // Code 399: CGM reading
+            if code == 399, let egv = props["currentGlucoseDisplayValue"]?.intValue, egv > 0 {
+                let cgmDate: Date = {
+                    if let ts = props["egvTimeStamp"]?.doubleValue, ts > 1000000000 {
+                        return Date(timeIntervalSince1970: ts / 1000)
+                    }
+                    if let ts = props["egvTimeStamp"]?.intValue, ts > 1000000000 {
+                        return Date(timeIntervalSince1970: TimeInterval(ts) / 1000)
+                    }
+                    return date
+                }()
+                cgmEntries.append(GlucoseEntry(glucose: Double(egv), date: cgmDate, changeRate: 0.0))
+            }
+
+            // Code 20, 55, 64: IOB snapshot from bolus/bg events
+            if [20, 55, 64].contains(code), let iob = props["iob"]?.doubleValue, date > newestIOBDate {
+                iobValue = iob; newestIOBDate = date
+            }
+
+            // Code 64: Bolus with carbs
+            if code == 64 {
+                if let carbs = props["carbAmount"]?.intValue, carbs > 0, date > newestCOBDate {
+                    cobValue = Double(carbs); newestCOBDate = date
+                }
+            }
+
+            // Code 90: CIQ basal rate
+            if code == 90, let rate = props["commandedBasalRate"]?.doubleValue {
+                let actual = rate / 1000
+                if date > newestBasalDate { basalRate = actual; newestBasalDate = date }
+                segments.append(BasalSegment(date: date, profileRate: actual, actualRate: actual))
+                lastSegmentDate = date
+            }
+
+            // Code 279: Legacy basal rate with profile
+            if code == 279 {
+                if let rate = props["commandedRate"]?.doubleValue {
+                    let actual = rate / 1000
+                    if date > newestBasalDate { basalRate = actual; newestBasalDate = date }
+                }
+                let actual = (props["commandedRate"]?.doubleValue ?? 0) / 1000
+                let profile = (props["profileBasalRate"]?.doubleValue ?? actual * 1000) / 1000
+                segments.append(BasalSegment(date: date, profileRate: profile, actualRate: actual))
+                lastSegmentDate = date
+            }
+            if code == 279, date > newestCIQDate {
+                newestCIQDate = date
+            }
+
+            // Code 64: bolus IOB + target
+            if code == 64, let iob = props["iob"]?.doubleValue, date > newestIOBDate {
+                iobValue = iob; newestIOBDate = date
             }
         }
 
-        return nil
+        if !cgmEntries.isEmpty {
+            let sorted = cgmEntries.sorted(by: { $0.date > $1.date })
+            setGlucoseEntries(sorted)
+            plog("Parsed \(sorted.count) CGM entries (latest: \(String(format:"%.0f", sorted.first!.glucose)) at \(sorted.first!.date.formatted()))", category: "tandem", level: .info)
+        }
+
+        var extras = GlucoseSourceExtras
+        extras.aid = .controliq
+        extras.glucoseTarget = Double(lowThreshold)
+        if hasControlIQ {
+            extras.reason = "Control-IQ active"
+        } else if let sn = (availablePumps.first(where: { $0.id == pumpAssignmentId }))?.serialNumber {
+            extras.reason = "Pump SN: \(sn)"
+        }
+        if newestCIQDate != .distantPast {
+            extras.enactedAt = newestCIQDate
+        }
+        if let iob = iobValue {
+            extras.iob = iob
+            plog("IOB: \(String(format:"%.2f", iob))U", category: "tandem", level: .info)
+        }
+        if let cob = cobValue {
+            extras.cob = cob
+            plog("COB: \(String(format:"%.0f", cob))g", category: "tandem", level: .info)
+        }
+        if let rate = basalRate {
+            extras.basalRate = rate
+            plog("Basal: \(String(format:"%.3f", rate))U/hr", category: "tandem", level: .info)
+        }
+        GlucoseSourceExtras = extras
+        basalSegments = segments.sorted(by: { $0.date < $1.date })
+        plog("Basal segments: \(segments.count)", category: "tandem", level: .info)
     }
 
     // MARK: - Helpers
 
+    private func logResponse(_ label: String, status: Int, body data: Data) {
+        let preview = String(data: data, encoding: .utf8)?.prefix(500) ?? "<binary>"
+        plog("\(label): HTTP \(status), body: \(preview)", category: "tandem", level: .info)
+    }
+
     override func plog(_ message: String, category: String, level: OSLogType = .default) {
         Logger(subsystem: "tools.t1d.GlucoseBar", category: "tandem")
             .dlog(message, category: category, level: level)
+    }
+}
+
+extension String {
+    func dropSuffix(_ suffix: String) -> String {
+        guard hasSuffix(suffix) else { return self }
+        return String(dropLast(suffix.count))
     }
 }
