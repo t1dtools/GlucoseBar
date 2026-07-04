@@ -17,6 +17,7 @@ public enum MenuBarItem: String, CaseIterable, Identifiable, Sendable, Codable {
     case eventualglucose
     case iob
     case cob
+    case basalrate
     case separator
     public var id: String { self.rawValue }
     public var name: String {
@@ -39,6 +40,8 @@ public enum MenuBarItem: String, CaseIterable, Identifiable, Sendable, Codable {
             return String(localized: "Insulin On Board", comment: "The name of the Insulin On Board menu bar item")
         case .cob:
             return String(localized: "Carbs On Board", comment: "The name of the Carbs on Board menu bar item")
+        case .basalrate:
+            return String(localized: "Basal Rate", comment: "The name of the Basal Rate menu bar item")
 
         // Separator
         case .separator:
@@ -155,6 +158,13 @@ public class MenuBarItemContainer: Equatable, Identifiable, Hashable, Codable, O
                 MenuBarItemSetting(key: .iconPlacement, value: .iconPlacementLeading),
             ]
         case .cob:
+            self.settings = [
+                MenuBarItemSetting(key: .textColor, value: .textColorDefault),
+                MenuBarItemSetting(key: .fontWeight, value: .fontWeightRegular),
+                MenuBarItemSetting(key: .icon, value: .iconColorHidden),
+                MenuBarItemSetting(key: .iconPlacement, value: .iconPlacementLeading),
+            ]
+        case .basalrate:
             self.settings = [
                 MenuBarItemSetting(key: .textColor, value: .textColorDefault),
                 MenuBarItemSetting(key: .fontWeight, value: .fontWeightRegular),
