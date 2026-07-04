@@ -41,6 +41,7 @@ struct GlucoseSourceExtraProperties {
     var aid: GlucoseSourceDevice = .null
     var iob: Double? = nil
     var cob: Double? = nil
+    var basalRate: Double? = nil
     var eventualGlucose: Double? = nil
     var reason: String? = nil
     var enactedAt: Date? = nil

@@ -67,6 +67,9 @@ struct MenuBarView: View {
             case .iob:
                 IOBView(viewSettings: item).environmentObject(s).environmentObject(g)
 
+            case .basalrate:
+                BasalRateView(viewSettings: item).environmentObject(s).environmentObject(g)
+
             case MenuBarItem.separator:
                 SeparatorView(viewSettings: item).environmentObject(s).environmentObject(g)
             }
@@ -86,14 +89,15 @@ struct MenuBarView: View {
                 let aid = g.provider.GlucoseSourceExtras.aid
                 let hasAIDData = (s.cgmProvider == .nightscout && s.aidEnableIntegration)
                     || s.cgmProvider == .tandemsource
-                    || s.aidSource == .tandemSource
                     || aid != .null
 
-                if !hasAIDData && [.loopstatus, .eventualglucose, .cob, .iob].contains(item.type) {
+                if !hasAIDData && [.loopstatus, .eventualglucose, .cob, .iob, .basalrate].contains(item.type) {
                     EmptyView()
                 } else if hasAIDData && aid == .loop && [.eventualglucose].contains(item.type) {
                     EmptyView()
                 } else if hasAIDData && aid == .controliq && [.eventualglucose].contains(item.type) {
+                    EmptyView()
+                } else if hasAIDData && aid != .controliq && [.basalrate].contains(item.type) {
                     EmptyView()
                 } else {
                     drawMenuBarItem(item)

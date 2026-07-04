@@ -10,6 +10,7 @@ import SwiftUI
 final class SourceManager: ObservableObject {
     @Published var sources: [SourceState] = []
     @Published var refreshToken = UUID()
+    @Published var pendingSelectedSourceId: UUID? = nil
 
     private let defaults = UserDefaults.standard
     private let sourceIdsKey = "sourceIds"

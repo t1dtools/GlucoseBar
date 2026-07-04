@@ -52,10 +52,9 @@ struct MenuBarSettingsView: View {
         for p in MenuBarItem.allCases where p != .separator {
             let hasAIDData = (s.cgmProvider == .nightscout && s.aidEnableIntegration)
                 || s.cgmProvider == .tandemsource
-                || s.aidSource == .tandemSource
                 || g.provider.GlucoseSourceExtras.aid != .null
 
-            if !hasAIDData && [.loopstatus, .eventualglucose, .cob, .iob].contains(p) {
+            if !hasAIDData && [.loopstatus, .eventualglucose, .cob, .iob, .basalrate].contains(p) {
                 continue
             }
 
@@ -64,6 +63,10 @@ struct MenuBarSettingsView: View {
             }
 
             if g.provider.GlucoseSourceExtras.aid == .controliq && [.eventualglucose].contains(p) {
+                continue
+            }
+
+            if g.provider.GlucoseSourceExtras.aid != .controliq && [.basalrate].contains(p) {
                 continue
             }
 
@@ -131,6 +134,10 @@ struct MenuBarSettingsView: View {
                 IOBView(viewSettings: item)
                     .opacity(focusedMenuBarItemID != nil && focusedMenuBarItemID != item.id ? 0.4 : 1)
 
+            case .basalrate:
+                BasalRateView(viewSettings: item)
+                    .opacity(focusedMenuBarItemID != nil && focusedMenuBarItemID != item.id ? 0.4 : 1)
+
             case MenuBarItem.separator:
                 SeparatorView(viewSettings: item)
                     .opacity(focusedMenuBarItemID != nil && focusedMenuBarItemID != item.id ? 0.4 : 1)
@@ -159,6 +166,8 @@ struct MenuBarSettingsView: View {
             COBSettingsView(viewSettings: item)
         case .iob:
             IOBSettingsView(viewSettings: item)
+        case .basalrate:
+            BasalRateSettingsView(viewSettings: item)
 
         case MenuBarItem.separator:
             SeparatorSettingsView(viewSettings: item)
