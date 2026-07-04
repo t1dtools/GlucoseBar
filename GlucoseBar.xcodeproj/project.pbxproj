@@ -84,6 +84,8 @@
 		83DEAD0126DEAD0100000000 /* TandemSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DEAD0426DEAD0400000000 /* TandemSource.swift */; };
 		83DEAD0226DEAD0200000000 /* TandemLogin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DEAD0526DEAD0500000000 /* TandemLogin.swift */; };
 		83DEAD0326DEAD0300000000 /* TandemResponseModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DEAD0626DEAD0600000000 /* TandemResponseModels.swift */; };
+		83BB00012B00000100000000 /* BasalRateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83BB00022B00000200000000 /* BasalRateView.swift */; };
+		83BB00032B00000300000000 /* BasalRateSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83BB00042B00000400000000 /* BasalRateSettingsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -164,6 +166,8 @@
 		83DEAD0426DEAD0400000000 /* TandemSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TandemSource.swift; sourceTree = "<group>"; };
 		83DEAD0526DEAD0500000000 /* TandemLogin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TandemLogin.swift; sourceTree = "<group>"; };
 		83DEAD0626DEAD0600000000 /* TandemResponseModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TandemResponseModels.swift; sourceTree = "<group>"; };
+		83BB00022B00000200000000 /* BasalRateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasalRateView.swift; sourceTree = "<group>"; };
+		83BB00042B00000400000000 /* BasalRateSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasalRateSettingsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -288,6 +292,7 @@
 				83DB10E72DFF3FEC001ADCE7 /* EventualGlucoseView.swift */,
 				83DB10E52DFF3FE0001ADCE7 /* IOBView.swift */,
 				83DB10E32DFF3FD8001ADCE7 /* COBView.swift */,
+				83BB00022B00000200000000 /* BasalRateView.swift */,
 				83DB10E12DFF3FD0001ADCE7 /* GlucoseDeltaView.swift */,
 				83DB10DF2DFF3FC4001ADCE7 /* GlucoseTrendView.swift */,
 				83DB10DD2DFF3FB2001ADCE7 /* GlucoseValueView.swift */,
@@ -304,6 +309,7 @@
 				83F850312E42A27C00F8699F /* SeparatorSettingsView.swift */,
 				83F8502F2E42A1C400F8699F /* IOBSettingsView.swift */,
 				83F8502D2E42A18A00F8699F /* COBSettingsView.swift */,
+				83BB00042B00000400000000 /* BasalRateSettingsView.swift */,
 				83F8502B2E42A14600F8699F /* EventualGlucoseSettingsView.swift */,
 				83F850292E42A01F00F8699F /* GlucoseTrendSettingsView.swift */,
 				83F850272E429F2400F8699F /* GlucoseDeltaSettingsView.swift */,
@@ -554,6 +560,8 @@
 				83DEAD0126DEAD0100000000 /* TandemSource.swift in Sources */,
 				83DEAD0226DEAD0200000000 /* TandemLogin.swift in Sources */,
 				83DEAD0326DEAD0300000000 /* TandemResponseModels.swift in Sources */,
+				83BB00012B00000100000000 /* BasalRateView.swift in Sources */,
+				83BB00032B00000300000000 /* BasalRateSettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
