@@ -11,8 +11,12 @@ import SwiftUI
 struct AidGridView: View {
     @ObservedObject var g: Glucose
     @EnvironmentObject var s: SettingsStore
+    let hoveredBasalRate: Double?
 
     var body: some View {
+        let aid = g.provider.GlucoseSourceExtras.aid
+        let isControlIQ = aid == .controliq
+
         VStack {
             Grid(alignment: .leading, horizontalSpacing: 10, verticalSpacing: 10) {
                 GridRow {
@@ -37,7 +41,16 @@ struct AidGridView: View {
                         }.frame(alignment: .leading).padding(.bottom, 5).padding(.top, 3)
                             .help("Loop Status and time since last loop")
                     }
-                    if s.aidChartShowEventualGlucose, let eventualGlucose = g.provider.GlucoseSourceExtras.eventualGlucose {
+                    if isControlIQ, s.aidChartShowBasalRate {
+                        let rate = hoveredBasalRate ?? g.provider.GlucoseSourceExtras.basalRate
+                        if let rate = rate {
+                            HStack {
+                                Image(systemName: "gauge.with.dots.needle.33percent").foregroundColor(.blue)
+                                Text(String(format: "%.2f U/h", rate))
+                            }.help("Basal Rate")
+                        }
+                    }
+                    if !isControlIQ, s.aidChartShowEventualGlucose, let eventualGlucose = g.provider.GlucoseSourceExtras.eventualGlucose {
                         HStack {
                             Image(systemName: "arrow.right.circle").fontWeight(.heavy)
                             Text(formatGlucoseForDisplay(settings: s, glucose: eventualGlucose))

@@ -19,6 +19,8 @@ struct GraphView: View {
     @State private var hoveredValue: Double?
     @State private var hoveredTrend: GlucoseEntry.GlucoseTrend?
     @State private var hoveredDelta: Double?
+    @State private var hoveredBasalRate: Double?
+    @State private var hoveredActualY: Double?
     @State private var isHovering: Bool = false
     @State private var legends: [String : Color] = [:]
     @State private var isLoading: Bool = false
@@ -198,6 +200,12 @@ struct GraphView: View {
 
         let graphDataDuration = (-1 * (g.entries?.last?.date.timeIntervalSinceNow ?? 1) / 60 / 60).rounded()
 
+        let basalEntries = GraphView.basalOverlayEntries(g: g, s: s, maxY: maxY, defaultMaxGlucose: defaultMaxGlucose, maxYMargin: maxYMargin, minY: minY, defaultMinGlucose: defaultMinGlucose)
+        let basalChartTop = maxY >= defaultMaxGlucose ? (maxY + maxYMargin) : defaultMaxGlucose
+        let basalChartMin = minY <= defaultMinGlucose ? minY : defaultMinGlucose
+        let basalVisibleOffset = max(0.0, (200.0 / 350.0) * (basalChartTop - basalChartMin))
+        let basalMaxRate: Double = 5.0
+
         // Loop only has one forecast, so a cone doesn't make sense
         let forecastDisplay = g.provider.GlucoseSourceExtras.aid == .loop ? .lines : s.aidChartForecastDisplay
         let legendList: KeyValuePairs<String, Color> = g.provider.GlucoseSourceExtras.aid == .loop ? ["Forecast": Color.blue] : ["UAM": Color.orange, "ZT": Color.purple, "IOB": Color.blue, "COB": Color.yellow]
@@ -210,10 +218,10 @@ struct GraphView: View {
                 }.padding(.leading, 25).padding(.top, 10)
 
                 // Currently, all three supported AIDs support these options.
-                if s.cgmProvider == .nightscout && g.provider.RemoteGlucoseSource != .null {
+                if g.provider.RemoteGlucoseSource != .null {
                     if s.aidChartShowCOB || s.aidChartShowIOB || s.aidChartShowLoopStatus || s.aidChartShowEventualGlucose {
                         Spacer()
-                        AidGridView(g: g).environmentObject(s)
+                        AidGridView(g: g, hoveredBasalRate: hoveredBasalRate).environmentObject(s)
                     }
                 }
             }.padding()
@@ -295,6 +303,28 @@ struct GraphView: View {
                 }
                 DrawGlucose(data: data)
 
+                if !basalEntries.isEmpty {
+                    ForEach(basalEntries) { e in
+                        AreaMark(x: .value("Fx", e.date),
+                                 yStart: .value("FyT", basalChartTop),
+                                 yEnd: .value("FyR", e.actualY))
+                        .foregroundStyle(
+                            LinearGradient(colors: [.blue.opacity(0.35), .blue.opacity(0.0)], startPoint: .bottom, endPoint: .top)
+                        )
+                        .interpolationMethod(.stepStart)
+                    }
+                    ForEach(basalEntries) { e in
+                        LineMark(x: .value("Lx", e.date), y: .value("Ly", e.actualY))
+                            .foregroundStyle(.blue).lineStyle(StrokeStyle(lineWidth: 1)).interpolationMethod(.stepStart)
+                    }
+                }
+
+                if let ht = hoveredTime, let hy = hoveredActualY {
+                    PointMark(x: .value("HovBX", ht), y: .value("HovBY", hy))
+                        .foregroundStyle(.blue)
+                        .symbolSize(40)
+                }
+
                 if let hoveredTime, let hoveredValue {
                     PointMark(
                         x: .value("Time", hoveredTime),
@@ -340,6 +370,12 @@ struct GraphView: View {
                                         hoveredTime = entry.date
                                         hoveredTrend = entry.trend
                                         hoveredDelta = entry.delta
+                                        hoveredBasalRate = (g.provider as? TandemSource)?.basalSegments
+                                            .filter { $0.date <= hTime! }
+                                            .last?.actualRate
+                                        if let br = hoveredBasalRate {
+                                            hoveredActualY = basalChartTop - (br / basalMaxRate) * basalVisibleOffset
+                                        }
                                         isHovering = true
                                     } else {
                                         hoveredTime = nil
@@ -351,11 +387,36 @@ struct GraphView: View {
                         case .ended:
                             hoveredTime = nil
                             isHovering = false
+                            hoveredBasalRate = nil
+                            hoveredActualY = nil
                         }
                     }
             }.chartForegroundStyleScale(legendList
             ).chartLegend(s.aidChartShowForecast && s.aidChartForecastDisplay == .lines ? .visible : .hidden)
             .padding()
+        }
+    }
+}
+
+fileprivate struct BasalOverlayEntry: Identifiable {
+    var id: UUID
+    let date: Date
+    let actualY: Double
+}
+
+extension GraphView {
+    fileprivate static func basalOverlayEntries(g: Glucose, s: SettingsStore, maxY: Double, defaultMaxGlucose: Double, maxYMargin: Double, minY: Double, defaultMinGlucose: Double) -> [BasalOverlayEntry] {
+        guard g.provider.type == .tandemsource, s.aidChartShowBasalOverlay else { return [] }
+        let segs = (g.provider as? TandemSource)?.basalSegments ?? []
+        guard !segs.isEmpty else { return [] }
+        let chartMaxY = maxY >= defaultMaxGlucose ? (maxY + maxYMargin) : defaultMaxGlucose
+        let chartMinY = minY <= defaultMinGlucose ? minY : defaultMinGlucose
+        let visibleOffset = max(0, (200.0 / 350.0) * (chartMaxY - chartMinY))
+        let maxBasal: Double = 5.0
+        let filtered = segs.filter { $0.date > Date(timeIntervalSinceNow: TimeInterval(-s.graphMinutes * 60)) }
+        return filtered.enumerated().map { i, seg in
+            let ay = chartMaxY - (seg.actualRate / maxBasal) * visibleOffset
+            return BasalOverlayEntry(id: seg.id, date: seg.date, actualY: ay)
         }
     }
 }
