@@ -9,7 +9,7 @@ import Foundation
 import OSLog
 
 @MainActor
-class TandemSource: Provider {
+class TandemSource: Provider, @unchecked Sendable {
 
     private let email: String
     private let password: String
@@ -33,6 +33,19 @@ class TandemSource: Provider {
     var availablePumps: [TandemPumpInfo] = []
     var selectedPumpAssignmentIdOverride: String? = nil
     @Published var basalSegments: [BasalSegment] = []
+    @Published var bolusHistory: [BolusRecord] = []
+
+    private struct BolusCandidate {
+        let date: Date
+        let code: Int
+        let key: String
+        let insulinDelivered: Double?
+        let insulinRequested: Double?
+        let carbAmount: Double?
+        let bolusType: String?
+        let bg: Double?
+        let isExtended: Bool
+    }
 
     struct TandemPumpInfo: Identifiable, Sendable {
         let id: String
@@ -317,7 +330,7 @@ class TandemSource: Provider {
         var newestCOBDate: Date = .distantPast
         var newestCIQDate: Date = .distantPast
         var segments: [BasalSegment] = []
-        var lastSegmentDate: Date = .distantPast
+        var bolusCandidates: [BolusCandidate] = []
 
         for event in events {
             guard let code = event.eventCode, let props = event.eventProperties else { continue }
@@ -370,7 +383,6 @@ class TandemSource: Provider {
                 let actual = rate / 1000
                 if date > newestBasalDate { basalRate = actual; newestBasalDate = date }
                 segments.append(BasalSegment(date: date, profileRate: actual, actualRate: actual))
-                lastSegmentDate = date
             }
 
             // Code 279: Legacy basal rate with profile
@@ -382,7 +394,6 @@ class TandemSource: Provider {
                 let actual = (props["commandedRate"]?.doubleValue ?? 0) / 1000
                 let profile = (props["profileBasalRate"]?.doubleValue ?? actual * 1000) / 1000
                 segments.append(BasalSegment(date: date, profileRate: profile, actualRate: actual))
-                lastSegmentDate = date
             }
             if code == 279, date > newestCIQDate {
                 newestCIQDate = date
@@ -392,7 +403,85 @@ class TandemSource: Provider {
             if code == 64, let iob = props["iob"]?.doubleValue, date > newestIOBDate {
                 iobValue = iob; newestIOBDate = date
             }
+
+            // --- Bolus event collection ---
+            let bolusCodes: Set<Int> = [20, 55, 64, 66, 280]
+            guard bolusCodes.contains(code) else { continue }
+
+            let bKey: String = {
+                if let bid = props["bolusId"]?.stringValue, !bid.isEmpty { return bid }
+                if let bid = props["bolusId"]?.intValue { return String(bid) }
+                return String(Int(date.timeIntervalSince1970 / 180))
+            }()
+
+            let bInsulin: Double? = {
+                if let v = props["deliveredTotal"]?.doubleValue, v > 0 { return v }
+                if let v = props["insulinDelivered"]?.doubleValue, v > 0 { return v }
+                if let v = props["totalBolusSize"]?.doubleValue, v > 0 { return v }
+                if let v = props["bolusSize"]?.doubleValue, v > 0 { return v }
+                return nil
+            }()
+
+            let bRequested: Double? = {
+                if let v = props["insulinRequested"]?.doubleValue { return v }
+                if let v = props["requestedNow"]?.doubleValue { return v }
+                return nil
+            }()
+
+            let bCarbs: Double? = props["carbAmount"]?.doubleValue
+            let bBG: Double? = props["bg"]?.doubleValue
+            let bType: String? = props["bolusType"]?.stringValue
+
+            let bExtended: Bool = {
+                if let dur = props["extendedDurationRequested"]?.doubleValue, dur > 0 { return true }
+                if let std = props["standardPercent"]?.doubleValue, std < 100 { return true }
+                return false
+            }()
+
+            bolusCandidates.append(BolusCandidate(
+                date: date, code: code, key: bKey,
+                insulinDelivered: bInsulin, insulinRequested: bRequested,
+                carbAmount: bCarbs, bolusType: bType, bg: bBG, isExtended: bExtended
+            ))
         }
+
+        // --- Merge bolus candidates into records ---
+        var bolusByKey: [String: (firstDate: Date, insD: Double?, insR: Double?, carbs: Double?, type: String?, bg: Double?, extended: Bool)] = [:]
+        for c in bolusCandidates {
+            var existing = bolusByKey[c.key] ?? (firstDate: c.date, insD: nil, insR: nil, carbs: nil, type: nil, bg: nil, extended: false)
+            let keyDate = existing.firstDate
+            let gap = abs(c.date.timeIntervalSince(keyDate))
+            if gap > 180, c.key.count < 10 {
+                let newKey = "\(c.key)_\(Int(c.date.timeIntervalSince1970))"
+                bolusByKey[newKey] = (firstDate: c.date, insD: c.insulinDelivered, insR: c.insulinRequested, carbs: c.carbAmount, type: c.bolusType, bg: c.bg, extended: c.isExtended)
+                continue
+            }
+            existing.firstDate = min(existing.firstDate, c.date)
+            existing.insD = c.insulinDelivered ?? existing.insD
+            existing.insR = c.insulinRequested ?? existing.insR
+            existing.carbs = c.carbAmount ?? existing.carbs
+            existing.type = c.bolusType ?? existing.type
+            existing.bg = c.bg ?? existing.bg
+            existing.extended = existing.extended || c.isExtended
+            bolusByKey[c.key] = existing
+        }
+
+        var records: [BolusRecord] = []
+        for (key, b) in bolusByKey {
+            guard let ins = b.insD, ins > 0 else { continue }
+            records.append(BolusRecord(
+                date: b.firstDate,
+                insulinDelivered: ins,
+                insulinRequested: b.insR,
+                carbAmount: b.carbs,
+                bolusType: b.type,
+                bg: b.bg,
+                isExtended: b.extended,
+                eventCode: key.count < 10 ? (Int(key) ?? 0) : 0
+            ))
+        }
+        bolusHistory = records.sorted(by: { $0.date > $1.date })
+        plog("Bolus history: \(bolusHistory.count) records", category: "tandem", level: .info)
 
         if !cgmEntries.isEmpty {
             let sorted = cgmEntries.sorted(by: { $0.date > $1.date })

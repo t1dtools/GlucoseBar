@@ -137,3 +137,17 @@ struct BasalSegment: Identifiable, Sendable {
     let profileRate: Double  // scheduled basal (profile rate / 1000 U/hr)
     let actualRate: Double   // delivered basal (commanded rate / 1000 U/hr)
 }
+
+// MARK: - Bolus History
+
+struct BolusRecord: Identifiable, Sendable {
+    var id = UUID()
+    let date: Date
+    let insulinDelivered: Double
+    let insulinRequested: Double?
+    let carbAmount: Double?
+    let bolusType: String?
+    let bg: Double?
+    let isExtended: Bool
+    let eventCode: Int
+}
