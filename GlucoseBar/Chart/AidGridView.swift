@@ -12,6 +12,7 @@ struct AidGridView: View {
     @ObservedObject var g: Glucose
     @EnvironmentObject var s: SettingsStore
     let hoveredBasalRate: Double?
+    let hoveredInsulinIOB: Double?
 
     var body: some View {
         let aid = g.provider.GlucoseSourceExtras.aid
@@ -20,7 +21,7 @@ struct AidGridView: View {
         VStack {
             Grid(alignment: .leading, horizontalSpacing: 10, verticalSpacing: 10) {
                 GridRow {
-                    if s.aidChartShowIOB, let iob = g.provider.GlucoseSourceExtras.iob {
+                    if s.aidChartShowIOB, let iob = hoveredInsulinIOB ?? g.provider.GlucoseSourceExtras.iob {
                         HStack {
                             Image(systemName: "syringe.fill").foregroundColor(.blue)
                             Text(formatIOBForDisplay(iob: iob) + " U")

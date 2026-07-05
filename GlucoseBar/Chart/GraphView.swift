@@ -14,12 +14,14 @@ struct GraphView: View {
     @ObservedObject var g: Glucose
     @EnvironmentObject var s: SettingsStore
     @EnvironmentObject var vs: ViewState
+    @Binding var hoveredInsulinIOB: Double?
+    @Binding var sharedHoverTime: Date?
 
     @State private var hoveredTime: Date?
     @State private var hoveredValue: Double?
     @State private var hoveredTrend: GlucoseEntry.GlucoseTrend?
     @State private var hoveredDelta: Double?
-    @State private var hoveredBasalRate: Double?
+    @Binding var basalRate: Double?
     @State private var hoveredActualY: Double?
     @State private var hoveredBolusId: UUID?
     @State private var hoveredBolus: BolusOverlayEntry?
@@ -29,9 +31,12 @@ struct GraphView: View {
 
     var gse: GlucoseSourceExtraProperties = GlucoseSourceExtraProperties()
 
-    init(glucose: Glucose) {
+    init(glucose: Glucose, hoveredInsulinIOB: Binding<Double?> = .constant(nil), sharedHoverTime: Binding<Date?> = .constant(nil), basalRate: Binding<Double?> = .constant(nil)) {
         self.g = glucose
         self.gse = glucose.provider.GlucoseSourceExtras
+        self._hoveredInsulinIOB = hoveredInsulinIOB
+        self._sharedHoverTime = sharedHoverTime
+        self._basalRate = basalRate
     }
 
     func getGraphData() -> [GraphEntry] {
@@ -224,7 +229,7 @@ struct GraphView: View {
                 if g.provider.RemoteGlucoseSource != .null {
                     if s.aidChartShowCOB || s.aidChartShowIOB || s.aidChartShowLoopStatus || s.aidChartShowEventualGlucose {
                         Spacer()
-                        AidGridView(g: g, hoveredBasalRate: hoveredBasalRate).environmentObject(s)
+                        AidGridView(g: g, hoveredBasalRate: basalRate, hoveredInsulinIOB: hoveredInsulinIOB).environmentObject(s)
                     }
                 }
             }.padding()
@@ -321,6 +326,12 @@ struct GraphView: View {
                 }
                 DrawGlucose(data: data)
 
+                if let ht = sharedHoverTime {
+                    RuleMark(x: .value("HovRX", ht))
+                        .foregroundStyle(.blue.opacity(0.4))
+                        .lineStyle(StrokeStyle(lineWidth: 1))
+                }
+
                 if let ht = hoveredTime, let hy = hoveredActualY {
                     PointMark(x: .value("HovBX", ht), y: .value("HovBY", hy))
                         .foregroundStyle(.blue)
@@ -415,8 +426,11 @@ struct GraphView: View {
                                             hoveredTime = entry.date
                                             hoveredTrend = entry.trend
                                             hoveredDelta = entry.delta
-                                            hoveredBasalRate = (g.provider as? TandemSource)?.basalSegments.filter { $0.date <= hTime! }.last?.actualRate
-                                            if let br = hoveredBasalRate { hoveredActualY = basalChartTop - (br / basalMaxRate) * basalVisibleOffset }
+                                            basalRate = (g.provider as? TandemSource)?.basalSegments.filter { $0.date <= hTime! }.last?.actualRate
+                                            if let br = basalRate { hoveredActualY = basalChartTop - (br / basalMaxRate) * basalVisibleOffset }
+                                            let boluses = (g.provider as? TandemSource)?.bolusHistory ?? []
+                                            hoveredInsulinIOB = ActiveInsulinChart.iob(at: hTime!, bolusHistory: boluses, diaHours: s.activeInsulinDIA)
+                                            sharedHoverTime = hTime
                                             if let match = bolusEntries.first(where: { abs($0.date.timeIntervalSince(hTime!)) < 120 }) {
                                                 hoveredBolusId = match.id
                                                 hoveredBolus = match
@@ -434,15 +448,24 @@ struct GraphView: View {
                             case .ended:
                                 hoveredTime = nil
                                 isHovering = false
-                                hoveredBasalRate = nil
+                                basalRate = nil
                                 hoveredActualY = nil
                                 hoveredBolusId = nil
                                 hoveredBolus = nil
+                                hoveredInsulinIOB = nil
+                                sharedHoverTime = nil
                             }
                         }
             }.chartForegroundStyleScale(legendList
             ).chartLegend(s.aidChartShowForecast && s.aidChartForecastDisplay == .lines ? .visible : .hidden)
             .padding()
+        }
+        .onChange(of: sharedHoverTime) { ht in
+            if let ht = ht {
+                basalRate = (g.provider as? TandemSource)?.basalSegments.filter { $0.date <= ht }.last?.actualRate
+            } else {
+                basalRate = nil
+            }
         }
     }
 }

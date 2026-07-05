@@ -17,7 +17,17 @@ struct MainAppView: View {
     @EnvironmentObject var uc: UpdateChecker
     @EnvironmentObject var sm: SourceManager
 
+    @State private var hoveredInsulinIOB: Double?
+    @State private var sharedHoverTime: Date?
+    @State private var sharedBasalRate: Double?
+
     let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "main")
+
+    private var popoverHeight: CGFloat {
+        var h: CGFloat = 500
+        if s.cgmProvider == .tandemsource, s.aidChartShowActiveInsulin { h += 60 }
+        return h
+    }
 
     func QuitButton() -> some View {
         Button(action: {
@@ -153,7 +163,20 @@ struct MainAppView: View {
                         }
                         .padding(.horizontal).padding(.top, 8)
                     }
-                    GraphView(glucose: g).environmentObject(s).environmentObject(vs)
+                    GraphView(glucose: g, hoveredInsulinIOB: $hoveredInsulinIOB, sharedHoverTime: $sharedHoverTime, basalRate: $sharedBasalRate).environmentObject(s).environmentObject(vs)
+                    let chartStart = Date(timeIntervalSinceNow: TimeInterval(-s.graphMinutes * 60))
+                    let glucoseStart = g.entries?.last(where: { $0.date > chartStart })?.date
+                    let glucoseEnd = g.entries?.first?.date
+                    ActiveInsulinChart(
+                        bolusHistory: (g.provider as? TandemSource)?.bolusHistory ?? [],
+                        graphMinutes: s.graphMinutes,
+                        diaHours: s.activeInsulinDIA,
+                        isVisible: s.aidChartShowActiveInsulin && s.cgmProvider == .tandemsource,
+                        glucoseStart: glucoseStart,
+                        glucoseEnd: glucoseEnd,
+                        hoveredIOB: $hoveredInsulinIOB,
+                        hoverTime: $sharedHoverTime
+                    )
                     HStack {
                         ZenModeButton().help("Replaces your configured items in the menu bar with a circle that changes color based on glucose levels.")
                         Spacer()
@@ -201,7 +224,7 @@ struct MainAppView: View {
                     }
                 }
             }
-            .frame(width: 500, height: 500, alignment: .leading)
+            .frame(width: 500, height: popoverHeight, alignment: .leading)
             .focusable()
             .focusEffectDisabled()
 //            .onKeyPress(keys: [.escape]) { press in
