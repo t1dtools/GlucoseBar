@@ -88,6 +88,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     @Published var aidChartShowLoopStatus: Bool = true
     @Published var aidChartShowBasalRate: Bool = true
     @Published var aidChartShowBasalOverlay: Bool = true
+    @Published var aidShowBolusHistory: Bool = true
 
     @Published var validSettings: Bool = false
     @Published var debugMode: Bool = false
@@ -294,6 +295,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         self.aidChartShowLoopStatus = defaults.bool(forKey: key("trioChartShowLoopStatus"))
         self.aidChartShowBasalRate = defaults.bool(forKey: key("aidChartShowBasalRate"))
         self.aidChartShowBasalOverlay = defaults.bool(forKey: key("aidChartShowBasalOverlay"))
+        self.aidShowBolusHistory = defaults.bool(forKey: key("aidShowBolusHistory"))
 
         // Tandem Source
         self.tandemEmail = defaults.string(forKey: key("tandemEmail")) ?? "your@email.com"
@@ -387,6 +389,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         defaults.set(self.aidChartShowLoopStatus, forKey: key("trioChartShowLoopStatus"))
         defaults.set(self.aidChartShowBasalRate, forKey: key("aidChartShowBasalRate"))
         defaults.set(self.aidChartShowBasalOverlay, forKey: key("aidChartShowBasalOverlay"))
+        defaults.set(self.aidShowBolusHistory, forKey: key("aidShowBolusHistory"))
 
         // Tandem Source
         defaults.set(self.tandemEmail, forKey: key("tandemEmail"))

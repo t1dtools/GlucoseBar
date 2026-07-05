@@ -196,6 +196,16 @@ struct AidSettingsView: View {
                             }.fixedSize()
                                 .scaleEffect(0.7, anchor: .trailing)
                         }
+
+                        Divider()
+                        HStack {
+                            Text("Show Bolus History")
+                            Spacer()
+                            Toggle(isOn: $s.aidShowBolusHistory, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidShowBolusHistory, initial: false) {
+                                s.save()
+                            }.fixedSize()
+                                .scaleEffect(0.7, anchor: .trailing)
+                        }
                     }
 
                     if [.trio, .openaps, .aaps, .controliq].contains(g.provider.GlucoseSourceExtras.aid) {

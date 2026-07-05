@@ -21,6 +21,8 @@ struct GraphView: View {
     @State private var hoveredDelta: Double?
     @State private var hoveredBasalRate: Double?
     @State private var hoveredActualY: Double?
+    @State private var hoveredBolusId: UUID?
+    @State private var hoveredBolus: BolusOverlayEntry?
     @State private var isHovering: Bool = false
     @State private var legends: [String : Color] = [:]
     @State private var isLoading: Bool = false
@@ -201,6 +203,7 @@ struct GraphView: View {
         let graphDataDuration = (-1 * (g.entries?.last?.date.timeIntervalSinceNow ?? 1) / 60 / 60).rounded()
 
         let basalEntries = GraphView.basalOverlayEntries(g: g, s: s, maxY: maxY, defaultMaxGlucose: defaultMaxGlucose, maxYMargin: maxYMargin, minY: minY, defaultMinGlucose: defaultMinGlucose)
+        let bolusEntries = GraphView.bolusOverlayEntries(g: g, s: s, data: data)
         let basalChartTop = maxY >= defaultMaxGlucose ? (maxY + maxYMargin) : defaultMaxGlucose
         let basalChartMin = minY <= defaultMinGlucose ? minY : defaultMinGlucose
         let basalVisibleOffset = max(0.0, (200.0 / 350.0) * (basalChartTop - basalChartMin))
@@ -301,15 +304,13 @@ struct GraphView: View {
                         forecastType: forecastDisplay
                     )
                 }
-                DrawGlucose(data: data)
-
                 if !basalEntries.isEmpty {
                     ForEach(basalEntries) { e in
                         AreaMark(x: .value("Fx", e.date),
                                  yStart: .value("FyT", basalChartTop),
                                  yEnd: .value("FyR", e.actualY))
                         .foregroundStyle(
-                            LinearGradient(colors: [.blue.opacity(0.35), .blue.opacity(0.0)], startPoint: .bottom, endPoint: .top)
+                            LinearGradient(colors: [.blue.opacity(0.0), .blue.opacity(0.35)], startPoint: .bottom, endPoint: .top)
                         )
                         .interpolationMethod(.stepStart)
                     }
@@ -318,6 +319,7 @@ struct GraphView: View {
                             .foregroundStyle(.blue).lineStyle(StrokeStyle(lineWidth: 1)).interpolationMethod(.stepStart)
                     }
                 }
+                DrawGlucose(data: data)
 
                 if let ht = hoveredTime, let hy = hoveredActualY {
                     PointMark(x: .value("HovBX", ht), y: .value("HovBY", hy))
@@ -353,44 +355,91 @@ struct GraphView: View {
                 }
             }.chartOverlay { (chartProxy: ChartProxy) in
                 Color.clear
-                    .onContinuousHover { phase in
-                        switch phase {
-                        case .active(let hoverLocation):
-                            let hTime = chartProxy.value(
-                                atX: hoverLocation.x, as: Date.self
-                            )
-
-                            // Do we have a minute that has a value in the data?
-                            data.forEach { entry in
-                                let date = entry.date
-                                let timeDiff = date.timeIntervalSince(hTime!)
-                                if timeDiff < 60 && timeDiff > 0 {
-                                    if entry.forecastType == .none {
-                                        hoveredValue = entry.value
-                                        hoveredTime = entry.date
-                                        hoveredTrend = entry.trend
-                                        hoveredDelta = entry.delta
-                                        hoveredBasalRate = (g.provider as? TandemSource)?.basalSegments
-                                            .filter { $0.date <= hTime! }
-                                            .last?.actualRate
-                                        if let br = hoveredBasalRate {
-                                            hoveredActualY = basalChartTop - (br / basalMaxRate) * basalVisibleOffset
-                                        }
-                                        isHovering = true
-                                    } else {
-                                        hoveredTime = nil
-                                        isHovering = false
+                    .background {
+                        if !bolusEntries.isEmpty {
+                            Canvas { context, size in
+                                for b in bolusEntries {
+                                    guard let pt = chartProxy.position(for: (b.date, b.glucoseY)) else { continue }
+                                    let isHL = b.id == hoveredBolusId
+                                    let r = isHL ? 7.0 : 3.5 + min(b.insulinDelivered * 1.6, 4.0)
+                                    context.fill(
+                                        Path(ellipseIn: CGRect(x: pt.x - r, y: pt.y - r, width: r * 2, height: r * 2)),
+                                        with: .color(isHL ? .blue : .blue.opacity(0.45))
+                                    )
+                                    if isHL {
+                                        context.stroke(
+                                            Path(ellipseIn: CGRect(x: pt.x - r - 1, y: pt.y - r - 1, width: (r + 1) * 2, height: (r + 1) * 2)),
+                                            with: .color(.white.opacity(0.6)),
+                                            lineWidth: 1.5
+                                        )
                                     }
                                 }
+                                if let hb = hoveredBolus, let pt = chartProxy.position(for: (hb.date, hb.glucoseY)) {
+                                    let r = 7.0 + min(hb.insulinDelivered * 1.6, 4.0)
+                                    let text: String = {
+                                        var parts = ["\(String(format: "%.1f", hb.insulinDelivered))U"]
+                                        if let c = hb.carbAmount, c > 0 { parts.append("\(String(format: "%.0f", c))g") }
+                                        if let t = hb.bolusType { parts.append(t) }
+                                        return parts.joined(separator: " ")
+                                    }()
+                                    let font = NSFont.monospacedDigitSystemFont(ofSize: 10, weight: .medium)
+                                    let attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: NSColor.white]
+                                    let textSize = (text as NSString).size(withAttributes: attrs)
+                                    let pad: CGFloat = 6
+                                    let tipH: CGFloat = textSize.height + pad * 2
+                                    let tipW: CGFloat = textSize.width + pad * 2 + 10
+                                    let tipX = min(max(pt.x - tipW / 2, 4), size.width - tipW - 4)
+                                    let tipY = pt.y - r - tipH - 6
+                                    let bgRect = CGRect(x: tipX, y: tipY, width: tipW, height: tipH)
+                                    let bgPath = Path(roundedRect: bgRect, cornerRadius: 4)
+                                    context.fill(bgPath, with: .color(Color(nsColor: .windowBackgroundColor)))
+                                    context.stroke(bgPath, with: .color(.secondary.opacity(0.4)), lineWidth: 1)
+                                    context.draw(
+                                        Text(text).foregroundColor(.primary).font(.system(size: 10, design: .monospaced)),
+                                        at: CGPoint(x: tipX + tipW / 2, y: tipY + tipH / 2)
+                                    )
+                                }
                             }
-
-                        case .ended:
-                            hoveredTime = nil
-                            isHovering = false
-                            hoveredBasalRate = nil
-                            hoveredActualY = nil
                         }
                     }
+                        .onContinuousHover { phase in
+                            switch phase {
+                            case .active(let hoverLocation):
+                                let hTime = chartProxy.value(atX: hoverLocation.x, as: Date.self)
+                                data.forEach { entry in
+                                    let date = entry.date
+                                    let timeDiff = date.timeIntervalSince(hTime!)
+                                    if timeDiff < 60 && timeDiff > 0 {
+                                        if entry.forecastType == .none {
+                                            hoveredValue = entry.value
+                                            hoveredTime = entry.date
+                                            hoveredTrend = entry.trend
+                                            hoveredDelta = entry.delta
+                                            hoveredBasalRate = (g.provider as? TandemSource)?.basalSegments.filter { $0.date <= hTime! }.last?.actualRate
+                                            if let br = hoveredBasalRate { hoveredActualY = basalChartTop - (br / basalMaxRate) * basalVisibleOffset }
+                                            if let match = bolusEntries.first(where: { abs($0.date.timeIntervalSince(hTime!)) < 120 }) {
+                                                hoveredBolusId = match.id
+                                                hoveredBolus = match
+                                            } else {
+                                                hoveredBolusId = nil
+                                                hoveredBolus = nil
+                                            }
+                                            isHovering = true
+                                        } else {
+                                            hoveredTime = nil
+                                            isHovering = false
+                                        }
+                                    }
+                                }
+                            case .ended:
+                                hoveredTime = nil
+                                isHovering = false
+                                hoveredBasalRate = nil
+                                hoveredActualY = nil
+                                hoveredBolusId = nil
+                                hoveredBolus = nil
+                            }
+                        }
             }.chartForegroundStyleScale(legendList
             ).chartLegend(s.aidChartShowForecast && s.aidChartForecastDisplay == .lines ? .visible : .hidden)
             .padding()
@@ -417,6 +466,40 @@ extension GraphView {
         return filtered.enumerated().map { i, seg in
             let ay = chartMaxY - (seg.actualRate / maxBasal) * visibleOffset
             return BasalOverlayEntry(id: seg.id, date: seg.date, actualY: ay)
+        }
+    }
+
+    fileprivate struct BolusOverlayEntry {
+        let id: UUID
+        let date: Date
+        let glucoseY: Double
+        let insulinDelivered: Double
+        let carbAmount: Double?
+        let bolusType: String?
+    }
+
+    fileprivate static func bolusOverlayEntries(g: Glucose, s: SettingsStore, data: [GraphEntry]) -> [BolusOverlayEntry] {
+        guard g.provider.type == .tandemsource, s.aidShowBolusHistory else { return [] }
+        let boluses = (g.provider as? TandemSource)?.bolusHistory ?? []
+        guard !boluses.isEmpty else { return [] }
+        let start = Date(timeIntervalSinceNow: TimeInterval(-s.graphMinutes * 60))
+        let filtered = boluses.filter { $0.date >= start }
+        let cgm = data.filter { $0.forecastType == .none }.sorted(by: { $0.date < $1.date })
+        guard !cgm.isEmpty else { return [] }
+        let offsetY = convertGlucose(s, glucose: 25)
+        return filtered.compactMap { bolus -> BolusOverlayEntry? in
+            let gy: Double
+            if let idx = cgm.firstIndex(where: { $0.date >= bolus.date }) {
+                let e = cgm[idx]
+                if idx > 0 {
+                    let prev = cgm[idx - 1]
+                    let dur = e.date.timeIntervalSince(prev.date)
+                    gy = dur > 0 && dur < 600
+                        ? prev.value + (e.value - prev.value) * (bolus.date.timeIntervalSince(prev.date) / dur)
+                        : e.value
+                } else { gy = e.value }
+            } else { gy = cgm.last!.value }
+            return BolusOverlayEntry(id: bolus.id, date: bolus.date, glucoseY: gy - offsetY, insulinDelivered: bolus.insulinDelivered, carbAmount: bolus.carbAmount, bolusType: bolus.bolusType)
         }
     }
 }
