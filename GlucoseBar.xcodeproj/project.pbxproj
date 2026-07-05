@@ -34,8 +34,9 @@
 		83A3301C2AC9F70100222445 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A3301B2AC9F70100222445 /* SettingsView.swift */; };
 		83B737A22BE9728F00B84A75 /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 83B737A12BE9728F00B84A75 /* LaunchAtLogin */; };
 		83BB00012B00000100000000 /* BasalRateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83BB00022B00000200000000 /* BasalRateView.swift */; };
-		83BB00032B00000300000000 /* BasalRateSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83BB00042B00000400000000 /* BasalRateSettingsView.swift */; };
-		83CA4BBA2DE26ED3003E5A24 /* DeviceStatusResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CA4BB92DE26ECA003E5A24 /* DeviceStatusResponse.swift */; };
+ 		83BB00032B00000300000000 /* BasalRateSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83BB00042B00000400000000 /* BasalRateSettingsView.swift */; };
+ 		F980A384747E421CBF8C88147BC961E2 /* ActiveInsulinChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BB04858EDB645A1B421F8A5C9A07830 /* ActiveInsulinChart.swift */; };
+ 		83CA4BBA2DE26ED3003E5A24 /* DeviceStatusResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CA4BB92DE26ECA003E5A24 /* DeviceStatusResponse.swift */; };
 		83CC00022F0000010000CC00 /* CodableColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC00012F0000010000CC00 /* CodableColor.swift */; };
 		83CC00042F0000010000CC00 /* SourceConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC00032F0000010000CC00 /* SourceConfiguration.swift */; };
 		83CC00062F0000010000CC00 /* SourceState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC00052F0000010000CC00 /* SourceState.swift */; };
@@ -115,8 +116,9 @@
 		83A330192AC9F69B00222445 /* GraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphView.swift; sourceTree = "<group>"; };
 		83A3301B2AC9F70100222445 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		83BB00022B00000200000000 /* BasalRateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasalRateView.swift; sourceTree = "<group>"; };
-		83BB00042B00000400000000 /* BasalRateSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasalRateSettingsView.swift; sourceTree = "<group>"; };
-		83CA4BB92DE26ECA003E5A24 /* DeviceStatusResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusResponse.swift; sourceTree = "<group>"; };
+ 		83BB00042B00000400000000 /* BasalRateSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasalRateSettingsView.swift; sourceTree = "<group>"; };
+ 		5BB04858EDB645A1B421F8A5C9A07830 /* ActiveInsulinChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveInsulinChart.swift; sourceTree = "<group>"; };
+ 		83CA4BB92DE26ECA003E5A24 /* DeviceStatusResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusResponse.swift; sourceTree = "<group>"; };
 		83CC00012F0000010000CC00 /* CodableColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodableColor.swift; sourceTree = "<group>"; };
 		83CC00032F0000010000CC00 /* SourceConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceConfiguration.swift; sourceTree = "<group>"; };
 		83CC00052F0000010000CC00 /* SourceState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceState.swift; sourceTree = "<group>"; };
@@ -365,8 +367,9 @@
 				83E198022DEB595500B0F995 /* DrawGlucose.swift */,
 				83E198002DEB58ED00B0F995 /* DrawForecast.swift */,
 				83E197FE2DEB578E00B0F995 /* AidGridView.swift */,
-				83A330192AC9F69B00222445 /* GraphView.swift */,
-			);
+ 				83A330192AC9F69B00222445 /* GraphView.swift */,
+ 				5BB04858EDB645A1B421F8A5C9A07830 /* ActiveInsulinChart.swift */,
+ 			);
 			path = Chart;
 			sourceTree = "<group>";
 		};
@@ -561,8 +564,9 @@
 				83DEAD0226DEAD0200000000 /* TandemLogin.swift in Sources */,
 				83DEAD0326DEAD0300000000 /* TandemResponseModels.swift in Sources */,
 				83BB00012B00000100000000 /* BasalRateView.swift in Sources */,
-				83BB00032B00000300000000 /* BasalRateSettingsView.swift in Sources */,
-			);
+ 				83BB00032B00000300000000 /* BasalRateSettingsView.swift in Sources */,
+ 				F980A384747E421CBF8C88147BC961E2 /* ActiveInsulinChart.swift in Sources */,
+ 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
