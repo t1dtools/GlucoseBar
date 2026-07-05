@@ -104,7 +104,7 @@ struct TandemLoginSession {
     }
 }
 
-final class TandemLoginHelper {
+final class TandemLoginHelper: @unchecked Sendable {
 
     private let region: TandemRegion
     private let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "tandem-login")

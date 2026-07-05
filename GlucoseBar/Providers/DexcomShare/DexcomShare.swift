@@ -141,7 +141,7 @@ class DexcomShare: Provider, @unchecked Sendable {
             guard isAuthValid() else { return }
         }
 
-        self.setProviderIssue(nil)
+        await self.setProviderIssue(nil)
 
         let url = "\(self.server.url)/Publisher/ReadPublisherLatestGlucoseValues"
         let requestBody = DexcomShareListRequest(sessionId: self.sessionID, minutes: 1440, maxCount: 288)
@@ -434,7 +434,7 @@ class DexcomShare: Provider, @unchecked Sendable {
 
         isAuthenticating = true
 
-        await self.setProviderIssue(nil)
+        self.setProviderIssue(nil)
 
         // Do we need a full refresh?
         if self.accountID == "" {
