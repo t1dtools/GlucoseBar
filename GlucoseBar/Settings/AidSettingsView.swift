@@ -179,6 +179,28 @@ struct AidSettingsView: View {
                     if [.controliq].contains(g.provider.GlucoseSourceExtras.aid) {
                         Divider()
                         HStack {
+                            Text("Show Active Insulin")
+                            Spacer()
+                            Toggle(isOn: $s.aidChartShowActiveInsulin, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowActiveInsulin, initial: false) {
+                                s.save()
+                            }.fixedSize()
+                                .scaleEffect(0.7, anchor: .trailing)
+                        }
+                        if s.aidChartShowActiveInsulin {
+                            HStack {
+                                Text("Duration of Insulin Action")
+                                Spacer()
+                                Stepper("\(String(format: "%.1f", s.activeInsulinDIA)) h",
+                                        value: $s.activeInsulinDIA,
+                                        in: 1...8,
+                                        step: 0.5)
+                                    .onChange(of: s.activeInsulinDIA) { s.save() }
+                                    .fixedSize()
+                            }
+                        }
+
+                        Divider()
+                        HStack {
                             Text("Show Basal Rate")
                             Spacer()
                             Toggle(isOn: $s.aidChartShowBasalRate, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowBasalRate, initial: false) {
