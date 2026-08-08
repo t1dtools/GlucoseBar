@@ -107,14 +107,15 @@ struct TandemLoginSession {
 final class TandemLoginHelper: @unchecked Sendable {
 
     private let region: TandemRegion
-    private let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "tandem-login")
+    private let sourceIndex: Int
     private let httpTimeout: Double = 120.0
 
     private let session: URLSession
     private let apiSession: URLSession
 
-    init(region: TandemRegion) {
+    init(region: TandemRegion, sourceIndex: Int = -1) {
         self.region = region
+        self.sourceIndex = sourceIndex
 
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = httpTimeout
@@ -129,15 +130,21 @@ final class TandemLoginHelper: @unchecked Sendable {
         apiSession = URLSession(configuration: apiConfig)
     }
 
+    private func plog(_ message: String, level: OSLogType = .default) {
+        let cat = sourceIndex < 0 ? "tandem-login" : "tandem-login/\(sourceIndex)"
+        Logger(subsystem: "tools.t1d.GlucoseBar", category: cat)
+            .dlog(message, category: "tandem-login", level: level)
+    }
+
     func browserSession() -> URLSession { apiSession }
     func loginSession() -> URLSession { session }
 
     func login(email: String, password: String) async throws -> TandemLoginSession {
-        logger.info("TandemLogin (\(self.region.presentable, privacy: .public)): starting login for \(email, privacy: .private)")
+        plog("TandemLogin (\(self.region.presentable)): starting login")
 
         try await establishSession(email: email, password: password)
 
-        logger.info("TandemLogin: session established, starting OIDC flow")
+        plog("TandemLogin: session established, starting OIDC flow")
 
         let code = try await oidcAuthorize()
 
@@ -146,7 +153,7 @@ final class TandemLoginHelper: @unchecked Sendable {
         let (pumperId, accountId) = try parseJWT(idToken)
 
         let expiresAt = Date().addingTimeInterval(TimeInterval(expiresIn))
-        logger.info("TandemLogin: OIDC complete, pumperId=\(pumperId.prefix(8), privacy: .public)..., token expires in \(expiresIn)s")
+        plog("TandemLogin: OIDC complete, pumperId=\(pumperId.prefix(8))..., token expires in \(expiresIn)s")
 
         return TandemLoginSession(
             pumperId: pumperId,
@@ -160,7 +167,7 @@ final class TandemLoginHelper: @unchecked Sendable {
     // MARK: - Session Establishment
 
     private func establishSession(email: String, password: String) async throws {
-        logger.info("TandemLogin: GET \(self.region.loginPageURL.absoluteString, privacy: .public)...")
+        plog("TandemLogin: GET \(self.region.loginPageURL.absoluteString)...")
         var initialReq = URLRequest(url: region.loginPageURL)
         initialReq.setValue(TandemLoginHelper.randomUserAgent(), forHTTPHeaderField: "User-Agent")
         initialReq.cachePolicy = .reloadIgnoringLocalCacheData
@@ -185,7 +192,7 @@ final class TandemLoginHelper: @unchecked Sendable {
 
         if httpResponse.statusCode != 200 {
             let body = String(data: data, encoding: .utf8)?.prefix(500) ?? ""
-            logger.error("TandemLogin: login API returned HTTP \(httpResponse.statusCode, privacy: .public), body: \(body, privacy: .public)")
+            plog("TandemLogin: login API returned HTTP \(httpResponse.statusCode), body: \(body)", level: .error)
             throw TandemLoginError.httpError(httpResponse.statusCode)
         }
 
@@ -193,11 +200,11 @@ final class TandemLoginHelper: @unchecked Sendable {
               let status = json["status"] as? String,
               status == "SUCCESS" else {
             let body = String(data: data, encoding: .utf8) ?? ""
-            logger.error("TandemLogin: login API unexpected response: \(body, privacy: .public)")
+            plog("TandemLogin: login API unexpected response: \(body)", level: .error)
             throw TandemLoginError.invalidCredentials
         }
 
-        logger.info("TandemLogin: login API OK")
+        plog("TandemLogin: login API OK")
     }
 
     // MARK: - OIDC Authorization
@@ -223,7 +230,7 @@ final class TandemLoginHelper: @unchecked Sendable {
         authReq.setValue(TandemLoginHelper.randomUserAgent(), forHTTPHeaderField: "User-Agent")
         authReq.setValue(region.loginPageURL.absoluteString, forHTTPHeaderField: "Referer")
 
-        logger.info("TandemLogin: OIDC authorize request...")
+        plog("TandemLogin: OIDC authorize request...")
 
         let (data, response) = try await session.data(for: authReq)
 
@@ -231,18 +238,18 @@ final class TandemLoginHelper: @unchecked Sendable {
               httpResponse.statusCode / 100 == 2 else {
             let body = String(data: data, encoding: .utf8)?.prefix(500) ?? ""
             let status = (response as? HTTPURLResponse)?.statusCode ?? -1
-            logger.error("TandemLogin: OIDC authorize returned HTTP \(status, privacy: .public), body: \(body, privacy: .public)")
+            plog("TandemLogin: OIDC authorize returned HTTP \(status), body: \(body)", level: .error)
             throw TandemLoginError.parseError("OIDC authorize failed")
         }
 
         guard let finalURL = httpResponse.url,
               let components = URLComponents(url: finalURL, resolvingAgainstBaseURL: false),
               let code = components.queryItems?.first(where: { $0.name == "code" })?.value else {
-            logger.error("TandemLogin: no code in OIDC redirect URL: \(httpResponse.url?.absoluteString ?? "nil", privacy: .public)")
+            plog("TandemLogin: no code in OIDC redirect URL: \(httpResponse.url?.absoluteString ?? "nil")", level: .error)
             throw TandemLoginError.parseError("No authorization code in OIDC response")
         }
 
-        logger.info("TandemLogin: OIDC authorize OK, got code")
+        plog("TandemLogin: OIDC authorize OK, got code")
         self.codeVerifier = verifier
         return code
     }
@@ -271,14 +278,14 @@ final class TandemLoginHelper: @unchecked Sendable {
         tokenReq.setValue(TandemLoginHelper.randomUserAgent(), forHTTPHeaderField: "User-Agent")
         tokenReq.httpBody = bodyString.data(using: .utf8)
 
-        logger.info("TandemLogin: OIDC token exchange...")
+        plog("TandemLogin: OIDC token exchange...")
         let (data, response) = try await session.data(for: tokenReq)
 
         guard let httpResponse = response as? HTTPURLResponse,
               httpResponse.statusCode / 100 == 2 else {
             let body = String(data: data, encoding: .utf8)?.prefix(500) ?? ""
             let status = (response as? HTTPURLResponse)?.statusCode ?? -1
-            logger.error("TandemLogin: OIDC token returned HTTP \(status, privacy: .public), body: \(body, privacy: .public)")
+            plog("TandemLogin: OIDC token returned HTTP \(status), body: \(body)", level: .error)
             throw TandemLoginError.parseError("OIDC token exchange failed")
         }
 
@@ -287,11 +294,11 @@ final class TandemLoginHelper: @unchecked Sendable {
               let idToken = json["id_token"] as? String,
               let expiresIn = json["expires_in"] as? Int else {
             let body = String(data: data, encoding: .utf8) ?? ""
-            logger.error("TandemLogin: OIDC token response missing fields: \(body, privacy: .public)")
+            plog("TandemLogin: OIDC token response missing fields: \(body)", level: .error)
             throw TandemLoginError.noAccessToken
         }
 
-        logger.info("TandemLogin: OIDC token exchange OK")
+        plog("TandemLogin: OIDC token exchange OK")
         codeVerifier = ""
         return (accessToken, idToken, expiresIn)
     }
@@ -313,12 +320,12 @@ final class TandemLoginHelper: @unchecked Sendable {
         }
 
         guard let pumperId = payload["pumperId"] as? String else {
-            logger.error("TandemLogin: JWT missing pumperId. Claims: \(payload.keys.joined(separator: ", "), privacy: .public)")
+            plog("TandemLogin: JWT missing pumperId. Claims: \(payload.keys.joined(separator: ", "))", level: .error)
             throw TandemLoginError.noPumperId
         }
 
         let accountId = payload["accountId"] as? String ?? ""
-        logger.info("TandemLogin: JWT decoded, pumperId=\(pumperId.prefix(8), privacy: .public)..., accountId=\(accountId.prefix(8), privacy: .public)...")
+        plog("TandemLogin: JWT decoded, pumperId=\(pumperId.prefix(8))..., accountId=\(accountId.prefix(8))...")
         return (pumperId, accountId)
     }
 

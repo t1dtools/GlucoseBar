@@ -65,6 +65,21 @@ struct BffPumpSettingsDetails: Codable {
     var dda: Double? { storage["dda"]?.doubleValue }
     var basalRate: Double? { storage["maxBasalRate"]?.doubleValue }
     var pumpId: String? { storage["pumpId"]?.stringValue }
+    var allKeys: [String] { Array(storage.keys).sorted() }
+    func value(for key: String) -> PumpLogProperty? { storage[key] }
+
+    var activeProfileDiaMinutes: Double? {
+        guard let profDict = storage["profiles"]?.dictionaryValue,
+              let idp = profDict["activeIdp"]?.intValue,
+              idp > 0,
+              let profileArray = profDict["profile"],
+              case .array(let arr) = profileArray,
+              idp <= arr.count,
+              case .dictionary(let activeProfile) = arr[idp - 1] else {
+            return storage["dda"]?.doubleValue
+        }
+        return activeProfile["insulinDuration"]?.doubleValue ?? storage["dda"]?.doubleValue
+    }
 }
 
 // MARK: - Pump Logs
@@ -90,6 +105,7 @@ enum PumpLogProperty: Codable {
     case string(String)
     case bool(Bool)
     case array([PumpLogProperty])
+    case dictionary([String: PumpLogProperty])
     case null
 
     init(from decoder: Decoder) throws {
@@ -104,6 +120,8 @@ enum PumpLogProperty: Codable {
             self = .string(stringVal)
         } else if let arrayVal = try? container.decode([PumpLogProperty].self) {
             self = .array(arrayVal)
+        } else if let dictVal = try? container.decode([String: PumpLogProperty].self) {
+            self = .dictionary(dictVal)
         } else if container.decodeNil() {
             self = .null
         } else {
@@ -119,6 +137,7 @@ enum PumpLogProperty: Codable {
         case .string(let v): try container.encode(v)
         case .bool(let v): try container.encode(v)
         case .array(let v): try container.encode(v)
+        case .dictionary(let v): try container.encode(v)
         case .null: try container.encodeNil()
         }
     }
@@ -127,6 +146,8 @@ enum PumpLogProperty: Codable {
     var doubleValue: Double? { if case .double(let v) = self { return v }; if case .int(let v) = self { return Double(v) }; return nil }
     var stringValue: String? { if case .string(let v) = self { return v }; return nil }
     var boolValue: Bool? { if case .bool(let v) = self { return v }; return nil }
+    var dictionaryValue: [String: PumpLogProperty]? { if case .dictionary(let v) = self { return v }; return nil }
+    var arrayValue: [PumpLogProperty]? { if case .array(let v) = self { return v }; return nil }
 }
 
 // MARK: - Basal Chart Data

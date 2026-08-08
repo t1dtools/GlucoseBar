@@ -26,6 +26,7 @@ class TandemSource: Provider, @unchecked Sendable {
     private var highThreshold: Int = 180
     private var unsuccessfulAuthAttempts: Int = 0
     private let maxAuthAttempts: Int = 5
+    private var lastAuthAttempt: Date = .distantPast
     private var nextFetchAllowedAt: Date = .distantPast
 
     private let httpTimeout: Double = 120.0
@@ -34,6 +35,7 @@ class TandemSource: Provider, @unchecked Sendable {
     var selectedPumpAssignmentIdOverride: String? = nil
     @Published var basalSegments: [BasalSegment] = []
     @Published var bolusHistory: [BolusRecord] = []
+    @Published var pumpDIAHours: Double? = nil
 
     private struct BolusCandidate {
         let date: Date
@@ -75,14 +77,14 @@ class TandemSource: Provider, @unchecked Sendable {
     private func hasValidAuthMain() -> Bool {
         guard let session = loginSession else { return false }
         let valid = !session.isExpired
-        if !valid { plog("Token expired, needs re-auth", category: "tandem", level: .info) }
+        if !valid { plog("Token expired, needs re-auth", category: "tandemsource", level: .info) }
         return valid
     }
 
     @MainActor
     private func ensureAuth() async -> Bool {
         if !hasValidAuthMain() {
-            plog("Auth invalid or expired, authenticating...", category: "tandem", level: .info)
+            plog("Auth invalid or expired, authenticating...", category: "tandemsource", level: .info)
             return await authenticate()
         }
         return true
@@ -92,14 +94,18 @@ class TandemSource: Provider, @unchecked Sendable {
     private func authenticate() async -> Bool {
         if isAuthenticating { return false }
         if unsuccessfulAuthAttempts > maxAuthAttempts {
-            plog("Auth locked: \(unsuccessfulAuthAttempts) failed attempts", category: "tandem", level: .error)
-            providerIssue = "Unable to connect to Tandem Source after \(maxAuthAttempts) attempts. Please check your credentials."
-            return false
+            if Date().timeIntervalSince(lastAuthAttempt) > 900 {
+                unsuccessfulAuthAttempts = 0
+            } else {
+                plog("Auth locked: \(unsuccessfulAuthAttempts) failed attempts", category: "tandemsource", level: .error)
+                providerIssue = "Unable to connect to Tandem Source after \(maxAuthAttempts) attempts. Please check your credentials."
+                return false
+            }
         }
 
         isAuthenticating = true
         providerIssue = nil
-        plog("Authenticating (attempt \(unsuccessfulAuthAttempts + 1))...", category: "tandem", level: .info)
+        plog("Authenticating (attempt \(unsuccessfulAuthAttempts + 1))...", category: "tandemsource", level: .info)
 
         do {
             let session = try await loginHelper.login(email: email, password: password)
@@ -111,11 +117,17 @@ class TandemSource: Provider, @unchecked Sendable {
             isAuthenticating = false
             GlucoseSourceExtras.aid = .controliq
             RemoteGlucoseSource = .controliq
-            plog("Authentication successful, pumperId=\(session.pumperId.prefix(8))..., token valid for \(String(format:"%.0f", session.accessTokenExpiresAt.timeIntervalSinceNow))s", category: "tandem", level: .info)
+            plog("Authentication successful, pumperId=\(session.pumperId.prefix(8))..., token valid for \(String(format:"%.0f", session.accessTokenExpiresAt.timeIntervalSinceNow))s", category: "tandemsource", level: .info)
             return true
         } catch {
-            plog("Authentication failed: \(error.localizedDescription)", category: "tandem", level: .error)
-            unsuccessfulAuthAttempts += 1
+            plog("Authentication failed: \(error.localizedDescription)", category: "tandemsource", level: .error)
+            let nsErr = error as NSError
+            let networkCodes = [NSURLErrorNotConnectedToInternet, NSURLErrorCannotFindHost,
+                                NSURLErrorCannotConnectToHost, NSURLErrorNetworkConnectionLost,
+                                NSURLErrorTimedOut, NSURLErrorDNSLookupFailed]
+            let isNetworkError = nsErr.domain == NSURLErrorDomain && networkCodes.contains(nsErr.code)
+            if !isNetworkError { unsuccessfulAuthAttempts += 1 }
+            lastAuthAttempt = Date()
             if unsuccessfulAuthAttempts > maxAuthAttempts {
                 providerIssue = "Unable to connect to Tandem Source after \(maxAuthAttempts) attempts. Please check your credentials."
             } else {
@@ -135,14 +147,14 @@ class TandemSource: Provider, @unchecked Sendable {
     @MainActor
     override internal func fetch() async {
         if Date() < nextFetchAllowedAt {
-            plog("Fetch skipped: cooldown until \(nextFetchAllowedAt.formatted())", category: "tandem", level: .info)
+            plog("Fetch skipped: cooldown until \(nextFetchAllowedAt.formatted())", category: "tandemsource", level: .info)
             return
         }
 
-        plog("Fetch cycle starting", category: "tandem", level: .info)
+        plog("Fetch cycle starting", category: "tandemsource", level: .info)
 
         guard await ensureAuth() else {
-            plog("Fetch skipped: not authenticated", category: "tandem", level: .info)
+            plog("Fetch skipped: not authenticated", category: "tandemsource", level: .info)
             return
         }
 
@@ -151,7 +163,7 @@ class TandemSource: Provider, @unchecked Sendable {
         do {
             try await fetchPumperInfo()
         } catch {
-            plog("Pumper info fetch failed: \(error.localizedDescription)", category: "tandem", level: .error)
+            plog("Pumper info fetch failed: \(error.localizedDescription)", category: "tandemsource", level: .error)
             providerIssue = "Tandem fetch error: \(error.localizedDescription)"
             didTimeout = isTimeout(error)
         }
@@ -159,13 +171,13 @@ class TandemSource: Provider, @unchecked Sendable {
         do {
             try await fetchPumpLogs()
         } catch {
-            plog("Pump logs fetch failed: \(error.localizedDescription)", category: "tandem", level: .error)
+            plog("Pump logs fetch failed: \(error.localizedDescription)", category: "tandemsource", level: .error)
             didTimeout = didTimeout || isTimeout(error)
         }
 
         if didTimeout {
             nextFetchAllowedAt = Date().addingTimeInterval(60)
-            plog("Cooldown set for 60s due to timeout", category: "tandem", level: .info)
+            plog("Cooldown set for 60s due to timeout", category: "tandemsource", level: .info)
         }
 
         lastFetch = Date()
@@ -193,30 +205,23 @@ class TandemSource: Provider, @unchecked Sendable {
         request.cachePolicy = .reloadIgnoringLocalCacheData
         request.timeoutInterval = httpTimeout
 
-        plog("fetchPumperInfo: requesting...", category: "tandem", level: .debug)
-
         let (data, response) = try await networkSession.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             let status = (response as? HTTPURLResponse)?.statusCode ?? -1
             logResponse("fetchPumperInfo", status: status, body: data)
             if status == 401 {
-                plog("fetchPumperInfo: token expired, clearing session", category: "tandem", level: .info)
+                plog("fetchPumperInfo: token expired, clearing session", category: "tandemsource", level: .info)
                 loginSession = nil
             }
             return
         }
 
-        plog("fetchPumperInfo: response received, parsing...", category: "tandem", level: .debug)
-
-        let rawJSON = String(data: data, encoding: .utf8)?.prefix(1000) ?? "<binary>"
-        plog("fetchPumperInfo: raw JSON: \(rawJSON)", category: "tandem", level: .info)
-
         let pumper: BffPumper
         do {
             pumper = try JSONDecoder().decode(BffPumper.self, from: data)
         } catch {
-            plog("fetchPumperInfo: decode failed: \(error)", category: "tandem", level: .error)
+            plog("fetchPumperInfo: decode failed: \(error)", category: "tandemsource", level: .error)
             return
         }
 
@@ -239,20 +244,23 @@ class TandemSource: Provider, @unchecked Sendable {
             if let overrideId = selectedPumpAssignmentIdOverride,
                let match = pumps.first(where: { $0.assignmentId == overrideId }) {
                 selected = match
-                plog("Pumper: using user-selected pump \(match.serialNumber ?? "?")", category: "tandem", level: .info)
+                plog("Pumper: using user-selected pump \(match.serialNumber ?? "?")", category: "tandemsource", level: .info)
             } else {
                 selected = pumps.max(by: { a, b in
                     (a.availableDataRange?.end ?? "") < (b.availableDataRange?.end ?? "")
                 }) ?? pumps.first!
-                plog("Pumper: auto-selected pump \(selected.serialNumber ?? "?"), \(pumps.count) pumps on account", category: "tandem", level: .info)
+                plog("Pumper: auto-selected pump \(selected.serialNumber ?? "?"), \(pumps.count) pumps on account", category: "tandemsource", level: .info)
             }
 
             pumpAssignmentId = selected.assignmentId
             hasControlIQ = selected.algorithm == "Control-IQ"
             lowThreshold = pumper.lowGlucoseThreshold ?? 110
             highThreshold = pumper.highGlucoseThreshold ?? 180
+            if let diaMin = selected.settings?.details?.activeProfileDiaMinutes {
+                pumpDIAHours = diaMin / 60
+            }
             let dataEnd = selected.availableDataRange?.end ?? "never uploaded"
-            plog("Pumper: serial=\(selected.serialNumber ?? "?"), model=\(selected.modelName ?? "?"), CIQ=\(hasControlIQ), targets=\(lowThreshold)-\(highThreshold), data till \(dataEnd)", category: "tandem", level: .info)
+            plog("Pumper: serial=\(selected.serialNumber ?? "?"), model=\(selected.modelName ?? "?"), CIQ=\(hasControlIQ), targets=\(lowThreshold)-\(highThreshold), data till \(dataEnd)", category: "tandemsource", level: .info)
         } else {
             availablePumps = []
         }
@@ -263,10 +271,7 @@ class TandemSource: Provider, @unchecked Sendable {
     private func fetchPumpLogs() async throws {
         guard let token = loginSession?.accessToken,
               let pid = pumperId,
-              let deviceId = pumpAssignmentId else {
-            plog("fetchPumpLogs: missing pumperId or pumpAssignmentId", category: "tandem", level: .debug)
-            return
-        }
+              let deviceId = pumpAssignmentId else { return }
 
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime]
@@ -296,8 +301,6 @@ class TandemSource: Provider, @unchecked Sendable {
         request.cachePolicy = .reloadIgnoringLocalCacheData
         request.timeoutInterval = httpTimeout
 
-        plog("fetchPumpLogs: requesting events for device=\(deviceId.prefix(8))..., range=\(startStr) to \(endStr)", category: "tandem", level: .debug)
-
         let (data, response) = try await networkSession.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
@@ -311,7 +314,7 @@ class TandemSource: Provider, @unchecked Sendable {
 
         let logs = try JSONDecoder().decode(PumpLogsResponse.self, from: data)
         let events = logs.events ?? []
-        plog("fetchPumpLogs: received \(events.count) events", category: "tandem", level: .info)
+        plog("fetchPumpLogs: received \(events.count) events", category: "tandemsource", level: .info)
 
         if events.isEmpty { return }
 
@@ -321,7 +324,81 @@ class TandemSource: Provider, @unchecked Sendable {
     // MARK: - Event Parsing
 
     private func parsePumpEvents(_ events: [PumpLogEvent]) {
+        // --- Date helpers ---
+        func parseISO(_ s: String) -> Date? {
+            let clean = s.hasSuffix("Z") ? String(s.dropLast()) : s
+            let fmt = DateFormatter()
+            fmt.locale = Locale(identifier: "en_US_POSIX")
+            fmt.timeZone = TimeZone(secondsFromGMT: 0)
+            fmt.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+            return fmt.date(from: clean)
+        }
+
+        func fallbackDate(for event: PumpLogEvent) -> Date {
+            if let ds = event.estimatedDateTime, !ds.isEmpty, let d = parseISO(ds) { return d }
+            if let ds = event.pumpDateTime, !ds.isEmpty, let d = parseISO(ds) { return d }
+            return Date()
+        }
+
+        func wrap32(_ delta: Int) -> Int {
+            delta >= 0 ? delta : Int(Int64(delta) &+ (1 << 32))
+        }
+
+        // --- Pass 1: build CGM anchor with RTC-based times ---
+        struct CGMAnchor { let seq: Int; let rtc: Int; let date: Date }
+        var cgmAnchors: [CGMAnchor] = []
+
+        var refRtc: Int?
+        var refDate: Date?
         var cgmEntries: [GlucoseEntry] = []
+
+        // Also collect raw non-CGM events for pass 2
+        struct RawEvent { let event: PumpLogEvent; let seq: Int; let fallback: Date }
+        var rawEvents: [RawEvent] = []
+
+        for event in events {
+            let seq = (event.sequenceGroup ?? 0) * 1_000_000 + (event.sequenceNumber ?? 0)
+            guard let code = event.eventCode, let props = event.eventProperties else { continue }
+
+            if code == 399,
+               let rtc = props["egvTimeStamp"]?.intValue,
+               let egv = props["currentGlucoseDisplayValue"]?.intValue, egv > 0 {
+                if refRtc == nil, let edt = event.estimatedDateTime, !edt.isEmpty, let d = parseISO(edt) {
+                    refRtc = rtc
+                    refDate = d
+                }
+                let date: Date
+                if let ref = refRtc, let refD = refDate {
+                    date = refD.addingTimeInterval(TimeInterval(wrap32(rtc - ref)))
+                } else {
+                    date = fallbackDate(for: event)
+                }
+                cgmEntries.append(GlucoseEntry(glucose: Double(egv), date: date, changeRate: 0.0))
+                cgmAnchors.append(CGMAnchor(seq: seq, rtc: rtc, date: date))
+                continue
+            }
+
+            rawEvents.append(RawEvent(event: event, seq: seq, fallback: fallbackDate(for: event)))
+        }
+
+        cgmAnchors.sort(by: { $0.seq < $1.seq })
+
+        // --- Pre-scan: collect profile basal anchors from code 279 ---
+        var profileAnchors: [(Date, Double)] = []
+        for raw in rawEvents {
+            let code = raw.event.eventCode!
+            if code == 279,
+               let props = raw.event.eventProperties,
+               let rate = props["profileBasalRate"]?.intValue {
+                profileAnchors.append((raw.fallback, Double(rate) / 1000))
+            }
+        }
+        profileAnchors.sort(by: { $0.0 < $1.0 })
+        func profileRate(at date: Date) -> Double? {
+            profileAnchors.last(where: { $0.0 <= date })?.1
+        }
+
+        // --- Pass 2: process non-CGM events with interpolated RTC times ---
         var iobValue: Double? = nil
         var newestIOBDate: Date = .distantPast
         var basalRate: Double? = nil
@@ -332,57 +409,57 @@ class TandemSource: Provider, @unchecked Sendable {
         var segments: [BasalSegment] = []
         var bolusCandidates: [BolusCandidate] = []
 
-        for event in events {
-            guard let code = event.eventCode, let props = event.eventProperties else { continue }
+        for raw in rawEvents {
+            let code = raw.event.eventCode!
+            let props = raw.event.eventProperties!
+            let seq = raw.seq
 
-            let date: Date = {
-                if let ds = event.pumpDateTime, !ds.isEmpty {
-                    let fmt = DateFormatter()
-                    fmt.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-                    return fmt.date(from: ds) ?? Date()
-                }
-                return Date()
-            }()
-
-            // Code 16: BG entry (calibration) with IOB
+            let date: Date
             if code == 16, let bg = props["bg"]?.intValue, bg > 0 {
+                // Code 16 BG entries: use estimateDateTime directly (no RTC)
+                date = raw.fallback
                 cgmEntries.append(GlucoseEntry(glucose: Double(bg), date: date, changeRate: 0.0))
                 if let iob = props["iob"]?.doubleValue, date > newestIOBDate {
                     iobValue = iob; newestIOBDate = date
                 }
+            } else if let rtc = props["egvTimeStamp"]?.intValue ?? props["rawRtcTime"]?.intValue,
+                      let ref = refRtc, let refD = refDate {
+                // Has RTC: compute directly
+                date = refD.addingTimeInterval(TimeInterval(wrap32(rtc - ref)))
+            } else if !cgmAnchors.isEmpty {
+                // No RTC: interpolate between CGM anchors
+                var before: CGMAnchor?, after: CGMAnchor?
+                for a in cgmAnchors { if a.seq <= seq { before = a } else { after = a; break } }
+                if before == nil, let a = cgmAnchors.first { before = a }
+                if after == nil, let a = cgmAnchors.last { after = a }
+                if let b = before, let a = after, let ref = refRtc, let refD = refDate {
+                    let rtcDelta = wrap32(a.rtc - b.rtc)
+                    let frac = a.seq > b.seq ? Double(seq - b.seq) / Double(a.seq - b.seq) : 0
+                    let interpRtc = b.rtc + Int(Double(rtcDelta) * frac)
+                    date = refD.addingTimeInterval(TimeInterval(wrap32(interpRtc - ref)))
+                } else {
+                    date = raw.fallback
+                }
+            } else {
+                date = raw.fallback
             }
 
-            // Code 399: CGM reading
-            if code == 399, let egv = props["currentGlucoseDisplayValue"]?.intValue, egv > 0 {
-                let cgmDate: Date = {
-                    if let ts = props["egvTimeStamp"]?.doubleValue, ts > 1000000000 {
-                        return Date(timeIntervalSince1970: ts / 1000)
-                    }
-                    if let ts = props["egvTimeStamp"]?.intValue, ts > 1000000000 {
-                        return Date(timeIntervalSince1970: TimeInterval(ts) / 1000)
-                    }
-                    return date
-                }()
-                cgmEntries.append(GlucoseEntry(glucose: Double(egv), date: cgmDate, changeRate: 0.0))
-            }
-
-            // Code 20, 55, 64: IOB snapshot from bolus/bg events
+            // Code 20, 55, 64: IOB snapshot
             if [20, 55, 64].contains(code), let iob = props["iob"]?.doubleValue, date > newestIOBDate {
                 iobValue = iob; newestIOBDate = date
             }
 
             // Code 64: Bolus with carbs
-            if code == 64 {
-                if let carbs = props["carbAmount"]?.intValue, carbs > 0, date > newestCOBDate {
-                    cobValue = Double(carbs); newestCOBDate = date
-                }
+            if code == 64, let carbs = props["carbAmount"]?.intValue, carbs > 0, date > newestCOBDate {
+                cobValue = Double(carbs); newestCOBDate = date
             }
 
             // Code 90: CIQ basal rate
             if code == 90, let rate = props["commandedBasalRate"]?.doubleValue {
                 let actual = rate / 1000
+                let profile = profileRate(at: date) ?? actual
                 if date > newestBasalDate { basalRate = actual; newestBasalDate = date }
-                segments.append(BasalSegment(date: date, profileRate: actual, actualRate: actual))
+                segments.append(BasalSegment(date: date, profileRate: profile, actualRate: actual))
             }
 
             // Code 279: Legacy basal rate with profile
@@ -401,12 +478,12 @@ class TandemSource: Provider, @unchecked Sendable {
 
             // Code 64: bolus IOB + target
             if code == 64, let iob = props["iob"]?.doubleValue, date > newestIOBDate {
-                iobValue = iob; newestIOBDate = date
+                iobValue = iob;
+                newestIOBDate = date
             }
 
             // --- Bolus event collection ---
-            let bolusCodes: Set<Int> = [20, 55, 64, 66, 280]
-            guard bolusCodes.contains(code) else { continue }
+            guard [20, 55, 64, 66, 280].contains(code) else { continue }
 
             let bKey: String = {
                 if let bid = props["bolusId"]?.stringValue, !bid.isEmpty { return bid }
@@ -415,28 +492,24 @@ class TandemSource: Provider, @unchecked Sendable {
             }()
 
             let bInsulin: Double? = {
-                if let v = props["deliveredTotal"]?.doubleValue, v > 0 { return v }
-                if let v = props["insulinDelivered"]?.doubleValue, v > 0 { return v }
-                if let v = props["totalBolusSize"]?.doubleValue, v > 0 { return v }
-                if let v = props["bolusSize"]?.doubleValue, v > 0 { return v }
+                if let v = props["deliveredTotal"]?.doubleValue, v >= 50 { return v / 1000 }
+                if let v = props["insulinDelivered"]?.doubleValue, v >= 50 { return v / 1000 }
+                if let v = props["totalBolusSize"]?.doubleValue, v >= 50 { return v / 1000 }
+                if let v = props["requestedNow"]?.doubleValue, v >= 50 { return v / 1000 }
                 return nil
             }()
 
             let bRequested: Double? = {
-                if let v = props["insulinRequested"]?.doubleValue { return v }
-                if let v = props["requestedNow"]?.doubleValue { return v }
+                let val = props["insulinRequested"]?.doubleValue ?? props["requestedNow"]?.doubleValue
+                if let v = val, v > 0 {
+                    return v / 1000
+                }
                 return nil
             }()
-
             let bCarbs: Double? = props["carbAmount"]?.doubleValue
             let bBG: Double? = props["bg"]?.doubleValue
             let bType: String? = props["bolusType"]?.stringValue
-
-            let bExtended: Bool = {
-                if let dur = props["extendedDurationRequested"]?.doubleValue, dur > 0 { return true }
-                if let std = props["standardPercent"]?.doubleValue, std < 100 { return true }
-                return false
-            }()
+            let bExtended = (props["extendedDurationRequested"]?.doubleValue ?? 0) > 0 || (props["standardPercent"]?.doubleValue ?? 100) < 100
 
             bolusCandidates.append(BolusCandidate(
                 date: date, code: code, key: bKey,
@@ -449,11 +522,9 @@ class TandemSource: Provider, @unchecked Sendable {
         var bolusByKey: [String: (firstDate: Date, insD: Double?, insR: Double?, carbs: Double?, type: String?, bg: Double?, extended: Bool)] = [:]
         for c in bolusCandidates {
             var existing = bolusByKey[c.key] ?? (firstDate: c.date, insD: nil, insR: nil, carbs: nil, type: nil, bg: nil, extended: false)
-            let keyDate = existing.firstDate
-            let gap = abs(c.date.timeIntervalSince(keyDate))
+            let gap = abs(c.date.timeIntervalSince(existing.firstDate))
             if gap > 180, c.key.count < 10 {
-                let newKey = "\(c.key)_\(Int(c.date.timeIntervalSince1970))"
-                bolusByKey[newKey] = (firstDate: c.date, insD: c.insulinDelivered, insR: c.insulinRequested, carbs: c.carbAmount, type: c.bolusType, bg: c.bg, extended: c.isExtended)
+                bolusByKey["\(c.key)_\(Int(c.date.timeIntervalSince1970))"] = (firstDate: c.date, insD: c.insulinDelivered, insR: c.insulinRequested, carbs: c.carbAmount, type: c.bolusType, bg: c.bg, extended: c.isExtended)
                 continue
             }
             existing.firstDate = min(existing.firstDate, c.date)
@@ -470,63 +541,36 @@ class TandemSource: Provider, @unchecked Sendable {
         for (key, b) in bolusByKey {
             guard let ins = b.insD, ins > 0 else { continue }
             records.append(BolusRecord(
-                date: b.firstDate,
-                insulinDelivered: ins,
-                insulinRequested: b.insR,
-                carbAmount: b.carbs,
-                bolusType: b.type,
-                bg: b.bg,
-                isExtended: b.extended,
-                eventCode: key.count < 10 ? (Int(key) ?? 0) : 0
+                date: b.firstDate, insulinDelivered: ins, insulinRequested: b.insR,
+                carbAmount: b.carbs, bolusType: b.type, bg: b.bg,
+                isExtended: b.extended, eventCode: key.count < 10 ? (Int(key) ?? 0) : 0
             ))
         }
         bolusHistory = records.sorted(by: { $0.date > $1.date })
-        plog("Bolus history: \(bolusHistory.count) records", category: "tandem", level: .info)
 
         if !cgmEntries.isEmpty {
             let sorted = cgmEntries.sorted(by: { $0.date > $1.date })
             setGlucoseEntries(sorted)
-            plog("Parsed \(sorted.count) CGM entries (latest: \(String(format:"%.0f", sorted.first!.glucose)) at \(sorted.first!.date.formatted()))", category: "tandem", level: .info)
         }
 
         var extras = GlucoseSourceExtras
         extras.aid = .controliq
         extras.glucoseTarget = Double(lowThreshold)
-        if hasControlIQ {
-            extras.reason = "Control-IQ active"
-        } else if let sn = (availablePumps.first(where: { $0.id == pumpAssignmentId }))?.serialNumber {
-            extras.reason = "Pump SN: \(sn)"
-        }
-        if newestCIQDate != .distantPast {
-            extras.enactedAt = newestCIQDate
-        }
-        if let iob = iobValue {
-            extras.iob = iob
-            plog("IOB: \(String(format:"%.2f", iob))U", category: "tandem", level: .info)
-        }
-        if let cob = cobValue {
-            extras.cob = cob
-            plog("COB: \(String(format:"%.0f", cob))g", category: "tandem", level: .info)
-        }
-        if let rate = basalRate {
-            extras.basalRate = rate
-            plog("Basal: \(String(format:"%.3f", rate))U/hr", category: "tandem", level: .info)
-        }
+        extras.diaHours = pumpDIAHours
+        extras.reason = hasControlIQ ? "Control-IQ active" : "Pump SN: \(availablePumps.first(where: { $0.id == pumpAssignmentId })?.serialNumber ?? "?")"
+        if newestCIQDate != .distantPast { extras.enactedAt = newestCIQDate }
+        if let iob = iobValue { extras.iob = iob }
+        if let cob = cobValue { extras.cob = cob }
+        if let rate = basalRate { extras.basalRate = rate }
         GlucoseSourceExtras = extras
         basalSegments = segments.sorted(by: { $0.date < $1.date })
-        plog("Basal segments: \(segments.count)", category: "tandem", level: .info)
     }
 
     // MARK: - Helpers
 
     private func logResponse(_ label: String, status: Int, body data: Data) {
         let preview = String(data: data, encoding: .utf8)?.prefix(500) ?? "<binary>"
-        plog("\(label): HTTP \(status), body: \(preview)", category: "tandem", level: .info)
-    }
-
-    override func plog(_ message: String, category: String, level: OSLogType = .default) {
-        Logger(subsystem: "tools.t1d.GlucoseBar", category: "tandem")
-            .dlog(message, category: category, level: level)
+        plog("\(label): HTTP \(status), body: \(preview)", category: "tandemsource", level: .info)
     }
 }
 

@@ -48,6 +48,7 @@ struct GlucoseSourceExtraProperties {
     var forecasts: AIDForecasts = AIDForecasts(iob: nil, cob: nil, zt: nil, uam: nil)
     var glucoseTarget: Double? = nil
     var error: String? = nil
+    var diaHours: Double? = nil
 }
 
 struct AIDForecasts: Decodable {
