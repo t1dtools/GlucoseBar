@@ -137,6 +137,12 @@ struct MainAppView: View {
                         Text("Additional Info: \(providerIssue)").fixedSize(horizontal: false, vertical: true).padding(.top)
                     }
 
+                    Button("Retry") {
+                        g.reset(s)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .padding(.vertical, 8)
+
                     Spacer()
                     HStack {
                         SettingsButton()

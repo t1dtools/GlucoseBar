@@ -115,12 +115,14 @@ class Glucose: ObservableObject, Sendable {
         self.providerCancellable = self.provider.objectWillChange
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
+                self?.objectWillChange.send()
                 self?.getGlucose()
             }
     }
 
     func reset(_ settings: SettingsStore) {
 
+        self.error = ""
         self.setSettings(settings)
         self.entries = nil
         self.fetchedGlucose = false

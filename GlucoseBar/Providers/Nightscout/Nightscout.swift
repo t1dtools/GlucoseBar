@@ -47,6 +47,8 @@ class Nightscout: Provider, @unchecked Sendable {
 
     private var isAuthenticated = false
     private var unsuccessfulAuthAttempts = 0
+    private var lastAuthFailureDate: Date? = nil
+    private let authLockoutDuration: TimeInterval = 30 * 60
     public var validSettings: Bool = true
     public var settingsError: String = ""
 
@@ -118,6 +120,11 @@ class Nightscout: Provider, @unchecked Sendable {
 
     func disconnect() {
         socket.disconnect()
+    }
+
+    deinit {
+        socket.disconnect()
+        manager.disconnect()
     }
 
     private func registerHandlers() {
@@ -311,8 +318,15 @@ class Nightscout: Provider, @unchecked Sendable {
         }
 
         if unsuccessfulAuthAttempts > 5 {
-            self.providerIssue = "Unable to connect to Nightscout after 5 attempts. Please check your credentials."
-            return
+            if let failDate = lastAuthFailureDate,
+               Date().timeIntervalSince(failDate) > authLockoutDuration {
+                plog("Auth lockout expired, resetting counter", category: "nightscout", level: .default)
+                unsuccessfulAuthAttempts = 0
+                lastAuthFailureDate = nil
+            } else {
+                self.providerIssue = "Unable to connect to Nightscout after 5 attempts. Please check your credentials."
+                return
+            }
         }
 
         if token.count > 0 && !isAuthValid() {
@@ -574,6 +588,7 @@ class Nightscout: Provider, @unchecked Sendable {
             }
             if res.statusCode > 299 {
                 unsuccessfulAuthAttempts += 1
+                lastAuthFailureDate = Date()
                 self.plog("status code over 299: \(res.statusCode). Body: \(data)", category: "nightscout", level: .debug)
                 var providerError = ""
                 do {
@@ -620,6 +635,7 @@ class Nightscout: Provider, @unchecked Sendable {
                 err = "Request timed out"
             }
             self.unsuccessfulAuthAttempts += 1
+            lastAuthFailureDate = Date()
             self.providerIssue = err
         }
 
