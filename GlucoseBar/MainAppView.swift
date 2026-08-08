@@ -20,12 +20,14 @@ struct MainAppView: View {
     @State private var hoveredInsulinIOB: Double?
     @State private var sharedHoverTime: Date?
     @State private var sharedBasalRate: Double?
+    @State private var hoveredCarbCOB: Double?
 
     let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "main")
 
     private var popoverHeight: CGFloat {
         var h: CGFloat = 500
         if s.cgmProvider == .tandemsource, s.aidChartShowActiveInsulin { h += 60 }
+        if s.cgmProvider == .tandemsource, s.aidChartShowCOBChart { h += 60 }
         return h
     }
 
@@ -163,18 +165,26 @@ struct MainAppView: View {
                         }
                         .padding(.horizontal).padding(.top, 8)
                     }
-                    GraphView(glucose: g, hoveredInsulinIOB: $hoveredInsulinIOB, sharedHoverTime: $sharedHoverTime, basalRate: $sharedBasalRate).environmentObject(s).environmentObject(vs)
+                    GraphView(glucose: g, hoveredInsulinIOB: $hoveredInsulinIOB, sharedHoverTime: $sharedHoverTime, basalRate: $sharedBasalRate, hoveredCarbCOB: $hoveredCarbCOB).environmentObject(s).environmentObject(vs)
                     let chartStart = Date(timeIntervalSinceNow: TimeInterval(-s.graphMinutes * 60))
                     let glucoseStart = g.entries?.last(where: { $0.date > chartStart })?.date
                     let glucoseEnd = g.entries?.first?.date
                     ActiveInsulinChart(
                         bolusHistory: (g.provider as? TandemSource)?.bolusHistory ?? [],
                         graphMinutes: s.graphMinutes,
-                        diaHours: s.activeInsulinDIA,
+                        diaHours: g.provider.GlucoseSourceExtras.diaHours ?? 5.0,
                         isVisible: s.aidChartShowActiveInsulin && s.cgmProvider == .tandemsource,
                         glucoseStart: glucoseStart,
                         glucoseEnd: glucoseEnd,
-                        hoveredIOB: $hoveredInsulinIOB,
+                        hoverTime: $sharedHoverTime
+                    )
+                    CarbsOnBoardChart(
+                        bolusHistory: (g.provider as? TandemSource)?.bolusHistory ?? [],
+                        graphMinutes: s.graphMinutes,
+                        absorptionHours: g.provider.GlucoseSourceExtras.diaHours ?? 3.0,
+                        isVisible: s.aidChartShowCOBChart && s.cgmProvider == .tandemsource,
+                        glucoseStart: glucoseStart,
+                        glucoseEnd: glucoseEnd,
                         hoverTime: $sharedHoverTime
                     )
                     HStack {
@@ -185,6 +195,17 @@ struct MainAppView: View {
                         }
                         SettingsButton()
                         QuitButton()
+                    }
+                }
+                .onChange(of: sharedHoverTime) { _, ht in
+                    let boluses = (g.provider as? TandemSource)?.bolusHistory ?? []
+                    if let ht = ht {
+                        let dia = g.provider.GlucoseSourceExtras.diaHours
+                        hoveredInsulinIOB = ActiveInsulinChart.iob(at: ht, bolusHistory: boluses, diaHours: dia ?? 5.0)
+                        hoveredCarbCOB = CarbsOnBoardChart.cob(at: ht, bolusHistory: boluses, absorptionHours: dia ?? 3.0)
+                    } else {
+                        hoveredInsulinIOB = nil
+                        hoveredCarbCOB = nil
                     }
                 }
                 if case .outdated(let latestVersion, let latestBuild) = uc.status {

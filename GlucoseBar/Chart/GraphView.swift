@@ -16,12 +16,13 @@ struct GraphView: View {
     @EnvironmentObject var vs: ViewState
     @Binding var hoveredInsulinIOB: Double?
     @Binding var sharedHoverTime: Date?
+    @Binding var hoveredCarbCOB: Double?
+    @Binding var basalRate: Double?
 
     @State private var hoveredTime: Date?
     @State private var hoveredValue: Double?
     @State private var hoveredTrend: GlucoseEntry.GlucoseTrend?
     @State private var hoveredDelta: Double?
-    @Binding var basalRate: Double?
     @State private var hoveredActualY: Double?
     @State private var hoveredBolusId: UUID?
     @State private var hoveredBolus: BolusOverlayEntry?
@@ -31,12 +32,13 @@ struct GraphView: View {
 
     var gse: GlucoseSourceExtraProperties = GlucoseSourceExtraProperties()
 
-    init(glucose: Glucose, hoveredInsulinIOB: Binding<Double?> = .constant(nil), sharedHoverTime: Binding<Date?> = .constant(nil), basalRate: Binding<Double?> = .constant(nil)) {
+    init(glucose: Glucose, hoveredInsulinIOB: Binding<Double?> = .constant(nil), sharedHoverTime: Binding<Date?> = .constant(nil), basalRate: Binding<Double?> = .constant(nil), hoveredCarbCOB: Binding<Double?> = .constant(nil)) {
         self.g = glucose
         self.gse = glucose.provider.GlucoseSourceExtras
         self._hoveredInsulinIOB = hoveredInsulinIOB
         self._sharedHoverTime = sharedHoverTime
         self._basalRate = basalRate
+        self._hoveredCarbCOB = hoveredCarbCOB
     }
 
     func getGraphData() -> [GraphEntry] {
@@ -229,7 +231,7 @@ struct GraphView: View {
                 if g.provider.RemoteGlucoseSource != .null {
                     if s.aidChartShowCOB || s.aidChartShowIOB || s.aidChartShowLoopStatus || s.aidChartShowEventualGlucose {
                         Spacer()
-                        AidGridView(g: g, hoveredBasalRate: basalRate, hoveredInsulinIOB: hoveredInsulinIOB).environmentObject(s)
+                        AidGridView(g: g, hoveredBasalRate: basalRate, hoveredInsulinIOB: hoveredInsulinIOB, hoveredCarbCOB: hoveredCarbCOB).environmentObject(s)
                     }
                 }
             }.padding()
@@ -347,8 +349,13 @@ struct GraphView: View {
             }
             .chartYScale(domain: [minY <= defaultMinGlucose ? minY : defaultMinGlucose, maxY >= defaultMaxGlucose ? (maxY + maxYMargin) : defaultMaxGlucose])
             .chartYAxis {
-                AxisMarks(values: .automatic(desiredCount:8)) {
-                    AxisValueLabel()
+                AxisMarks(values: .automatic(desiredCount:8)) { value in
+                    AxisValueLabel {
+                        if let v = value.as(Double.self) {
+                            Text("\(String(format: "%.0f", v))")
+                                .font(.caption2).monospacedDigit().frame(width: 35, alignment: .trailing)
+                        }
+                    }
                 }
             }
             .chartXAxis {
@@ -413,60 +420,87 @@ struct GraphView: View {
                             }
                         }
                     }
-                        .onContinuousHover { phase in
-                            switch phase {
-                            case .active(let hoverLocation):
-                                let hTime = chartProxy.value(atX: hoverLocation.x, as: Date.self)
-                                data.forEach { entry in
-                                    let date = entry.date
-                                    let timeDiff = date.timeIntervalSince(hTime!)
-                                    if timeDiff < 60 && timeDiff > 0 {
-                                        if entry.forecastType == .none {
-                                            hoveredValue = entry.value
-                                            hoveredTime = entry.date
-                                            hoveredTrend = entry.trend
-                                            hoveredDelta = entry.delta
-                                            basalRate = (g.provider as? TandemSource)?.basalSegments.filter { $0.date <= hTime! }.last?.actualRate
-                                            if let br = basalRate { hoveredActualY = basalChartTop - (br / basalMaxRate) * basalVisibleOffset }
-                                            let boluses = (g.provider as? TandemSource)?.bolusHistory ?? []
-                                            hoveredInsulinIOB = ActiveInsulinChart.iob(at: hTime!, bolusHistory: boluses, diaHours: s.activeInsulinDIA)
-                                            sharedHoverTime = hTime
-                                            if let match = bolusEntries.first(where: { abs($0.date.timeIntervalSince(hTime!)) < 120 }) {
-                                                hoveredBolusId = match.id
-                                                hoveredBolus = match
-                                            } else {
-                                                hoveredBolusId = nil
-                                                hoveredBolus = nil
-                                            }
-                                            isHovering = true
+                    .onContinuousHover { phase in
+                        switch phase {
+                        case .active(let hoverLocation):
+                            let hTime = chartProxy.value(atX: hoverLocation.x, as: Date.self)
+                            data.forEach { entry in
+                                let date = entry.date
+                                let timeDiff = date.timeIntervalSince(hTime!)
+                                if timeDiff < 60 && timeDiff > 0 {
+                                    if entry.forecastType == .none {
+                                        hoveredValue = entry.value
+                                        hoveredTime = entry.date
+                                        hoveredTrend = entry.trend
+                                        hoveredDelta = entry.delta
+                                        basalRate = (g.provider as? TandemSource)?.basalSegments.filter { $0.date <= hTime! }.last?.actualRate
+                                        if let br = basalRate { hoveredActualY = basalChartTop - (br / basalMaxRate) * basalVisibleOffset }
+                                        let boluses = (g.provider as? TandemSource)?.bolusHistory ?? []
+                                        let dia = g.provider.GlucoseSourceExtras.diaHours
+                                        hoveredInsulinIOB = ActiveInsulinChart.iob(at: hTime!, bolusHistory: boluses, diaHours: dia ?? 5.0)
+                                        hoveredCarbCOB = CarbsOnBoardChart.cob(at: hTime!, bolusHistory: boluses, absorptionHours: dia ?? 3.0)
+                                        sharedHoverTime = hTime
+                                        if let match = bolusEntries.first(where: { abs($0.date.timeIntervalSince(hTime!)) < 300 }) {
+                                            hoveredBolusId = match.id
+                                            hoveredBolus = match
                                         } else {
-                                            hoveredTime = nil
-                                            isHovering = false
+                                            hoveredBolusId = nil
+                                            hoveredBolus = nil
                                         }
+                                        isHovering = true
+                                    } else {
+                                        hoveredTime = nil
+                                        isHovering = false
                                     }
                                 }
-                            case .ended:
-                                hoveredTime = nil
-                                isHovering = false
-                                basalRate = nil
-                                hoveredActualY = nil
-                                hoveredBolusId = nil
-                                hoveredBolus = nil
-                                hoveredInsulinIOB = nil
-                                sharedHoverTime = nil
                             }
+                        case .ended:
+                            hoveredTime = nil
+                            isHovering = false
+                            basalRate = nil
+                            hoveredActualY = nil
+                            hoveredBolusId = nil
+                            hoveredBolus = nil
+                            hoveredInsulinIOB = nil
+                            hoveredCarbCOB = nil
+                            sharedHoverTime = nil
                         }
+                    }
             }.chartForegroundStyleScale(legendList
             ).chartLegend(s.aidChartShowForecast && s.aidChartForecastDisplay == .lines ? .visible : .hidden)
             .padding()
         }
-        .onChange(of: sharedHoverTime) { ht in
+        .onChange(of: sharedHoverTime) { _, ht in
             if let ht = ht {
                 basalRate = (g.provider as? TandemSource)?.basalSegments.filter { $0.date <= ht }.last?.actualRate
+                if let br = basalRate { hoveredActualY = hoveredActualY(for: br) }
+                let gd = getGraphData().filter { $0.forecastType == .none }
+                if let match = gd.first(where: { $0.date > ht && $0.date.timeIntervalSince(ht) < 60 }) {
+                    hoveredTime = match.date
+                    hoveredValue = match.value
+                    hoveredTrend = match.trend
+                    hoveredDelta = match.delta
+                    isHovering = true
+                }
             } else {
                 basalRate = nil
+                hoveredTime = nil
+                hoveredValue = nil
+                hoveredTrend = nil
+                hoveredDelta = nil
+                isHovering = false
             }
         }
+    }
+
+    private func hoveredActualY(for rate: Double) -> Double {
+        let data = getGraphData()
+        let (minY, maxY, dMin, dMax) = getMinMaxY(data: data)
+        let margin = convertGlucose(s, glucose: 36.0)
+        let top = maxY >= dMax ? (maxY + margin) : dMax
+        let cMin = minY <= dMin ? minY : dMin
+        let offset = max(0, (200.0 / 350.0) * (top - cMin))
+        return top - (rate / 5.0) * offset
     }
 }
 

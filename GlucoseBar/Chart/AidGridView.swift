@@ -13,6 +13,7 @@ struct AidGridView: View {
     @EnvironmentObject var s: SettingsStore
     let hoveredBasalRate: Double?
     let hoveredInsulinIOB: Double?
+    let hoveredCarbCOB: Double?
 
     var body: some View {
         let aid = g.provider.GlucoseSourceExtras.aid
@@ -27,7 +28,7 @@ struct AidGridView: View {
                             Text(formatIOBForDisplay(iob: iob) + " U")
                         }.help("Insulin On Board")
                     }
-                    if s.aidChartShowCOB, let cob = g.provider.GlucoseSourceExtras.cob {
+                    if s.aidChartShowCOB, let cob = hoveredCarbCOB ?? g.provider.GlucoseSourceExtras.cob {
                         HStack {
                             Image(systemName: "fork.knife").foregroundColor(.orange)
                             Text(formatCOBForDisplay(cob: cob) + " g")
