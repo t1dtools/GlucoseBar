@@ -186,17 +186,15 @@ struct AidSettingsView: View {
                             }.fixedSize()
                                 .scaleEffect(0.7, anchor: .trailing)
                         }
-                        if s.aidChartShowActiveInsulin {
-                            HStack {
-                                Text("Duration of Insulin Action")
-                                Spacer()
-                                Stepper("\(String(format: "%.1f", s.activeInsulinDIA)) h",
-                                        value: $s.activeInsulinDIA,
-                                        in: 1...8,
-                                        step: 0.5)
-                                    .onChange(of: s.activeInsulinDIA) { s.save() }
-                                    .fixedSize()
-                            }
+
+                        Divider()
+                        HStack {
+                            Text("Show Carbs On Board Chart")
+                            Spacer()
+                            Toggle(isOn: $s.aidChartShowCOBChart, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowCOBChart, initial: false) {
+                                s.save()
+                            }.fixedSize()
+                                .scaleEffect(0.7, anchor: .trailing)
                         }
 
                         Divider()

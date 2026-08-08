@@ -90,7 +90,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     @Published var aidChartShowBasalOverlay: Bool = true
     @Published var aidShowBolusHistory: Bool = true
     @Published var aidChartShowActiveInsulin: Bool = true
-    @Published var activeInsulinDIA: Double = 4.0
+    @Published var aidChartShowCOBChart: Bool = true
 
     @Published var validSettings: Bool = false
     @Published var debugMode: Bool = false
@@ -299,8 +299,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         self.aidChartShowBasalOverlay = defaults.bool(forKey: key("aidChartShowBasalOverlay"))
         self.aidShowBolusHistory = defaults.bool(forKey: key("aidShowBolusHistory"))
         self.aidChartShowActiveInsulin = defaults.bool(forKey: key("aidChartShowActiveInsulin"))
-        self.activeInsulinDIA = defaults.double(forKey: key("activeInsulinDIA"))
-        if self.activeInsulinDIA == 0 { self.activeInsulinDIA = 4.0 }
+        self.aidChartShowCOBChart = defaults.bool(forKey: key("aidChartShowCOBChart"))
 
         // Tandem Source
         self.tandemEmail = defaults.string(forKey: key("tandemEmail")) ?? "your@email.com"
@@ -396,7 +395,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         defaults.set(self.aidChartShowBasalOverlay, forKey: key("aidChartShowBasalOverlay"))
         defaults.set(self.aidShowBolusHistory, forKey: key("aidShowBolusHistory"))
         defaults.set(self.aidChartShowActiveInsulin, forKey: key("aidChartShowActiveInsulin"))
-        defaults.set(self.activeInsulinDIA, forKey: key("activeInsulinDIA"))
+        defaults.set(self.aidChartShowCOBChart, forKey: key("aidChartShowCOBChart"))
 
         // Tandem Source
         defaults.set(self.tandemEmail, forKey: key("tandemEmail"))

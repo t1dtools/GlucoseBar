@@ -1,74 +1,61 @@
 //
-//  ActiveInsulinChart.swift
+//  CarbsOnBoardChart.swift
 //  GlucoseBar
 //
 
 import SwiftUI
 import Charts
 
-struct ActiveInsulinChart: View {
+struct CarbsOnBoardChart: View {
     let bolusHistory: [BolusRecord]
     let graphMinutes: Int
-    let diaHours: Double
+    let absorptionHours: Double
     let isVisible: Bool
     let glucoseStart: Date?
     let glucoseEnd: Date?
     @Binding var hoverTime: Date?
 
-    static func iob(at date: Date, bolusHistory: [BolusRecord], diaHours: Double) -> Double {
-        let diaSeconds = diaHours * 3600
-        var iob: Double = 0
-        for bolus in bolusHistory where bolus.date < date {
-            let elapsed = date.timeIntervalSince(bolus.date)
-            if elapsed < 0 || elapsed > diaSeconds { continue }
-            iob += bolus.insulinDelivered * (1 - elapsed / diaSeconds)
-        }
-        return iob
-    }
-
     var body: some View {
-        if !isVisible || bolusHistory.isEmpty { return AnyView(EmptyView()) }
+        if !isVisible || bolusHistory.isEmpty {
+            return AnyView(EmptyView())
+        }
 
         let now = Date()
         let start = Date(timeIntervalSinceNow: TimeInterval(-graphMinutes * 60))
         let dataStart = glucoseStart ?? start
         let end = glucoseEnd ?? now
-        let data = computeIOB(start: dataStart, end: end)
+        let data = computeCOB(start: dataStart, end: end)
+        let maxCOB = data.max(by: { $0.value < $1.value })?.value ?? 0
 
-        guard let maxIOB = data.max(by: { $0.value < $1.value })?.value, maxIOB > 0 else {
-            return AnyView(EmptyView())
-        }
-
-        let yMax = max(maxIOB, 1.0) * 1.1
+        let yMax = max(maxCOB, 1.0) * 1.1
         let hoverValue: Double? = hoverTime.flatMap { ht in data.first(where: { abs($0.date.timeIntervalSince(ht)) < 150 })?.value }
 
         return AnyView(
-            ZStack {
-                VStack(spacing: 0) {
+            VStack(spacing: 0) {
+                ZStack {
                     Chart {
                         ForEach(data) { pt in
                             AreaMark(
                                 x: .value("Time", pt.date),
-                                y: .value("IOB", pt.value)
+                                y: .value("COB", pt.value)
                             )
-                            .foregroundStyle(.blue.opacity(0.12))
-                            .interpolationMethod(.cardinal)
+                            .foregroundStyle(.orange.opacity(0.12))
                         }
                         ForEach(data) { pt in
                             LineMark(
                                 x: .value("Time", pt.date),
-                                y: .value("IOB", pt.value)
+                                y: .value("COB", pt.value)
                             )
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(.orange)
                         }
                         if let ht = hoverTime {
-                            RuleMark(x: .value("Hover", ht))
-                                .foregroundStyle(.blue.opacity(0.4))
+                            RuleMark(x: .value("Hov", ht))
+                                .foregroundStyle(.orange.opacity(0.4))
                                 .lineStyle(StrokeStyle(lineWidth: 1))
                         }
                         if let ht = hoverTime, let hv = hoverValue {
                             PointMark(x: .value("Hx", ht), y: .value("Hy", hv))
-                                .foregroundStyle(.blue)
+                                .foregroundStyle(.orange)
                                 .symbolSize(30)
                         }
                     }
@@ -79,7 +66,7 @@ struct ActiveInsulinChart: View {
                         AxisMarks(values: .automatic(desiredCount: 3)) { value in
                             AxisValueLabel {
                                 if let v = value.as(Double.self) {
-                                    Text("\(String(format: "%.1f", v))").font(.caption2).monospacedDigit().frame(width: 35, alignment: .trailing)
+                                    Text("\(String(format: "%.0f", v))").font(.caption2).monospacedDigit().frame(width: 35, alignment: .trailing)
                                 }
                             }
                         }
@@ -98,31 +85,51 @@ struct ActiveInsulinChart: View {
                             }
                     }
                     .frame(height: 60).padding(.horizontal)
-                }
-                HStack {
-                    VStack {
-                        Text("ESTIMATED").font(.caption2).foregroundColor(.secondary).opacity(0.7).padding(.horizontal)
+                    HStack {
+                        VStack {
+                            Text("ESTIMATED").font(.caption2).foregroundColor(.secondary).opacity(0.7).padding(.horizontal)
+                            Spacer()
+                        }
                         Spacer()
+
                     }
-                    Spacer()
                 }
             }
         .frame(height: 70)
         )
     }
 
-    private func computeIOB(start: Date, end: Date) -> [IOBPoint] {
-        var points: [IOBPoint] = []
+    static func cob(at date: Date, bolusHistory: [BolusRecord], absorptionHours: Double) -> Double {
+        let absorptionSeconds = absorptionHours * 3600
+        var cob: Double = 0
+        for bolus in bolusHistory where bolus.date < date {
+            guard let carbs = bolus.carbAmount, carbs > 0 else { continue }
+            let elapsed = date.timeIntervalSince(bolus.date)
+            if elapsed < 0 || elapsed > absorptionSeconds { continue }
+            cob += carbs * (1 - elapsed / absorptionSeconds)
+        }
+        return cob
+    }
+
+    private func computeCOB(start: Date, end: Date) -> [COBPoint] {
+        let absorptionSeconds = absorptionHours * 3600
+        var points: [COBPoint] = []
         var t = start
         while t <= end {
-            let iob = Self.iob(at: t, bolusHistory: bolusHistory, diaHours: diaHours)
-            points.append(IOBPoint(date: t, value: iob))
+            var cob: Double = 0
+            for bolus in bolusHistory where bolus.date < t {
+                guard let carbs = bolus.carbAmount, carbs > 0 else { continue }
+                let elapsed = t.timeIntervalSince(bolus.date)
+                if elapsed < 0 || elapsed > absorptionSeconds { continue }
+                cob += carbs * (1 - elapsed / absorptionSeconds)
+            }
+            points.append(COBPoint(date: t, value: cob))
             t = t.addingTimeInterval(300)
         }
         return points
     }
 
-    private struct IOBPoint: Identifiable {
+    private struct COBPoint: Identifiable {
         let id = UUID()
         let date: Date
         let value: Double
