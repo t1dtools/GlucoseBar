@@ -62,12 +62,12 @@ struct ActiveInsulinChart: View {
                             .foregroundStyle(.blue)
                         }
                         if let ht = hoverTime {
-                            RuleMark(x: .value("Hover", ht))
+                            RuleMark(x: .value(axisKey("Hover"), ht))
                                 .foregroundStyle(.blue.opacity(0.4))
                                 .lineStyle(StrokeStyle(lineWidth: 1))
                         }
                         if let ht = hoverTime, let hv = hoverValue {
-                            PointMark(x: .value("Hx", ht), y: .value("Hy", hv))
+                            PointMark(x: .value(axisKey("Hx"), ht), y: .value(axisKey("Hy"), hv))
                                 .foregroundStyle(.blue)
                                 .symbolSize(30)
                         }

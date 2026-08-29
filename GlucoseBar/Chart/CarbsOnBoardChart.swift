@@ -49,12 +49,12 @@ struct CarbsOnBoardChart: View {
                             .foregroundStyle(.orange)
                         }
                         if let ht = hoverTime {
-                            RuleMark(x: .value("Hov", ht))
+                            RuleMark(x: .value(axisKey("Hov"), ht))
                                 .foregroundStyle(.orange.opacity(0.4))
                                 .lineStyle(StrokeStyle(lineWidth: 1))
                         }
                         if let ht = hoverTime, let hv = hoverValue {
-                            PointMark(x: .value("Hx", ht), y: .value("Hy", hv))
+                            PointMark(x: .value(axisKey("Hx"), ht), y: .value(axisKey("Hy"), hv))
                                 .foregroundStyle(.orange)
                                 .symbolSize(30)
                         }

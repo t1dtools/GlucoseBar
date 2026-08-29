@@ -183,6 +183,14 @@ struct GraphView: View {
 
         maxY = entries.max(by: {$0.value < $1.value})?.value ?? defaultMaxGlucose
         minY = entries.min(by: {$0.value > $1.value})?.value ?? defaultMinGlucose
+
+        if s.showHighThreshold {
+            maxY = max(maxY, convertGlucose(s, glucose: s.highThreshold))
+        }
+        if s.showLowThreshold {
+            minY = min(minY, convertGlucose(s, glucose: s.lowThreshold))
+        }
+
         return (minY, maxY, defaultMinGlucose, defaultMaxGlucose)
     }
 
@@ -314,29 +322,29 @@ struct GraphView: View {
                 }
                 if !basalEntries.isEmpty {
                     ForEach(basalEntries) { e in
-                        AreaMark(x: .value("Fx", e.date),
-                                 yStart: .value("FyT", basalChartTop),
-                                 yEnd: .value("FyR", e.actualY))
+                        AreaMark(x: .value(axisKey("Fx"), e.date),
+                                 yStart: .value(axisKey("FyT"), basalChartTop),
+                                 yEnd: .value(axisKey("FyR"), e.actualY))
                         .foregroundStyle(
                             LinearGradient(colors: [.blue.opacity(0.0), .blue.opacity(0.35)], startPoint: .bottom, endPoint: .top)
                         )
                         .interpolationMethod(.stepStart)
                     }
                     ForEach(basalEntries) { e in
-                        LineMark(x: .value("Lx", e.date), y: .value("Ly", e.actualY))
+                        LineMark(x: .value(axisKey("Lx"), e.date), y: .value(axisKey("Ly"), e.actualY))
                             .foregroundStyle(.blue).lineStyle(StrokeStyle(lineWidth: 1)).interpolationMethod(.stepStart)
                     }
                 }
                 DrawGlucose(data: data)
 
                 if let ht = sharedHoverTime {
-                    RuleMark(x: .value("HovRX", ht))
+                    RuleMark(x: .value(axisKey("HovRX"), ht))
                         .foregroundStyle(.blue.opacity(0.4))
                         .lineStyle(StrokeStyle(lineWidth: 1))
                 }
 
                 if let ht = hoveredTime, let hy = hoveredActualY {
-                    PointMark(x: .value("HovBX", ht), y: .value("HovBY", hy))
+                    PointMark(x: .value(axisKey("HovBX"), ht), y: .value(axisKey("HovBY"), hy))
                         .foregroundStyle(.blue)
                         .symbolSize(40)
                 }
@@ -348,6 +356,10 @@ struct GraphView: View {
                     )
                 }
             }
+            .chartXScale(domain: [
+                Date(timeIntervalSinceNow: TimeInterval(-s.graphMinutes * 60)),
+                Date().addingTimeInterval(s.aidChartShowForecast ? forecastDuration : 0)
+            ])
             .chartYScale(domain: [minY <= defaultMinGlucose ? minY : defaultMinGlucose, maxY >= defaultMaxGlucose ? (maxY + maxYMargin) : defaultMaxGlucose])
             .chartYAxis {
                 AxisMarks(values: .automatic(desiredCount:8)) { value in
@@ -557,7 +569,8 @@ extension GraphView {
         let chartMinY = minY <= defaultMinGlucose ? minY : defaultMinGlucose
         let visibleOffset = max(0, (200.0 / 350.0) * (chartMaxY - chartMinY))
         let maxBasal: Double = 5.0
-        let filtered = segs.filter { $0.date > Date(timeIntervalSinceNow: TimeInterval(-s.graphMinutes * 60)) }
+        let start = Date(timeIntervalSinceNow: TimeInterval(-s.graphMinutes * 60))
+        let filtered = segs.filter { $0.date > start && $0.date <= Date() }
         return filtered.enumerated().map { i, seg in
             let ay = chartMaxY - (seg.actualRate / maxBasal) * visibleOffset
             return BasalOverlayEntry(id: seg.id, date: seg.date, actualY: ay)

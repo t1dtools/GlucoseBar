@@ -114,36 +114,114 @@ struct AidSettingsView: View {
             unknownView()
         } else {
             aidView()
-            chartDataView()
+            dataGridView()
+            chartOverlayView()
         }
     }
 
     @ViewBuilder
-    func chartDataView() -> some View {
+    func dataGridView() -> some View {
+        let aidType = g.provider.GlucoseSourceExtras.aid
+        Group {
+            VStack {
+                Text("Data Grid", comment: "Heading for the data grid settings on the AID integration settings view").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 10)
+                Text("Values shown alongside the glucose headline when you open GlucoseBar", comment: "Explaining text for what the data grid is on the AID integration settings view").font(.footnote).frame(maxWidth: .infinity, alignment: .leading)
+            }.padding(.bottom).padding(.horizontal)
+
+            GroupBox {
+                VStack {
+                    HStack {
+                        Text("Show Insulin On Board")
+                        Spacer()
+                        Toggle(isOn: $s.aidChartShowIOB, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowIOB, initial: false) {
+                            s.save()
+                        }.fixedSize()
+                            .scaleEffect(0.7, anchor: .trailing)
+                    }
+                    Text("Active insulin remaining from recent boluses.").font(.caption).foregroundColor(.secondary).lineLimit(3).fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .leading).padding(.bottom, 2)
+
+                    Divider()
+
+                    HStack {
+                        Text("Show Carbs On Board")
+                        Spacer()
+                        Toggle(isOn: $s.aidChartShowCOB, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowCOB, initial: false) {
+                            s.save()
+                        }.fixedSize()
+                            .scaleEffect(0.7, anchor: .trailing)
+                    }
+                    Text("Active carbohydrates from recent meals.").font(.caption).foregroundColor(.secondary).lineLimit(3).fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .leading).padding(.bottom, 2)
+
+                    if aidType == .controliq {
+                        Divider()
+                        HStack {
+                            Text("Show Basal Rate")
+                            Spacer()
+                            Toggle(isOn: $s.aidChartShowBasalRate, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowBasalRate, initial: false) {
+                                s.save()
+                            }.fixedSize()
+                                .scaleEffect(0.7, anchor: .trailing)
+                        }
+                        Text("Current basal delivery rate from the pump.").font(.caption).foregroundColor(.secondary).lineLimit(3).fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .leading).padding(.bottom, 2)
+                    }
+
+                    if [.trio, .openaps, .aaps, .controliq].contains(aidType) {
+                        Divider()
+                        HStack {
+                            Text("Show Loop Status")
+                            Spacer()
+                            Toggle(isOn: $s.aidChartShowLoopStatus, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowLoopStatus, initial: false) {
+                                s.save()
+                            }.fixedSize()
+                                .scaleEffect(0.7, anchor: .trailing)
+                        }
+                        Text("Time since the algorithm last enacted a recommendation.").font(.caption).foregroundColor(.secondary).lineLimit(3).fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .leading).padding(.bottom, 2)
+
+                        if [.trio, .openaps, .aaps].contains(aidType) {
+                            Divider()
+                            HStack {
+                                Text("Show Eventual Glucose")
+                                Spacer()
+                                Toggle(isOn: $s.aidChartShowEventualGlucose, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowEventualGlucose, initial: false) {
+                                    s.save()
+                                }.fixedSize()
+                                    .scaleEffect(0.7, anchor: .trailing)
+                            }
+                            Text("Predicted steady-state glucose if current IOB, COB, and basal persist.").font(.caption).foregroundColor(.secondary).lineLimit(3).fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .leading).padding(.bottom, 2)
+                        }
+                    }
+                }.padding()
+            }.padding(.bottom).padding(.horizontal)
+        }
+    }
+
+    @ViewBuilder
+    func chartOverlayView() -> some View {
         let aidType = g.provider.GlucoseSourceExtras.aid
         let hasForecast = ![.loop, .controliq].contains(aidType)
         let hasControlIQ = aidType == .controliq
         Group {
             VStack {
-                Text("Chart Data", comment: "Heading for settings for chart data on the AID integration settings view").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 10)
-                Text("This is the data you see in and around the chart when you open GlucoseBar", comment: "Explaining text for what the chart data is on the AID integration settings view").font(.footnote).frame(maxWidth: .infinity, alignment: .leading)
+                Text("Chart", comment: "Heading for the chart settings on the AID integration settings view").font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(.top, 10)
+                Text("Overlays and panels drawn on the glucose chart itself", comment: "Explaining text for what the chart settings are on the AID integration settings view").font(.footnote).frame(maxWidth: .infinity, alignment: .leading)
             }.padding(.bottom).padding(.horizontal)
 
             GroupBox {
                 VStack {
                     if hasForecast || !hasControlIQ {
-                    HStack {
-                        Text("Show Forecast")
-                        Spacer()
-                        Toggle(isOn: $s.aidChartShowForecast, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowForecast, initial: false) {
-                            s.save()
-                        }.fixedSize()
-                            .scaleEffect(0.7, anchor: .trailing)
-                    }
-                    Divider()
+                        HStack {
+                            Text("Show Forecast")
+                            Spacer()
+                            Toggle(isOn: $s.aidChartShowForecast, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowForecast, initial: false) {
+                                s.save()
+                            }.fixedSize()
+                                .scaleEffect(0.7, anchor: .trailing)
+                        }
+                        Text("Future glucose predictions as colored lines or a shaded cone.").font(.caption).foregroundColor(.secondary).lineLimit(3).fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .leading).padding(.bottom, 2)
+                        Divider()
                     }
 
-                    if s.aidChartShowForecast && g.provider.GlucoseSourceExtras.aid != .loop {
+                    if s.aidChartShowForecast && aidType != .loop {
                         HStack {
                             Text("Forecast Kind")
                             Spacer()
@@ -154,30 +232,11 @@ struct AidSettingsView: View {
                                 s.save()
                             }
                         }
+                        Text("Individual prediction lines or a combined min-max cone.").font(.caption).foregroundColor(.secondary).lineLimit(3).fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .leading).padding(.bottom, 2)
                         Divider()
                     }
 
-                    HStack {
-                        Text("Show Insulin On Board")
-                        Spacer()
-                        Toggle(isOn: $s.aidChartShowIOB, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowIOB, initial: false) {
-                            s.save()
-                        }.fixedSize()
-                            .scaleEffect(0.7, anchor: .trailing)
-                    }
-
-                    Divider()
-                    HStack {
-                        Text("Show Carbs On Board")
-                        Spacer()
-                        Toggle(isOn: $s.aidChartShowCOB, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowCOB, initial: false) {
-                            s.save()
-                        }.fixedSize()
-                            .scaleEffect(0.7, anchor: .trailing)
-                    }
-
-                    if [.controliq].contains(g.provider.GlucoseSourceExtras.aid) {
-                        Divider()
+                    if hasControlIQ {
                         HStack {
                             Text("Show Active Insulin")
                             Spacer()
@@ -186,8 +245,9 @@ struct AidSettingsView: View {
                             }.fixedSize()
                                 .scaleEffect(0.7, anchor: .trailing)
                         }
-
+                        Text("Modeled IOB decay curve as a chart panel below the main chart.").font(.caption).foregroundColor(.secondary).lineLimit(3).fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .leading).padding(.bottom, 2)
                         Divider()
+
                         HStack {
                             Text("Show Carbs On Board Chart")
                             Spacer()
@@ -196,18 +256,9 @@ struct AidSettingsView: View {
                             }.fixedSize()
                                 .scaleEffect(0.7, anchor: .trailing)
                         }
-
+                        Text("Modeled COB decay curve as a chart panel below the main chart.").font(.caption).foregroundColor(.secondary).lineLimit(3).fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .leading).padding(.bottom, 2)
                         Divider()
-                        HStack {
-                            Text("Show Basal Rate")
-                            Spacer()
-                            Toggle(isOn: $s.aidChartShowBasalRate, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowBasalRate, initial: false) {
-                                s.save()
-                            }.fixedSize()
-                                .scaleEffect(0.7, anchor: .trailing)
-                        }
 
-                        Divider()
                         HStack {
                             Text("Show Basal Overlay")
                             Spacer()
@@ -216,8 +267,9 @@ struct AidSettingsView: View {
                             }.fixedSize()
                                 .scaleEffect(0.7, anchor: .trailing)
                         }
-
+                        Text("Basal rate history as a stepped line and area fill on the chart.").font(.caption).foregroundColor(.secondary).lineLimit(3).fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .leading).padding(.bottom, 2)
                         Divider()
+
                         HStack {
                             Text("Show Bolus History")
                             Spacer()
@@ -226,30 +278,18 @@ struct AidSettingsView: View {
                             }.fixedSize()
                                 .scaleEffect(0.7, anchor: .trailing)
                         }
-                    }
-
-                    if [.trio, .openaps, .aaps, .controliq].contains(g.provider.GlucoseSourceExtras.aid) {
+                        Text("Bolus markers on the chart with dose, carb, and type tooltips.").font(.caption).foregroundColor(.secondary).lineLimit(3).fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .leading).padding(.bottom, 2)
                         Divider()
+
                         HStack {
-                            Text("Show Loop Status")
+                            Text("Show Mode Timeline")
                             Spacer()
-                            Toggle(isOn: $s.aidChartShowLoopStatus, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowLoopStatus, initial: false) {
+                            Toggle(isOn: $s.aidChartShowModeTimeline, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowModeTimeline, initial: false) {
                                 s.save()
                             }.fixedSize()
                                 .scaleEffect(0.7, anchor: .trailing)
                         }
-
-                        if [.trio, .openaps, .aaps].contains(g.provider.GlucoseSourceExtras.aid) {
-                        Divider()
-                        HStack {
-                            Text("Show Eventual Glucose")
-                            Spacer()
-                            Toggle(isOn: $s.aidChartShowEventualGlucose, label: {}).toggleStyle(.switch).tint(.blue).onChange(of: s.aidChartShowEventualGlucose, initial: false) {
-                                s.save()
-                            }.fixedSize()
-                                .scaleEffect(0.7, anchor: .trailing)
-                        }
-                        }
+                        Text("Pump mode changes as a colored bar at the chart bottom.").font(.caption).foregroundColor(.secondary).lineLimit(3).fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .leading).padding(.bottom, 2)
                     }
                 }.padding()
             }.padding(.bottom).padding(.horizontal)

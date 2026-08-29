@@ -8,6 +8,12 @@
 import Foundation
 import SwiftUI
 
+/// Returns a chart series/axis identifier verbatim, while hiding the literal
+/// from Xcode's automatic string-catalog extraction. Use this for mark labels
+/// that are only unique identifiers (never user-visible text) so they don't get
+/// collected as translation candidates (e.g. ".value(axisKey("Fx"), date)").
+func axisKey(_ s: String) -> String { s }
+
 struct GraphEntry {
     var date: Date
     var value: Double
