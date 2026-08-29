@@ -159,6 +159,15 @@ struct BasalSegment: Identifiable, Sendable {
     let actualRate: Double   // delivered basal (commanded rate / 1000 U/hr)
 }
 
+// MARK: - Pump Mode Timeline
+
+struct ModeChange: Identifiable, Sendable {
+    var id = UUID()
+    let date: Date
+    let mode: String
+    let endDate: Date
+}
+
 // MARK: - Bolus History
 
 struct BolusRecord: Identifiable, Sendable {

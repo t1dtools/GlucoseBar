@@ -36,6 +36,7 @@ class TandemSource: Provider, @unchecked Sendable {
     @Published var basalSegments: [BasalSegment] = []
     @Published var bolusHistory: [BolusRecord] = []
     @Published var pumpDIAHours: Double? = nil
+    @Published var modeTimeline: [ModeChange] = []
 
     private struct BolusCandidate {
         let date: Date
@@ -408,6 +409,7 @@ class TandemSource: Provider, @unchecked Sendable {
         var newestCIQDate: Date = .distantPast
         var segments: [BasalSegment] = []
         var bolusCandidates: [BolusCandidate] = []
+        var modeChanges: [ModeChange] = []
 
         for raw in rawEvents {
             let code = raw.event.eventCode!
@@ -480,6 +482,28 @@ class TandemSource: Provider, @unchecked Sendable {
             if code == 64, let iob = props["iob"]?.doubleValue, date > newestIOBDate {
                 iobValue = iob;
                 newestIOBDate = date
+            }
+
+            // --- Mode timeline: codes 229, 230, 11, 12 ---
+            let mode: String? = {
+                switch code {
+                case 229:
+                    let current = props["currentUserMode"]?.intValue
+                    if current == 1 { return "Sleep" }
+                    if current == 2 { return "Exercise" }
+                    if current == 3 { return "Eating Soon" }
+                    return "Normal"
+                case 230:
+                    if props["pumpSuspended"]?.boolValue == true { return "Suspended" }
+                    return nil
+                case 11: return "Suspended"
+                case 12: return "Normal"
+                default: return nil
+                }
+            }()
+            if let mode = mode {
+                modeChanges.append(ModeChange(date: date, mode: mode, endDate: date))
+                plog("Mode: \(mode) (event \(code))", category: "tandemsource", level: .info)
             }
 
             // --- Bolus event collection ---
@@ -564,6 +588,15 @@ class TandemSource: Provider, @unchecked Sendable {
         if let rate = basalRate { extras.basalRate = rate }
         GlucoseSourceExtras = extras
         basalSegments = segments.sorted(by: { $0.date < $1.date })
+
+        let sortedModes = modeChanges.sorted(by: { $0.date < $1.date })
+        var paired: [ModeChange] = []
+        for (i, mc) in sortedModes.enumerated() {
+            let end = i + 1 < sortedModes.count ? sortedModes[i + 1].date : Date()
+            paired.append(ModeChange(id: mc.id, date: mc.date, mode: mc.mode, endDate: end))
+        }
+        self.modeTimeline = paired
+        plog("Mode timeline: \(paired.count) changes", category: "tandemsource", level: .info)
     }
 
     // MARK: - Helpers

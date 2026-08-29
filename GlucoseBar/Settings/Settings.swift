@@ -89,6 +89,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     @Published var aidChartShowBasalRate: Bool = true
     @Published var aidChartShowBasalOverlay: Bool = true
     @Published var aidShowBolusHistory: Bool = true
+    @Published var aidChartShowModeTimeline: Bool = true
     @Published var aidChartShowActiveInsulin: Bool = true
     @Published var aidChartShowCOBChart: Bool = true
 
@@ -147,6 +148,8 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 
     private func loadInternal() {
         let defaults = UserDefaults.standard
+
+        defaults.register(defaults: [key("aidChartShowModeTimeline"): true])
 
         self.validSettings = defaults.bool(forKey: key("validSettings"))
         self.debugMode = defaults.bool(forKey: "debugMode")
@@ -298,6 +301,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         self.aidChartShowBasalRate = defaults.bool(forKey: key("aidChartShowBasalRate"))
         self.aidChartShowBasalOverlay = defaults.bool(forKey: key("aidChartShowBasalOverlay"))
         self.aidShowBolusHistory = defaults.bool(forKey: key("aidShowBolusHistory"))
+        self.aidChartShowModeTimeline = defaults.bool(forKey: key("aidChartShowModeTimeline"))
         self.aidChartShowActiveInsulin = defaults.bool(forKey: key("aidChartShowActiveInsulin"))
         self.aidChartShowCOBChart = defaults.bool(forKey: key("aidChartShowCOBChart"))
 
@@ -394,6 +398,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         defaults.set(self.aidChartShowBasalRate, forKey: key("aidChartShowBasalRate"))
         defaults.set(self.aidChartShowBasalOverlay, forKey: key("aidChartShowBasalOverlay"))
         defaults.set(self.aidShowBolusHistory, forKey: key("aidShowBolusHistory"))
+        defaults.set(self.aidChartShowModeTimeline, forKey: key("aidChartShowModeTimeline"))
         defaults.set(self.aidChartShowActiveInsulin, forKey: key("aidChartShowActiveInsulin"))
         defaults.set(self.aidChartShowCOBChart, forKey: key("aidChartShowCOBChart"))
 

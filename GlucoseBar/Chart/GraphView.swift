@@ -211,6 +211,7 @@ struct GraphView: View {
 
         let basalEntries = GraphView.basalOverlayEntries(g: g, s: s, maxY: maxY, defaultMaxGlucose: defaultMaxGlucose, maxYMargin: maxYMargin, minY: minY, defaultMinGlucose: defaultMinGlucose)
         let bolusEntries = GraphView.bolusOverlayEntries(g: g, s: s, data: data)
+        let modeEntries = GraphView.modeTimelineEntries(g: g, s: s)
         let basalChartTop = maxY >= defaultMaxGlucose ? (maxY + maxYMargin) : defaultMaxGlucose
         let basalChartMin = minY <= defaultMinGlucose ? minY : defaultMinGlucose
         let basalVisibleOffset = max(0.0, (200.0 / 350.0) * (basalChartTop - basalChartMin))
@@ -361,61 +362,88 @@ struct GraphView: View {
             .chartXAxis {
                 AxisMarks(values: .automatic(desiredCount:6)) { value in
                     if let date = value.as(Date.self) {
-                        AxisValueLabel {
-                            VStack(alignment: .leading) {
-                                Text(date, format: .dateTime.hour().minute())
-                            }
-                        }
-
-                        AxisGridLine()
-                        AxisTick()
+                        AxisValueLabel(format: .dateTime.hour().minute())
                     }
+                }
+                AxisMarks(values: .automatic(desiredCount:6)) {
+                    AxisGridLine()
+                    AxisTick()
                 }
             }.chartOverlay { (chartProxy: ChartProxy) in
                 Color.clear
                     .background {
-                        if !bolusEntries.isEmpty {
+                        if !bolusEntries.isEmpty || !modeEntries.isEmpty {
                             Canvas { context, size in
-                                for b in bolusEntries {
-                                    guard let pt = chartProxy.position(for: (b.date, b.glucoseY)) else { continue }
-                                    let isHL = b.id == hoveredBolusId
-                                    let r = isHL ? 7.0 : 3.5 + min(b.insulinDelivered * 1.6, 4.0)
-                                    context.fill(
-                                        Path(ellipseIn: CGRect(x: pt.x - r, y: pt.y - r, width: r * 2, height: r * 2)),
-                                        with: .color(isHL ? .blue : .blue.opacity(0.45))
-                                    )
-                                    if isHL {
-                                        context.stroke(
-                                            Path(ellipseIn: CGRect(x: pt.x - r - 1, y: pt.y - r - 1, width: (r + 1) * 2, height: (r + 1) * 2)),
-                                            with: .color(.white.opacity(0.6)),
-                                            lineWidth: 1.5
+                                if !bolusEntries.isEmpty {
+                                    for b in bolusEntries {
+                                        guard let pt = chartProxy.position(for: (b.date, b.glucoseY)) else { continue }
+                                        let isHL = b.id == hoveredBolusId
+                                        let r = isHL ? 7.0 : 3.5 + min(b.insulinDelivered * 1.6, 4.0)
+                                        context.fill(
+                                            Path(ellipseIn: CGRect(x: pt.x - r, y: pt.y - r, width: r * 2, height: r * 2)),
+                                            with: .color(isHL ? .blue : .blue.opacity(0.45))
+                                        )
+                                        if isHL {
+                                            context.stroke(
+                                                Path(ellipseIn: CGRect(x: pt.x - r - 1, y: pt.y - r - 1, width: (r + 1) * 2, height: (r + 1) * 2)),
+                                                with: .color(.white.opacity(0.6)),
+                                                lineWidth: 1.5
+                                            )
+                                        }
+                                    }
+                                    if let hb = hoveredBolus, let pt = chartProxy.position(for: (hb.date, hb.glucoseY)) {
+                                        let r = 7.0 + min(hb.insulinDelivered * 1.6, 4.0)
+                                        let text: String = {
+                                            var parts = ["\(String(format: "%.1f", hb.insulinDelivered))U"]
+                                            if let c = hb.carbAmount, c > 0 { parts.append("\(String(format: "%.0f", c))g") }
+                                            if let t = hb.bolusType { parts.append(t) }
+                                            return parts.joined(separator: " ")
+                                        }()
+                                        let font = NSFont.monospacedDigitSystemFont(ofSize: 10, weight: .medium)
+                                        let attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: NSColor.white]
+                                        let textSize = (text as NSString).size(withAttributes: attrs)
+                                        let pad: CGFloat = 6
+                                        let tipH: CGFloat = textSize.height + pad * 2
+                                        let tipW: CGFloat = textSize.width + pad * 2 + 10
+                                        let tipX = min(max(pt.x - tipW / 2, 4), size.width - tipW - 4)
+                                        let tipY = pt.y - r - tipH - 6
+                                        let bgRect = CGRect(x: tipX, y: tipY, width: tipW, height: tipH)
+                                        let bgPath = Path(roundedRect: bgRect, cornerRadius: 4)
+                                        context.fill(bgPath, with: .color(Color(nsColor: .windowBackgroundColor)))
+                                        context.stroke(bgPath, with: .color(.secondary.opacity(0.4)), lineWidth: 1)
+                                        context.draw(
+                                            Text(text).foregroundColor(.primary).font(.system(size: 10, design: .monospaced)),
+                                            at: CGPoint(x: tipX + tipW / 2, y: tipY + tipH / 2)
                                         )
                                     }
                                 }
-                                if let hb = hoveredBolus, let pt = chartProxy.position(for: (hb.date, hb.glucoseY)) {
-                                    let r = 7.0 + min(hb.insulinDelivered * 1.6, 4.0)
-                                    let text: String = {
-                                        var parts = ["\(String(format: "%.1f", hb.insulinDelivered))U"]
-                                        if let c = hb.carbAmount, c > 0 { parts.append("\(String(format: "%.0f", c))g") }
-                                        if let t = hb.bolusType { parts.append(t) }
-                                        return parts.joined(separator: " ")
-                                    }()
-                                    let font = NSFont.monospacedDigitSystemFont(ofSize: 10, weight: .medium)
-                                    let attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: NSColor.white]
-                                    let textSize = (text as NSString).size(withAttributes: attrs)
-                                    let pad: CGFloat = 6
-                                    let tipH: CGFloat = textSize.height + pad * 2
-                                    let tipW: CGFloat = textSize.width + pad * 2 + 10
-                                    let tipX = min(max(pt.x - tipW / 2, 4), size.width - tipW - 4)
-                                    let tipY = pt.y - r - tipH - 6
-                                    let bgRect = CGRect(x: tipX, y: tipY, width: tipW, height: tipH)
-                                    let bgPath = Path(roundedRect: bgRect, cornerRadius: 4)
-                                    context.fill(bgPath, with: .color(Color(nsColor: .windowBackgroundColor)))
-                                    context.stroke(bgPath, with: .color(.secondary.opacity(0.4)), lineWidth: 1)
-                                    context.draw(
-                                        Text(text).foregroundColor(.primary).font(.system(size: 10, design: .monospaced)),
-                                        at: CGPoint(x: tipX + tipW / 2, y: tipY + tipH / 2)
-                                    )
+                                if !modeEntries.isEmpty {
+                                    let barHeight: CGFloat = 4
+                                    let bottomPadding: CGFloat = 16
+                                    let barY = size.height - barHeight - bottomPadding
+                                    for mc in modeEntries {
+                                        guard let startX = chartProxy.position(forX: mc.date),
+                                              let endX = chartProxy.position(forX: mc.endDate) else { continue }
+                                        let color = modeColor(mc.mode)
+                                        let barWidth = max(endX - startX, 2)
+                                        context.fill(
+                                            Path(CGRect(x: startX, y: barY, width: barWidth, height: barHeight)),
+                                            with: .color(color.opacity(0.7))
+                                        )
+                                        let resolved = context.resolve(
+                                            Text(mc.mode.uppercased()).font(.system(size: 11, design: .monospaced)).foregroundColor(color)
+                                        )
+                                        let textSize = resolved.measure(in: size)
+                                        let fits = barWidth >= textSize.width + 8
+                                        let isHovered = sharedHoverTime.map { ht in ht >= mc.date && ht < mc.endDate } ?? false
+                                        if fits || isHovered {
+                                            let leftPad: CGFloat = 4
+                                            let domainEnd = Date().addingTimeInterval(s.aidChartShowForecast ? forecastDuration : 0)
+                                            let plotRightX = chartProxy.position(forX: domainEnd) ?? size.width
+                                            let textX = min(max(startX + leftPad, leftPad), plotRightX - textSize.width - 4)
+                                            context.draw(resolved, at: CGPoint(x: textX, y: barY - textSize.height / 2 - 1), anchor: .leading)
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -502,6 +530,16 @@ struct GraphView: View {
         let offset = max(0, (200.0 / 350.0) * (top - cMin))
         return top - (rate / 5.0) * offset
     }
+
+    private func modeColor(_ mode: String) -> Color {
+        switch mode {
+        case "Sleep": return .blue
+        case "Exercise": return .orange
+        case "Suspended": return .red
+        case "Eating Soon": return .yellow
+        default: return .clear
+        }
+    }
 }
 
 fileprivate struct BasalOverlayEntry: Identifiable {
@@ -557,6 +595,17 @@ extension GraphView {
                 } else { gy = e.value }
             } else { gy = cgm.last!.value }
             return BolusOverlayEntry(id: bolus.id, date: bolus.date, glucoseY: gy - offsetY, insulinDelivered: bolus.insulinDelivered, carbAmount: bolus.carbAmount, bolusType: bolus.bolusType)
+        }
+    }
+
+    fileprivate static func modeTimelineEntries(g: Glucose, s: SettingsStore) -> [ModeChange] {
+        guard g.provider.type == .tandemsource, s.aidChartShowModeTimeline else { return [] }
+        let modes = (g.provider as? TandemSource)?.modeTimeline ?? []
+        let start = Date(timeIntervalSinceNow: TimeInterval(-s.graphMinutes * 60))
+        let end = Date()
+        return modes.compactMap { mc -> ModeChange? in
+            guard mc.date <= end, mc.endDate > start else { return nil }
+            return ModeChange(id: mc.id, date: max(mc.date, start), mode: mc.mode, endDate: min(mc.endDate, end))
         }
     }
 }

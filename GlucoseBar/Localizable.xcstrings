@@ -9647,6 +9647,9 @@
         }
       }
     },
+    "Pump mode changes as a colored bar at the chart bottom." : {
+
+    },
     "Quit" : {
       "localizations" : {
         "da" : {
@@ -11258,6 +11261,9 @@
           }
         }
       }
+    },
+    "Show Mode Timeline" : {
+
     },
     "Show Target Line" : {
       "comment" : "Label of the toggle to show target line on the chart",
