@@ -326,13 +326,20 @@ class TandemSource: Provider, @unchecked Sendable {
 
     private func parsePumpEvents(_ events: [PumpLogEvent]) {
         // --- Date helpers ---
+        let iso8601Frac = ISO8601DateFormatter()
+        iso8601Frac.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let iso8601 = ISO8601DateFormatter()
+        iso8601.formatOptions = [.withInternetDateTime]
+        let manualFmt = DateFormatter()
+        manualFmt.locale = Locale(identifier: "en_US_POSIX")
+        manualFmt.timeZone = TimeZone(secondsFromGMT: 0)
+        manualFmt.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+
         func parseISO(_ s: String) -> Date? {
+            if let d = iso8601Frac.date(from: s) { return d }
+            if let d = iso8601.date(from: s) { return d }
             let clean = s.hasSuffix("Z") ? String(s.dropLast()) : s
-            let fmt = DateFormatter()
-            fmt.locale = Locale(identifier: "en_US_POSIX")
-            fmt.timeZone = TimeZone(secondsFromGMT: 0)
-            fmt.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-            return fmt.date(from: clean)
+            return manualFmt.date(from: clean)
         }
 
         func fallbackDate(for event: PumpLogEvent) -> Date {
@@ -345,13 +352,54 @@ class TandemSource: Provider, @unchecked Sendable {
             delta >= 0 ? delta : Int(Int64(delta) &+ (1 << 32))
         }
 
+        // RTC deltas larger than the fetch window are wrap/ordering artifacts;
+        // reject them so poisoned dates (e.g. ~136 years off) never reach the UI.
+        func safeDate(rtc: Int, ref: Int, refD: Date) -> Date? {
+            let delta = wrap32(rtc - ref)
+            guard delta < 86400 * 2 else { return nil }
+            return refD.addingTimeInterval(TimeInterval(delta))
+        }
+
+        // Final sanity check: reject dates far outside the fetch window (the
+        // pump-log query spans ~24-48h). Falls back to the API timestamp, then to now.
+        func sanitizeDate(_ date: Date, fallback: Date) -> Date {
+            let window: TimeInterval = 86400 * 3
+            if abs(date.timeIntervalSinceNow) <= window { return date }
+            if abs(fallback.timeIntervalSinceNow) <= window { return fallback }
+            return Date()
+        }
+
+        func propStr(_ p: PumpLogProperty) -> String {
+            switch p {
+            case .int(let v): return "\(v)"
+            case .double(let v): return "\(v)"
+            case .string(let v): return v
+            case .bool(let v): return "\(v)"
+            case .array(let v): return "[\(v.map(propStr).joined(separator: ","))]"
+            case .dictionary(let v): return "{\(v.map { "\($0.key):\(propStr($0.value))" }.joined(separator: ","))}"
+            case .null: return "null"
+            }
+        }
+
+        // --- Debug dump: raw CGM-related events to diagnose duplicate readings ---
+        let evtFmt = ISO8601DateFormatter()
+        evtFmt.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        for event in events {
+            guard let code = event.eventCode, code == 399 || code == 16 else { continue }
+            let props = event.eventProperties?.sorted(by: { $0.key < $1.key })
+                .map { "\($0.key)=\(propStr($0.value))" }
+                .joined(separator: " ") ?? "none"
+            plog("CGM_EVENT code=\(code) group=\(event.sequenceGroup ?? -1) num=\(event.sequenceNumber ?? -1) est=\(event.estimatedDateTime ?? "nil") pump=\(event.pumpDateTime ?? "nil") props={\(props)}", category: "tandemsource", level: .info)
+        }
+
         // --- Pass 1: build CGM anchor with RTC-based times ---
         struct CGMAnchor { let seq: Int; let rtc: Int; let date: Date }
         var cgmAnchors: [CGMAnchor] = []
 
         var refRtc: Int?
         var refDate: Date?
-        var cgmEntries: [GlucoseEntry] = []
+        struct CGMPoint { let seq: Int; let entry: GlucoseEntry }
+        var cgmEntries: [CGMPoint] = []
 
         // Also collect raw non-CGM events for pass 2
         struct RawEvent { let event: PumpLogEvent; let seq: Int; let fallback: Date }
@@ -364,17 +412,28 @@ class TandemSource: Provider, @unchecked Sendable {
             if code == 399,
                let rtc = props["egvTimeStamp"]?.intValue,
                let egv = props["currentGlucoseDisplayValue"]?.intValue, egv > 0 {
-                if refRtc == nil, let edt = event.estimatedDateTime, !edt.isEmpty, let d = parseISO(edt) {
-                    refRtc = rtc
-                    refDate = d
-                }
-                let date: Date
-                if let ref = refRtc, let refD = refDate {
-                    date = refD.addingTimeInterval(TimeInterval(wrap32(rtc - ref)))
+                var date: Date
+                if let ref = refRtc, let refD = refDate, let safe = safeDate(rtc: rtc, ref: ref, refD: refD) {
+                    date = safe
                 } else {
+                    // RTC wrapped (new CGM session) or no anchor yet: re-anchor to the
+                    // API timestamp so post-wrap readings spread out via RTC deltas
+                    // instead of collapsing onto a single shared fallback timestamp.
                     date = fallbackDate(for: event)
+                    if let edt = event.estimatedDateTime, !edt.isEmpty, let d = parseISO(edt) {
+                        refRtc = rtc
+                        refDate = d
+                    }
                 }
-                cgmEntries.append(GlucoseEntry(glucose: Double(egv), date: date, changeRate: 0.0))
+                // RTC timestamps are not monotonic across CGM sessions (they reset/wrap),
+                // so a purely RTC-derived date can be hours off. If it disagrees with the
+                // API's own timestamp by more than 5 minutes, trust the API timestamp.
+                if let edt = event.estimatedDateTime, !edt.isEmpty, let ed = parseISO(edt),
+                   abs(date.timeIntervalSince(ed)) > 300 {
+                    date = ed
+                }
+                date = sanitizeDate(date, fallback: fallbackDate(for: event))
+                cgmEntries.append(CGMPoint(seq: seq, entry: GlucoseEntry(glucose: Double(egv), date: date, changeRate: 0.0)))
                 cgmAnchors.append(CGMAnchor(seq: seq, rtc: rtc, date: date))
                 continue
             }
@@ -416,18 +475,20 @@ class TandemSource: Provider, @unchecked Sendable {
             let props = raw.event.eventProperties!
             let seq = raw.seq
 
-            let date: Date
+            var date: Date
+            var code16BG: Int? = nil
             if code == 16, let bg = props["bg"]?.intValue, bg > 0 {
                 // Code 16 BG entries: use estimateDateTime directly (no RTC)
                 date = raw.fallback
-                cgmEntries.append(GlucoseEntry(glucose: Double(bg), date: date, changeRate: 0.0))
-                if let iob = props["iob"]?.doubleValue, date > newestIOBDate {
-                    iobValue = iob; newestIOBDate = date
-                }
+                code16BG = bg
             } else if let rtc = props["egvTimeStamp"]?.intValue ?? props["rawRtcTime"]?.intValue,
                       let ref = refRtc, let refD = refDate {
                 // Has RTC: compute directly
-                date = refD.addingTimeInterval(TimeInterval(wrap32(rtc - ref)))
+                if let safe = safeDate(rtc: rtc, ref: ref, refD: refD) {
+                    date = safe
+                } else {
+                    date = raw.fallback
+                }
             } else if !cgmAnchors.isEmpty {
                 // No RTC: interpolate between CGM anchors
                 var before: CGMAnchor?, after: CGMAnchor?
@@ -444,6 +505,21 @@ class TandemSource: Provider, @unchecked Sendable {
                 }
             } else {
                 date = raw.fallback
+            }
+
+            date = sanitizeDate(date, fallback: raw.fallback)
+
+            // Same RTC-vs-API sanity check as pass 1 (non-CGM events).
+            if let edt = raw.event.estimatedDateTime, !edt.isEmpty, let ed = parseISO(edt),
+               abs(date.timeIntervalSince(ed)) > 300 {
+                date = ed
+            }
+
+            if let bg = code16BG {
+                cgmEntries.append(CGMPoint(seq: seq, entry: GlucoseEntry(glucose: Double(bg), date: date, glucoseType: .meter, changeRate: 0.0)))
+                if let iob = props["iob"]?.doubleValue, date > newestIOBDate {
+                    iobValue = iob; newestIOBDate = date
+                }
             }
 
             // Code 20, 55, 64: IOB snapshot
@@ -464,14 +540,12 @@ class TandemSource: Provider, @unchecked Sendable {
                 segments.append(BasalSegment(date: date, profileRate: profile, actualRate: actual))
             }
 
-            // Code 279: Legacy basal rate with profile
-            if code == 279 {
-                if let rate = props["commandedRate"]?.doubleValue {
-                    let actual = rate / 1000
-                    if date > newestBasalDate { basalRate = actual; newestBasalDate = date }
-                }
-                let actual = (props["commandedRate"]?.doubleValue ?? 0) / 1000
-                let profile = (props["profileBasalRate"]?.doubleValue ?? actual * 1000) / 1000
+            // Code 279: Legacy basal rate with profile (skip when no commanded rate,
+            // otherwise the missing rate reads as a spurious zero-delivery segment)
+            if code == 279, let commanded = props["commandedRate"]?.doubleValue {
+                let actual = commanded / 1000
+                if date > newestBasalDate { basalRate = actual; newestBasalDate = date }
+                let profile = (props["profileBasalRate"]?.doubleValue ?? commanded) / 1000
                 segments.append(BasalSegment(date: date, profileRate: profile, actualRate: actual))
             }
             if code == 279, date > newestCIQDate {
@@ -572,9 +646,42 @@ class TandemSource: Provider, @unchecked Sendable {
         }
         bolusHistory = records.sorted(by: { $0.date > $1.date })
 
+        // Buffered CGM readings (e.g. after a sensor gap) can share a single
+        // timestamp. Instead of discarding them, spread each stacked run backward
+        // at the known 5-minute CGM interval, ordered by sequence number, so the
+        // trace shows a continuous line rather than a vertical stack.
+        func spreadStackedPoints(_ points: [CGMPoint]) -> [CGMPoint] {
+            let sorted = points.sorted { $0.entry.date > $1.entry.date }
+            guard sorted.count > 1 else { return sorted }
+            var result: [CGMPoint] = []
+            var i = 0
+            while i < sorted.count {
+                var run = [sorted[i]]
+                i += 1
+                while i < sorted.count, sorted[i].entry.date == run[0].entry.date {
+                    run.append(sorted[i])
+                    i += 1
+                }
+                if run.count == 1 {
+                    result.append(run[0])
+                } else {
+                    let ordered = run.sorted { $0.seq > $1.seq }
+                    for (j, p) in ordered.enumerated() {
+                        let pushed = run[0].entry.date.addingTimeInterval(TimeInterval(-j * 300))
+                        let e = p.entry
+                        result.append(CGMPoint(seq: p.seq, entry: GlucoseEntry(
+                            glucose: e.glucose, date: pushed, glucoseType: e.glucoseType,
+                            trend: e.trend, changeRate: e.changeRate, isCalibration: e.isCalibration,
+                            condition: e.condition, id: e.id)))
+                    }
+                }
+            }
+            return result
+        }
+
         if !cgmEntries.isEmpty {
-            let sorted = cgmEntries.sorted(by: { $0.date > $1.date })
-            setGlucoseEntries(sorted)
+            let spread = spreadStackedPoints(cgmEntries)
+            setGlucoseEntries(spread.map { $0.entry })
         }
 
         var extras = GlucoseSourceExtras
