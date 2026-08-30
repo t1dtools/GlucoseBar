@@ -88,6 +88,30 @@ struct DebugSettingsView: View {
                     .padding(.top, 8)
                     .fixedSize(horizontal: false, vertical: true)
 
+                Text("VCR Proxy")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 8)
+
+                GroupBox {
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(spacing: 8) {
+                            Text("VCR proxy address")
+                            TextField("http://127.0.0.1:8787", text: $s.vcrProxyAddress)
+                                .textFieldStyle(.roundedBorder)
+                                .font(.system(.body, design: .monospaced))
+                                .onChange(of: s.vcrProxyAddress) {
+                                    s.save()
+                                }
+                        }
+                        Text("Empty = production URLs. When set, all providers route through this address (e.g. the glucosebar-vcr emulator) for recording or replay. Debug mode only.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(6)
+                }
+
                 Text("Reset Data")
                     .font(.headline)
                     .frame(maxWidth: .infinity, alignment: .leading)

@@ -134,11 +134,12 @@ class Glucose: ObservableObject, Sendable {
 
         switch settings.cgmProvider {
             case .dexcomshare:
-            provider = DexcomShare(username: settings.dxEmail, password: settings.dxPassword, server: settings.dxServer)
+            provider = DexcomShare(username: settings.dxEmail, password: settings.dxPassword, server: settings.dxServer, serverURL: VCRProxy.dexcom(account: settings.dxEmail))
         case .nightscout:
-            provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.aidEnableAID)
+            provider = Nightscout(baseURL: VCRProxy.nightscout() ?? settings.nsURL, token: settings.nsSecret, aidEnabled: settings.aidEnableAID)
         case .tandemsource:
-            let tandem = TandemSource(email: settings.tandemEmail, password: settings.tandemPassword, region: settings.tandemRegion)
+            let endpoints = TandemEndpoints(region: settings.tandemRegion, vcrBase: VCRProxy.tandem(account: settings.tandemEmail))
+            let tandem = TandemSource(email: settings.tandemEmail, password: settings.tandemPassword, region: settings.tandemRegion, endpoints: endpoints)
             if !settings.tandemPumpAssignmentId.isEmpty {
                 tandem.selectedPumpAssignmentIdOverride = settings.tandemPumpAssignmentId
             }
@@ -186,9 +187,9 @@ class Glucose: ObservableObject, Sendable {
 
         switch settings.cgmProvider {
         case .nightscout:
-            vs.providerURL = URL(string: settings.nsURL)
+            vs.providerURL = URL(string: VCRProxy.nightscout() ?? settings.nsURL)
         case .dexcomshare:
-            vs.providerURL = URL(string: settings.dxServer.url)
+            vs.providerURL = URL(string: VCRProxy.dexcom(account: settings.dxEmail) ?? settings.dxServer.url)
         default:
             vs.providerURL = nil
         }
@@ -199,13 +200,14 @@ class Glucose: ObservableObject, Sendable {
 
             switch settings.cgmProvider {
             case .nightscout:
-                self.provider = Nightscout(baseURL: settings.nsURL, token: settings.nsSecret, aidEnabled: settings.aidEnableAID)
+                self.provider = Nightscout(baseURL: VCRProxy.nightscout() ?? settings.nsURL, token: settings.nsSecret, aidEnabled: settings.aidEnableAID)
             case .dexcomshare:
-                self.provider = DexcomShare(username: settings.dxEmail, password: settings.dxPassword, server: settings.dxServer)
+                self.provider = DexcomShare(username: settings.dxEmail, password: settings.dxPassword, server: settings.dxServer, serverURL: VCRProxy.dexcom(account: settings.dxEmail))
             case .simulator:
                 self.provider = Simulator("simulate")
             case .tandemsource:
-                let tandem = TandemSource(email: settings.tandemEmail, password: settings.tandemPassword, region: settings.tandemRegion)
+                let endpoints = TandemEndpoints(region: settings.tandemRegion, vcrBase: VCRProxy.tandem(account: settings.tandemEmail))
+                let tandem = TandemSource(email: settings.tandemEmail, password: settings.tandemPassword, region: settings.tandemRegion, endpoints: endpoints)
                 if !settings.tandemPumpAssignmentId.isEmpty {
                     tandem.selectedPumpAssignmentIdOverride = settings.tandemPumpAssignmentId
                 }

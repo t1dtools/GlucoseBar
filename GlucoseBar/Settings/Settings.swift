@@ -96,6 +96,11 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     @Published var validSettings: Bool = false
     @Published var debugMode: Bool = false
 
+    /// Debug-only VCR proxy base (empty = production URLs). Stored under a
+    /// global UserDefaults key, like `debugMode` — one field shared by all
+    /// sources, never exposed outside debug mode.
+    @Published var vcrProxyAddress: String = ""
+
     let logger = Logger(subsystem: "tools.t1d.GlucoseBar", category: "settingsstore")
 
     // MARK: - Init
@@ -153,6 +158,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 
         self.validSettings = defaults.bool(forKey: key("validSettings"))
         self.debugMode = defaults.bool(forKey: "debugMode")
+        self.vcrProxyAddress = defaults.string(forKey: "vcrProxyAddress") ?? ""
 
         // Identity
         self.sourceName = defaults.string(forKey: key("sourceName")) ?? "My CGM"
@@ -335,6 +341,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         let defaults = UserDefaults.standard
         defaults.set(true, forKey: key("validSettings"))
         defaults.set(self.debugMode, forKey: "debugMode")
+        defaults.set(self.vcrProxyAddress, forKey: "vcrProxyAddress")
         defaults.set(self.glucoseUnit.presentable, forKey: key("glucoseUnit"))
         defaults.set(self.cgmProvider.presentable, forKey: key("cgmProvider"))
 
@@ -485,11 +492,12 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         case .simulator:
             provider = Simulator("test auth")
         case .nightscout:
-            provider = Nightscout(baseURL: self.nsURL, token: self.nsSecret, aidEnabled: false)
+            provider = Nightscout(baseURL: VCRProxy.nightscout() ?? self.nsURL, token: self.nsSecret, aidEnabled: false)
         case .dexcomshare:
-            provider = DexcomShare(username: self.dxEmail, password: self.dxPassword, server: self.dxServer)
+            provider = DexcomShare(username: self.dxEmail, password: self.dxPassword, server: self.dxServer, serverURL: VCRProxy.dexcom(account: self.dxEmail))
         case .tandemsource:
-            provider = TandemSource(email: self.tandemEmail, password: self.tandemPassword, region: self.tandemRegion)
+            let endpoints = TandemEndpoints(region: self.tandemRegion, vcrBase: VCRProxy.tandem(account: self.tandemEmail))
+            provider = TandemSource(email: self.tandemEmail, password: self.tandemPassword, region: self.tandemRegion, endpoints: endpoints)
         default:
             provider = Simulator("")
         }

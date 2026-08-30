@@ -62,8 +62,11 @@ class DexcomShare: Provider, @unchecked Sendable {
     var username: String
     var password: String
     var server: DexcomServer
+    /// Effective API base — the VCR proxy override when set, otherwise the
+    /// region's production URL. Keeps `server` for display/region logic.
+    private let baseURL: String
 
-    init(username: String, password: String, server: DexcomServer) {
+    init(username: String, password: String, server: DexcomServer, serverURL: String? = nil) {
         if username.isEmpty {
             validSettings = false
             settingsError = String(localized: "Username can not be empty")
@@ -77,6 +80,7 @@ class DexcomShare: Provider, @unchecked Sendable {
         self.username = username
         self.password = password
         self.server = server
+        self.baseURL = serverURL ?? server.url
 
         super.init()
         self.type = .dexcomshare
@@ -143,7 +147,7 @@ class DexcomShare: Provider, @unchecked Sendable {
 
         await self.setProviderIssue(nil)
 
-        let url = "\(self.server.url)/Publisher/ReadPublisherLatestGlucoseValues"
+        let url = "\(self.baseURL)/Publisher/ReadPublisherLatestGlucoseValues"
         let requestBody = DexcomShareListRequest(sessionId: self.sessionID, minutes: 1440, maxCount: 288)
 
         var request = URLRequest(url: URL(string: url)!, timeoutInterval: httpTimeout)
@@ -277,7 +281,7 @@ class DexcomShare: Provider, @unchecked Sendable {
         self.plog("DexcomShare.getAccountID", category: "dexcomshare", level: .debug)
         await self.setProviderIssue(nil)
 
-        let url = "\(self.server.url)/General/AuthenticatePublisherAccount"
+        let url = "\(self.baseURL)/General/AuthenticatePublisherAccount"
         let requestBody = DexcomShareAccountIDRequest(accountName: self.username, password: self.password, applicationId: self.dexcomApplicationID)
 
         var request = URLRequest(url: URL(string: url)!, timeoutInterval: httpTimeout)
@@ -356,7 +360,7 @@ class DexcomShare: Provider, @unchecked Sendable {
         self.plog("DexcomShare.getSessionID", category: "dexcomshare", level: .debug)
         await self.setProviderIssue(nil)
 
-        let url = "\(self.server.url)/General/LoginPublisherAccountById"
+        let url = "\(self.baseURL)/General/LoginPublisherAccountById"
         let requestBody = DexcomShareSessionIDRequest(accountId: self.accountID, password: self.password, applicationId: self.dexcomApplicationID)
 
         var request = URLRequest(url: URL(string: url)!, timeoutInterval: httpTimeout)

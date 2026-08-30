@@ -60,6 +60,7 @@
 		83DB10F12DFF45B0001ADCE7 /* GlucoseOps.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10F02DFF45AC001ADCE7 /* GlucoseOps.swift */; };
 		83DB10F32E009734001ADCE7 /* MenuBarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10F22E009730001ADCE7 /* MenuBarItem.swift */; };
 		83DB10F52E00B083001ADCE7 /* SeparatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10F42E00B080001ADCE7 /* SeparatorView.swift */; };
+		83CC0F02DFF1C00000000062 /* VCRProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC0F01DFF1C00000000062 /* VCRProxy.swift */; };
 		83DEAD0126DEAD0100000000 /* TandemSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DEAD0426DEAD0400000000 /* TandemSource.swift */; };
 		83DEAD0226DEAD0200000000 /* TandemLogin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DEAD0526DEAD0500000000 /* TandemLogin.swift */; };
 		83DEAD0326DEAD0300000000 /* TandemResponseModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DEAD0626DEAD0600000000 /* TandemResponseModels.swift */; };
@@ -144,6 +145,7 @@
 		83DB10F02DFF45AC001ADCE7 /* GlucoseOps.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseOps.swift; sourceTree = "<group>"; };
 		83DB10F22E009730001ADCE7 /* MenuBarItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarItem.swift; sourceTree = "<group>"; };
 		83DB10F42E00B080001ADCE7 /* SeparatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeparatorView.swift; sourceTree = "<group>"; };
+		83CC0F01DFF1C00000000062 /* VCRProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VCRProxy.swift; sourceTree = "<group>"; };
 		83DEAD0426DEAD0400000000 /* TandemSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TandemSource.swift; sourceTree = "<group>"; };
 		83DEAD0526DEAD0500000000 /* TandemLogin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TandemLogin.swift; sourceTree = "<group>"; };
 		83DEAD0626DEAD0600000000 /* TandemResponseModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TandemResponseModels.swift; sourceTree = "<group>"; };
@@ -205,6 +207,7 @@
 				83DF71B02AEDA9DD00FC0566 /* Nightscout */,
 				834621262ADDAC9E0024048E /* Simulator */,
 				834621292ADDACC20024048E /* Provider.swift */,
+				83CC0F01DFF1C00000000062 /* VCRProxy.swift */,
 			);
 			path = Providers;
 			sourceTree = "<group>";
@@ -541,6 +544,7 @@
 				83DB10E42DFF3FDC001ADCE7 /* COBView.swift in Sources */,
 				83F850322E42A27E00F8699F /* SeparatorSettingsView.swift in Sources */,
 				8346212A2ADDACC20024048E /* Provider.swift in Sources */,
+				83CC0F02DFF1C00000000062 /* VCRProxy.swift in Sources */,
 				836351842ABF6A9000BDAA96 /* GlucoseBarApp.swift in Sources */,
 				83A3301A2AC9F69B00222445 /* GraphView.swift in Sources */,
 				83E198012DEB58F200B0F995 /* DrawForecast.swift in Sources */,

@@ -92,6 +92,40 @@ public enum TandemRegion: String, CaseIterable, Identifiable {
     }
 }
 
+/// The concrete endpoints a Tandem session talks to. Normally derived from the
+/// region; when a VCR proxy base is supplied, every endpoint is served under
+/// the emulator's `/tandem` prefix instead of the real Tandem hosts (the
+/// region's OIDC `client_id`/`redirect_uri` are unchanged — the emulator
+/// mints its own token and accepts the redirect).
+struct TandemEndpoints {
+    let loginPageURL: URL
+    let loginAPIURL: URL
+    let authorizeURL: URL
+    let tokenURL: URL
+    let sourceURL: URL
+    let oidcClientID: String
+    let redirectURI: String
+
+    init(region: TandemRegion, vcrBase: String?) {
+        if let base = vcrBase {
+            let b = base.hasSuffix("/") ? base : base + "/"
+            loginPageURL = URL(string: b + "tandem")!
+            loginAPIURL = URL(string: b + "tandem/accounts/api/login")!
+            authorizeURL = URL(string: b + "tandem/accounts/api/connect/authorize")!
+            tokenURL = URL(string: b + "tandem/accounts/api/connect/token")!
+            sourceURL = URL(string: b + "tandem")!
+        } else {
+            loginPageURL = region.loginPageURL
+            loginAPIURL = region.loginAPIURL
+            authorizeURL = region.authorizeURL
+            tokenURL = region.tokenURL
+            sourceURL = region.sourceURL
+        }
+        oidcClientID = region.oidcClientID
+        redirectURI = region.redirectURI
+    }
+}
+
 struct TandemLoginSession {
     let pumperId: String
     let accountId: String
@@ -107,14 +141,16 @@ struct TandemLoginSession {
 final class TandemLoginHelper: @unchecked Sendable {
 
     private let region: TandemRegion
+    private let endpoints: TandemEndpoints
     private let sourceIndex: Int
     private let httpTimeout: Double = 120.0
 
     private let session: URLSession
     private let apiSession: URLSession
 
-    init(region: TandemRegion, sourceIndex: Int = -1) {
+    init(region: TandemRegion, endpoints: TandemEndpoints, sourceIndex: Int = -1) {
         self.region = region
+        self.endpoints = endpoints
         self.sourceIndex = sourceIndex
 
         let config = URLSessionConfiguration.ephemeral
@@ -167,19 +203,19 @@ final class TandemLoginHelper: @unchecked Sendable {
     // MARK: - Session Establishment
 
     private func establishSession(email: String, password: String) async throws {
-        plog("TandemLogin: GET \(self.region.loginPageURL.absoluteString)...")
-        var initialReq = URLRequest(url: region.loginPageURL)
+        plog("TandemLogin: GET \(self.endpoints.loginPageURL.absoluteString)...")
+        var initialReq = URLRequest(url: endpoints.loginPageURL)
         initialReq.setValue(TandemLoginHelper.randomUserAgent(), forHTTPHeaderField: "User-Agent")
         initialReq.cachePolicy = .reloadIgnoringLocalCacheData
 
         let _ = try await session.data(for: initialReq)
 
-        var loginReq = URLRequest(url: region.loginAPIURL)
+        var loginReq = URLRequest(url: endpoints.loginAPIURL)
         loginReq.httpMethod = "POST"
         loginReq.timeoutInterval = 30
         loginReq.setValue("application/json", forHTTPHeaderField: "Content-Type")
         loginReq.setValue(TandemLoginHelper.randomUserAgent(), forHTTPHeaderField: "User-Agent")
-        loginReq.setValue(region.loginPageURL.absoluteString, forHTTPHeaderField: "Referer")
+        loginReq.setValue(endpoints.loginPageURL.absoluteString, forHTTPHeaderField: "Referer")
 
         let body: [String: String] = ["username": email, "password": password]
         loginReq.httpBody = try JSONSerialization.data(withJSONObject: body)
@@ -214,21 +250,21 @@ final class TandemLoginHelper: @unchecked Sendable {
         let challenge = generateCodeChallenge(verifier)
 
         let params: [String: String] = [
-            "client_id": region.oidcClientID,
+            "client_id": endpoints.oidcClientID,
             "response_type": "code",
             "scope": "openid profile email",
-            "redirect_uri": region.redirectURI,
+            "redirect_uri": endpoints.redirectURI,
             "code_challenge": challenge,
             "code_challenge_method": "S256"
         ]
 
-        var components = URLComponents(url: region.authorizeURL, resolvingAgainstBaseURL: false)!
+        var components = URLComponents(url: endpoints.authorizeURL, resolvingAgainstBaseURL: false)!
         components.queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }
 
         var authReq = URLRequest(url: components.url!)
         authReq.timeoutInterval = 30
         authReq.setValue(TandemLoginHelper.randomUserAgent(), forHTTPHeaderField: "User-Agent")
-        authReq.setValue(region.loginPageURL.absoluteString, forHTTPHeaderField: "Referer")
+        authReq.setValue(endpoints.loginPageURL.absoluteString, forHTTPHeaderField: "Referer")
 
         plog("TandemLogin: OIDC authorize request...")
 
@@ -261,9 +297,9 @@ final class TandemLoginHelper: @unchecked Sendable {
     private func oidcToken(code: String) async throws -> (String, String, Int) {
         let tokenParams: [String: String] = [
             "grant_type": "authorization_code",
-            "client_id": region.oidcClientID,
+            "client_id": endpoints.oidcClientID,
             "code": code,
-            "redirect_uri": region.redirectURI,
+            "redirect_uri": endpoints.redirectURI,
             "code_verifier": codeVerifier
         ]
 
@@ -271,7 +307,7 @@ final class TandemLoginHelper: @unchecked Sendable {
             .map { "\($0.key)=\(percentEncode($0.value))" }
             .joined(separator: "&")
 
-        var tokenReq = URLRequest(url: region.tokenURL)
+        var tokenReq = URLRequest(url: endpoints.tokenURL)
         tokenReq.httpMethod = "POST"
         tokenReq.timeoutInterval = 30
         tokenReq.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")

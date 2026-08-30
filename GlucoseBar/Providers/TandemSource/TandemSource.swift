@@ -13,7 +13,7 @@ class TandemSource: Provider, @unchecked Sendable {
 
     private let email: String
     private let password: String
-    private let region: TandemRegion
+    private let endpoints: TandemEndpoints
 
     private let loginHelper: TandemLoginHelper
     private let networkSession: URLSession
@@ -58,11 +58,11 @@ class TandemSource: Provider, @unchecked Sendable {
         let lastDataDate: String?
     }
 
-    init(email: String, password: String, region: TandemRegion) {
+    init(email: String, password: String, region: TandemRegion, endpoints: TandemEndpoints) {
         self.email = email
         self.password = password
-        self.region = region
-        self.loginHelper = TandemLoginHelper(region: region)
+        self.endpoints = endpoints
+        self.loginHelper = TandemLoginHelper(region: region, endpoints: endpoints)
         networkSession = loginHelper.browserSession()
         super.init()
         self.type = .tandemsource
@@ -195,14 +195,14 @@ class TandemSource: Provider, @unchecked Sendable {
         guard let token = loginSession?.accessToken,
               let pid = pumperId else { return }
 
-        let url = region.sourceURL.appendingPathComponent("api/reports/bff/pumper/\(pid)")
+        let url = endpoints.sourceURL.appendingPathComponent("api/reports/bff/pumper/\(pid)")
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setValue(region.sourceURL.absoluteString.dropSuffix("/"), forHTTPHeaderField: "Origin")
-        request.setValue(region.sourceURL.absoluteString, forHTTPHeaderField: "Referer")
+        request.setValue(endpoints.sourceURL.absoluteString.dropSuffix("/"), forHTTPHeaderField: "Origin")
+        request.setValue(endpoints.sourceURL.absoluteString, forHTTPHeaderField: "Referer")
         request.cachePolicy = .reloadIgnoringLocalCacheData
         request.timeoutInterval = httpTimeout
 
@@ -283,7 +283,7 @@ class TandemSource: Provider, @unchecked Sendable {
 
         let eventIds = "229,5,28,4,26,99,279,3,16,59,21,55,20,280,64,65,66,61,33,371,171,369,460,172,370,461,372,480,399,256,213,406,477,394,212,404,214,405,486,447,313,60,14,6,90,230,140,12,11,53,13,63,203,307,191"
 
-        var components = URLComponents(url: region.sourceURL.appendingPathComponent("api/reports/bff/pump-logs/\(deviceId)"), resolvingAgainstBaseURL: false)!
+        var components = URLComponents(url: endpoints.sourceURL.appendingPathComponent("api/reports/bff/pump-logs/\(deviceId)"), resolvingAgainstBaseURL: false)!
         components.queryItems = [
             URLQueryItem(name: "pumperId", value: pid),
             URLQueryItem(name: "startDate", value: "\(startStr)T00:00:00Z"),
@@ -297,8 +297,8 @@ class TandemSource: Provider, @unchecked Sendable {
         request.httpMethod = "GET"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setValue(region.sourceURL.absoluteString.dropSuffix("/"), forHTTPHeaderField: "Origin")
-        request.setValue(region.sourceURL.absoluteString, forHTTPHeaderField: "Referer")
+        request.setValue(endpoints.sourceURL.absoluteString.dropSuffix("/"), forHTTPHeaderField: "Origin")
+        request.setValue(endpoints.sourceURL.absoluteString, forHTTPHeaderField: "Referer")
         request.cachePolicy = .reloadIgnoringLocalCacheData
         request.timeoutInterval = httpTimeout
 
