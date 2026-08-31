@@ -492,7 +492,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         case .simulator:
             provider = Simulator("test auth")
         case .nightscout:
-            provider = Nightscout(baseURL: VCRProxy.nightscout() ?? self.nsURL, token: self.nsSecret, aidEnabled: false)
+            provider = Nightscout(baseURL: VCRProxy.nightscout() ?? self.nsURL, token: self.nsSecret, aidEnabled: false, verifyOnly: true)
         case .dexcomshare:
             provider = DexcomShare(username: self.dxEmail, password: self.dxPassword, server: self.dxServer, serverURL: VCRProxy.dexcom(account: self.dxEmail))
         case .tandemsource:

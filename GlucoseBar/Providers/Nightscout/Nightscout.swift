@@ -62,8 +62,10 @@ class Nightscout: Provider, @unchecked Sendable {
     var baseURL: String
     var token: String
     var aidEnabled: Bool
+    var verifyOnly: Bool = false
 
-    init(baseURL: String, token: String, aidEnabled: Bool) {
+    init(baseURL: String, token: String, aidEnabled: Bool, verifyOnly: Bool = false) {
+        self.verifyOnly = verifyOnly
 
         // Do some basic validation
         if baseURL.isEmpty {
@@ -99,6 +101,16 @@ class Nightscout: Provider, @unchecked Sendable {
         socket = manager.defaultSocket
 
         super.init()
+
+        // In verify-only mode (used by the settings Test Connection) skip the
+        // socket connect + auto-fetch: a fresh provider would otherwise race
+        // its own verifyCredentials() on shared auth state and flake the
+        // verification result.
+        if verifyOnly {
+            self.isBaseProvider = false
+            self.type = .nightscout
+            return
+        }
 
         registerHandlers()
         if socket.status != .connected {
@@ -644,7 +656,21 @@ class Nightscout: Provider, @unchecked Sendable {
 
     override internal func verifyCredentials() async -> Bool {
         self.plog("nightscout.verifyCredentials", category: "nightscout", level: .debug)
-        await self.authenticate()
+
+        // If an auth is already in flight (e.g. the live fetch cycle),
+        // authenticate() early-returns and isAuthenticated stays stale,
+        // so Verify would spuriously fail. Wait briefly for the in-flight
+        // auth to settle, then auth if idle.
+        if isAuthenticating {
+            for _ in 0..<20 { // up to ~4s
+                if !isAuthenticating { break }
+                try? await Task.sleep(nanoseconds: 200_000_000)
+            }
+        }
+
+        if !isAuthenticating {
+            await self.authenticate()
+        }
 
         return self.isAuthenticated
     }
