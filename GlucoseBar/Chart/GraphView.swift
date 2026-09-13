@@ -373,7 +373,7 @@ struct GraphView: View {
             }
             .chartXAxis {
                 AxisMarks(values: .automatic(desiredCount:6)) { value in
-                    if let date = value.as(Date.self) {
+                    if value.as(Date.self) != nil {
                         AxisValueLabel(format: .dateTime.hour().minute())
                     }
                 }
