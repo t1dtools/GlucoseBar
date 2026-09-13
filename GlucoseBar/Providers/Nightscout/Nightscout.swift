@@ -393,12 +393,14 @@ class Nightscout: Provider, @unchecked Sendable {
 
             let res = response as? HTTPURLResponse
             if res == nil {
+                noteTransportFailure()
                 self.plog("Unable to cast response to HTTPURLResponse", category: "nightscout", level: .error)
                 Task { @MainActor in
                     self.providerIssue = "Unable to get glucose data: Empty response from server."
                 }
                 return
             }
+            noteResponseReceived()
 
             if res!.statusCode == 200 {
                 do {
@@ -488,6 +490,7 @@ class Nightscout: Provider, @unchecked Sendable {
                 }
             }
         } catch {
+            noteTransportFailure()
             Task { @MainActor [weak self] in
                 guard let self = self else { return }
 
@@ -595,9 +598,11 @@ class Nightscout: Provider, @unchecked Sendable {
             let (data, response) = try await URLSession.appDefault.data(for: request)
 
             guard let res = response as? HTTPURLResponse else {
+                noteTransportFailure()
                 self.providerIssue = "Invalid response from Nightscout"
                 return
             }
+            noteResponseReceived()
             if res.statusCode > 299 {
                 unsuccessfulAuthAttempts += 1
                 lastAuthFailureDate = Date()
@@ -642,6 +647,7 @@ class Nightscout: Provider, @unchecked Sendable {
                 }
             }
         } catch {
+            noteTransportFailure()
             var err = "Nightscout Error: \(String(describing: error))"
             if (error as? URLError)?.code == .timedOut {
                 err = "Request timed out"

@@ -127,6 +127,9 @@ class TandemSource: Provider, @unchecked Sendable {
                                 NSURLErrorCannotConnectToHost, NSURLErrorNetworkConnectionLost,
                                 NSURLErrorTimedOut, NSURLErrorDNSLookupFailed]
             let isNetworkError = nsErr.domain == NSURLErrorDomain && networkCodes.contains(nsErr.code)
+            if isNetworkError {
+                noteTransportFailure()
+            }
             if !isNetworkError { unsuccessfulAuthAttempts += 1 }
             lastAuthAttempt = Date()
             if unsuccessfulAuthAttempts > maxAuthAttempts {
@@ -164,6 +167,7 @@ class TandemSource: Provider, @unchecked Sendable {
         do {
             try await fetchPumperInfo()
         } catch {
+            noteTransportFailure()
             plog("Pumper info fetch failed: \(error.localizedDescription)", category: "tandemsource", level: .error)
             providerIssue = "Tandem fetch error: \(error.localizedDescription)"
             didTimeout = isTimeout(error)
@@ -172,6 +176,7 @@ class TandemSource: Provider, @unchecked Sendable {
         do {
             try await fetchPumpLogs()
         } catch {
+            noteTransportFailure()
             plog("Pump logs fetch failed: \(error.localizedDescription)", category: "tandemsource", level: .error)
             didTimeout = didTimeout || isTimeout(error)
         }
@@ -208,10 +213,17 @@ class TandemSource: Provider, @unchecked Sendable {
 
         let (data, response) = try await networkSession.data(for: request)
 
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-            let status = (response as? HTTPURLResponse)?.statusCode ?? -1
-            logResponse("fetchPumperInfo", status: status, body: data)
-            if status == 401 {
+        guard let httpResponse = response as? HTTPURLResponse else {
+            noteTransportFailure()
+            logResponse("fetchPumperInfo", status: -1, body: data)
+            return
+        }
+
+        noteResponseReceived()
+
+        guard httpResponse.statusCode == 200 else {
+            logResponse("fetchPumperInfo", status: httpResponse.statusCode, body: data)
+            if httpResponse.statusCode == 401 {
                 plog("fetchPumperInfo: token expired, clearing session", category: "tandemsource", level: .info)
                 loginSession = nil
             }
@@ -304,10 +316,17 @@ class TandemSource: Provider, @unchecked Sendable {
 
         let (data, response) = try await networkSession.data(for: request)
 
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-            let status = (response as? HTTPURLResponse)?.statusCode ?? -1
-            logResponse("fetchPumpLogs", status: status, body: data)
-            if status == 401 {
+        guard let httpResponse = response as? HTTPURLResponse else {
+            noteTransportFailure()
+            logResponse("fetchPumpLogs", status: -1, body: data)
+            return
+        }
+
+        noteResponseReceived()
+
+        guard httpResponse.statusCode == 200 else {
+            logResponse("fetchPumpLogs", status: httpResponse.statusCode, body: data)
+            if httpResponse.statusCode == 401 {
                 loginSession = nil
             }
             return

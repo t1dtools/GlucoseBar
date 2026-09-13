@@ -36,7 +36,7 @@ struct SourceMenuBarLabel: View {
                         }
                     }
                 }
-            } else if g.error != "" && s.validSettings && vs.isOnline {
+            } else if g.error != "" && s.validSettings && g.sourceOnline {
                 if g.provider.providerIssue == DexcomShare.noDataIssue {
                     Label(
                         title: { Text(" No data") },
@@ -54,7 +54,7 @@ struct SourceMenuBarLabel: View {
                     .environmentObject(g)
                     .environmentObject(uc)
             } else {
-                if !vs.isOnline {
+                if !g.sourceOnline {
                     Image(nsImage: NSImage(
                         systemSymbolName: "bolt.horizontal",
                         accessibilityDescription: "Can not start GlucoseBar while offline")!)

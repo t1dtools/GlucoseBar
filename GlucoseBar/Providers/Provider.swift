@@ -105,6 +105,26 @@ class Provider: ObservableObject, @unchecked Sendable {
 
     @Published var connectionID: String = ""
 
+    /// Consecutive transport-level failures (timeout, refused, DNS, or a
+    /// non-HTTP response). Reset to zero whenever ANY HTTP response arrives,
+    /// including error-status ones — a 401/403/5xx still proves the host is
+    /// reachable. Drives the per-source online indicator; a source is only
+    /// considered offline after several transport failures in a row.
+    @Published public var consecutiveTransportFailures: Int = 0
+
+    /// Call when a request yielded any HTTP response (any status code).
+    func noteResponseReceived() {
+        if consecutiveTransportFailures != 0 {
+            consecutiveTransportFailures = 0
+        }
+    }
+
+    /// Call when a request failed below the HTTP layer (timeout, refused, DNS,
+    /// or a response that was not HTTP).
+    func noteTransportFailure() {
+        consecutiveTransportFailures += 1
+    }
+
     init() {
         if self.isBaseProvider {
             return

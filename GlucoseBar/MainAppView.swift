@@ -99,7 +99,7 @@ struct MainAppView: View {
     }
 
     var body: some View {
-        if g.error != "" && s.validSettings && vs.isOnline {
+        if g.error != "" && s.validSettings && g.sourceOnline {
             if g.provider.providerIssue == DexcomShare.noDataIssue {
                 ScrollView {
                     Image(systemName: "bolt.trianglebadge.exclamationmark").resizable()
@@ -231,7 +231,7 @@ struct MainAppView: View {
                         }.offset(y: -10)
                         Spacer()
                     }
-                } else if !vs.isOnline {
+                } else if !g.sourceOnline {
                     VStack {
                         HStack {
                             Spacer()

@@ -33,15 +33,21 @@ class ViewState: ObservableObject, @unchecked Sendable {
     }
 
     init() {
+        // Fire an initial probe immediately so the online state self-heals
+        // from launch, independent of OS path events.
+        startProbe()
+
         networkMonitor.pathUpdateHandler = { [weak self] path in
             guard let self = self else { return }
+            // Path events only opportunistically re-kick the probe. The path
+            // status itself is deliberately NOT trusted as an offline verdict:
+            // firewalls/VPNs (e.g. Little Snitch) can make a path flap while
+            // provider traffic is fine, and vice versa. Offline is instead
+            // decided per source by the providers' own transport failures.
             if path.status == .satisfied {
                 self.retryAttempt = 0
                 self.probeURLIndex = 0
                 self.startProbe()
-            } else {
-                self.cancelProbe()
-                Task { @MainActor in self.isOnline = false }
             }
         }
         networkMonitor.start(queue: DispatchQueue(label: "NetworkMonitor"))
@@ -58,8 +64,11 @@ class ViewState: ObservableObject, @unchecked Sendable {
 
             let task = URLSession.shared.dataTask(with: request) { [weak self] _, response, error in
                 guard let self = self else { return }
-                if let httpResponse = response as? HTTPURLResponse,
-                   (200...399).contains(httpResponse.statusCode) {
+                // Any HTTP response — even 401/403/404/500 — proves a host
+                // answered, so treat it as online. Only non-HTTP outcomes
+                // (timeout, refused, DNS, connection blocked) fall through to
+                // the retry/backoff cycle below.
+                if (response as? HTTPURLResponse) != nil {
                     Task { @MainActor in self.isOnline = true }
                     self.retryAttempt = 0
                     self.probeQueue.async { [weak self] in

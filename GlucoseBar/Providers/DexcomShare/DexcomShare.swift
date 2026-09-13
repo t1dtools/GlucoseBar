@@ -167,9 +167,11 @@ class DexcomShare: Provider, @unchecked Sendable {
         do {
             let (data, response) = try await URLSession.appDefault.data(for: request)
             guard let res = response as? HTTPURLResponse else {
+                noteTransportFailure()
                 self.setProviderIssue(String(localized: "Invalid response from Dexcom Share"))
                 return
             }
+            noteResponseReceived()
             if res.statusCode > 299 {
                 var providerError = ""
 
@@ -227,6 +229,7 @@ class DexcomShare: Provider, @unchecked Sendable {
                 }
             }
         } catch {
+            noteTransportFailure()
             var err = String(localized: "Dexcom Share Error: ") + "\(String(describing: error))"
             if (error as? URLError)?.code == .timedOut {
                 err = String(localized: "Request timed out")
@@ -301,9 +304,11 @@ class DexcomShare: Provider, @unchecked Sendable {
             let (data, response) = try await URLSession.appDefault.data(for: request)
 
             guard let res = response as? HTTPURLResponse else {
+                noteTransportFailure()
                 await self.setProviderIssue(String(localized: "Invalid response from Dexcom Share"))
                 return
             }
+            noteResponseReceived()
             if res.statusCode > 299 {
                 // Only count 4xx responses as credential failures.
                 // 5xx responses are transient server errors and must not
@@ -347,6 +352,7 @@ class DexcomShare: Provider, @unchecked Sendable {
                 self.accountID = responseString.replacingOccurrences(of: "\"", with: "")
             }
         } catch {
+            noteTransportFailure()
             var err = String(localized: "Dexcom Share Error: ") + "\(String(describing: error))"
             if (error as? URLError)?.code == .timedOut {
                 err = String(localized: "Request timed out")
@@ -380,9 +386,11 @@ class DexcomShare: Provider, @unchecked Sendable {
             let (data, response) = try await URLSession.appDefault.data(for: request)
 
             guard let res = response as? HTTPURLResponse else {
+                noteTransportFailure()
                 await self.setProviderIssue(String(localized: "Invalid response from Dexcom Share"))
                 return
             }
+            noteResponseReceived()
             if res.statusCode > 299 {
                 // Only count 4xx responses as credential failures (not transient 5xx).
                 if res.statusCode < 500 {
@@ -419,6 +427,7 @@ class DexcomShare: Provider, @unchecked Sendable {
                 self.sessionID = responseString.replacingOccurrences(of: "\"", with: "")
             }
         } catch {
+            noteTransportFailure()
             var err = String(localized: "Dexcom Share Error: ") + "\(String(describing: error))"
             if (error as? URLError)?.code == .timedOut {
                 err = String(localized: "Request timed out")

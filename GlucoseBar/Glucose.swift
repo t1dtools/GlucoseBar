@@ -27,6 +27,14 @@ class Glucose: ObservableObject, Sendable {
     @ObservedObject var settings: SettingsStore
     @ObservedObject var vs: ViewState
 
+    /// Per-source liveness indicator: true unless the provider has suffered a
+    /// run of consecutive transport-level failures with no HTTP response in
+    /// between. Recomputed from `provider.consecutiveTransportFailures` on
+    /// every provider change. Drives the offline banner and label UI.
+    @Published public var sourceOnline: Bool = true
+    /// Above this many consecutive transport failures the source is offline.
+    private let offlineFailureThreshold = 3
+
     private var providerCancellable: AnyCancellable?
     private var timer: DispatchTimer
     private var isFetching: Bool = false
@@ -74,10 +82,6 @@ class Glucose: ObservableObject, Sendable {
                 self.setSettings(settings)
             }
             var shouldFetch: Bool = false
-            if !vs.isOnline {
-                self.plog("Aborting fetch because network is offline", level: .default)
-                return
-            }
 
             if self.provider.lastFetch.timeIntervalSinceNow <= -180 {
                 shouldFetch = true
@@ -115,8 +119,10 @@ class Glucose: ObservableObject, Sendable {
         self.providerCancellable = self.provider.objectWillChange
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                self?.objectWillChange.send()
-                self?.getGlucose()
+                guard let self = self else { return }
+                self.sourceOnline = self.provider.consecutiveTransportFailures < self.offlineFailureThreshold
+                self.objectWillChange.send()
+                self.getGlucose()
             }
     }
 
@@ -190,6 +196,9 @@ class Glucose: ObservableObject, Sendable {
             vs.providerURL = URL(string: VCRProxy.nightscout() ?? settings.nsURL)
         case .dexcomshare:
             vs.providerURL = URL(string: VCRProxy.dexcom(account: settings.dxEmail) ?? settings.dxServer.url)
+        case .tandemsource:
+            let endpoints = TandemEndpoints(region: settings.tandemRegion, vcrBase: VCRProxy.tandem(account: settings.tandemEmail))
+            vs.providerURL = endpoints.sourceURL
         default:
             vs.providerURL = nil
         }
