@@ -4948,6 +4948,9 @@
         }
       }
     },
+    "Empty = production URLs. When set, all providers route through this address (e.g. the glucosebar-vcr emulator) for recording or replay. Debug mode only." : {
+
+    },
     "Enable" : {
       "comment" : "A button that enables debug mode.",
       "localizations" : {
@@ -6576,6 +6579,9 @@
           }
         }
       }
+    },
+    "http://127.0.0.1:8787" : {
+
     },
     "I'm a privacy first application that lives here in the menu bar on your Mac, providing you a quick way to glance at your Continous Glucose Monitor (CGM) readings, from places like Nightscout and Dexcom" : {
       "localizations" : {
@@ -10156,6 +10162,9 @@
           }
         }
       }
+    },
+    "Report Issue on GitHub" : {
+
     },
     "Request timed out" : {
       "localizations" : {
@@ -13929,6 +13938,12 @@
     },
     "Values shown alongside the glucose headline when you open GlucoseBar" : {
       "comment" : "Explaining text for what the data grid is on the AID integration settings view"
+    },
+    "VCR Proxy" : {
+
+    },
+    "VCR proxy address" : {
+
     },
     "Very Narrow" : {
       "comment" : "A segment option in the menu bar settings for the element distance.",
