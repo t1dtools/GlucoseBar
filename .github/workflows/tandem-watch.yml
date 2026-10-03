@@ -1,0 +1,56 @@
+name: tandem-watch
+
+on:
+  schedule:
+    # Nightly 03:00 UTC — Tandem BFF breaks have historically landed overnight
+    # (verified: 2026-06-30 and 2026-10-01), so a morning check catches the
+    # previous night while the community (jwoglom/tconnectsync) is often
+    # already reacting. See scripts/tandem-watch.py + the
+    # tandem-api-change-resilience openspec plan for why these signals.
+    - cron: "0 3 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: tandem-watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Tandem watch
+        id: watch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/tandem-watch.py
+
+      - name: Commit watch state
+        # Always persist the state file so the next run compares against this
+        # one (first run establishes the baseline; alerts only on deltas).
+        if: steps.watch.outcome == 'success'
+        run: |
+          git config user.name "tandem-watch[bot]"
+          git config user.email "tandem-watch[bot]@users.noreply.github.com"
+          git add scripts/tandem-watch-state.json
+          if git diff --cached --quiet; then
+            echo "State unchanged — nothing to commit."
+          else
+            git commit -m "chore: update tandem watch state"
+            git push
+          fi
+
+      - name: Alert on change
+        if: steps.watch.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --repo "t1dtools/GlucoseBar" \
+            --title "$(head -1 watch-changes.md)" \
+            --body-file watch-changes.md
