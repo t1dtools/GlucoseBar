@@ -44,6 +44,7 @@
 		83CC000A2F0000010000CC00 /* SourceMenuBarLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC00092F0000010000CC00 /* SourceMenuBarLabel.swift */; };
 		83CC000C2F0000010000CC00 /* SymbolPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC000B2F0000010000CC00 /* SymbolPickerView.swift */; };
 		83CC000E2F0000010000CC00 /* MenuBarCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC000D2F0000010000CC00 /* MenuBarCoordinator.swift */; };
+		83CC0F02DFF1C00000000062 /* VCRProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC0F01DFF1C00000000062 /* VCRProxy.swift */; };
 		83CE1E872E5906D000630629 /* ZenModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CE1E862E5906CB00630629 /* ZenModeView.swift */; };
 		83CE1E8A2E5917E300630629 /* ZenModeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CE1E892E5917DD00630629 /* ZenModeSettingsView.swift */; };
 		83CE1E8C2E59239700630629 /* GlucoseAgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CE1E8B2E59238E00630629 /* GlucoseAgeView.swift */; };
@@ -60,7 +61,6 @@
 		83DB10F12DFF45B0001ADCE7 /* GlucoseOps.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10F02DFF45AC001ADCE7 /* GlucoseOps.swift */; };
 		83DB10F32E009734001ADCE7 /* MenuBarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10F22E009730001ADCE7 /* MenuBarItem.swift */; };
 		83DB10F52E00B083001ADCE7 /* SeparatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DB10F42E00B080001ADCE7 /* SeparatorView.swift */; };
-		83CC0F02DFF1C00000000062 /* VCRProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC0F01DFF1C00000000062 /* VCRProxy.swift */; };
 		83DEAD0126DEAD0100000000 /* TandemSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DEAD0426DEAD0400000000 /* TandemSource.swift */; };
 		83DEAD0226DEAD0200000000 /* TandemLogin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DEAD0526DEAD0500000000 /* TandemLogin.swift */; };
 		83DEAD0326DEAD0300000000 /* TandemResponseModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DEAD0626DEAD0600000000 /* TandemResponseModels.swift */; };
@@ -128,6 +128,7 @@
 		83CC00092F0000010000CC00 /* SourceMenuBarLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceMenuBarLabel.swift; sourceTree = "<group>"; };
 		83CC000B2F0000010000CC00 /* SymbolPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolPickerView.swift; sourceTree = "<group>"; };
 		83CC000D2F0000010000CC00 /* MenuBarCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarCoordinator.swift; sourceTree = "<group>"; };
+		83CC0F01DFF1C00000000062 /* VCRProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VCRProxy.swift; sourceTree = "<group>"; };
 		83CE1E862E5906CB00630629 /* ZenModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenModeView.swift; sourceTree = "<group>"; };
 		83CE1E892E5917DD00630629 /* ZenModeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenModeSettingsView.swift; sourceTree = "<group>"; };
 		83CE1E8B2E59238E00630629 /* GlucoseAgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseAgeView.swift; sourceTree = "<group>"; };
@@ -145,7 +146,6 @@
 		83DB10F02DFF45AC001ADCE7 /* GlucoseOps.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseOps.swift; sourceTree = "<group>"; };
 		83DB10F22E009730001ADCE7 /* MenuBarItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarItem.swift; sourceTree = "<group>"; };
 		83DB10F42E00B080001ADCE7 /* SeparatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeparatorView.swift; sourceTree = "<group>"; };
-		83CC0F01DFF1C00000000062 /* VCRProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VCRProxy.swift; sourceTree = "<group>"; };
 		83DEAD0426DEAD0400000000 /* TandemSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TandemSource.swift; sourceTree = "<group>"; };
 		83DEAD0526DEAD0500000000 /* TandemLogin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TandemLogin.swift; sourceTree = "<group>"; };
 		83DEAD0626DEAD0600000000 /* TandemResponseModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TandemResponseModels.swift; sourceTree = "<group>"; };
@@ -722,7 +722,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 117;
+				CURRENT_PROJECT_VERSION = 118;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"GlucoseBar/Preview Content\"";
@@ -762,7 +762,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 117;
+				CURRENT_PROJECT_VERSION = 118;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"GlucoseBar/Preview Content\"";
 				ENABLE_APP_SANDBOX = YES;

@@ -29,6 +29,17 @@ class TandemSource: Provider, @unchecked Sendable {
     private var lastAuthAttempt: Date = .distantPast
     private var nextFetchAllowedAt: Date = .distantPast
 
+    /// HTTP-level failures (non-200 responses, undecodable bodies) from the BFF
+    /// drive a progressive backoff: Tandem's pump-logs interface is validated by
+    /// zod server-side, so a contract break (e.g. the `eventIds` -> `eventCodes`
+    /// rename, 2026-10-01) fails with a stable non-200. Hammering that is
+    /// pointless, so consecutive failures escalate to one request per hour and
+    /// reset on the first success. Transport-level failures (network down,
+    /// timeouts) intentionally do NOT advance the chain: a transient offline
+    /// period must recover at the normal cadence instead of waiting out the cap.
+    private var consecutiveFetchFailures: Int = 0
+    private let backoffIntervals: [TimeInterval] = [60, 300, 900, 1800, 3600] // 1m -> 5m -> 15m -> 30m -> 1h (cap)
+
     private let httpTimeout: Double = 120.0
 
     var availablePumps: [TandemPumpInfo] = []
@@ -169,7 +180,9 @@ class TandemSource: Provider, @unchecked Sendable {
         } catch {
             noteTransportFailure()
             plog("Pumper info fetch failed: \(error.localizedDescription)", category: "tandemsource", level: .error)
-            providerIssue = "Tandem fetch error: \(error.localizedDescription)"
+            if !isTransportFailure(error) {
+                registerFetchFailure(endpoint: "pumper", status: nil)
+            }
             didTimeout = isTimeout(error)
         }
 
@@ -178,15 +191,63 @@ class TandemSource: Provider, @unchecked Sendable {
         } catch {
             noteTransportFailure()
             plog("Pump logs fetch failed: \(error.localizedDescription)", category: "tandemsource", level: .error)
+            if !isTransportFailure(error) {
+                registerFetchFailure(endpoint: "pump-logs", status: nil)
+            }
             didTimeout = didTimeout || isTimeout(error)
         }
 
         if didTimeout {
-            nextFetchAllowedAt = Date().addingTimeInterval(60)
+            let cooldownUntil = Date().addingTimeInterval(60)
+            if cooldownUntil > nextFetchAllowedAt {
+                nextFetchAllowedAt = cooldownUntil
+            }
             plog("Cooldown set for 60s due to timeout", category: "tandemsource", level: .info)
         }
 
         lastFetch = Date()
+    }
+
+    /// A request that ended below the HTTP layer (timeout, refused, DNS, lost
+    /// connection). These are reachability problems, not contract problems, and
+    /// must not advance the failure backoff.
+    private func isTransportFailure(_ error: Error) -> Bool {
+        let nsError = error as NSError
+        guard nsError.domain == NSURLErrorDomain else { return false }
+        return [NSURLErrorNotConnectedToInternet, NSURLErrorCannotFindHost,
+                NSURLErrorCannotConnectToHost, NSURLErrorNetworkConnectionLost,
+                NSURLErrorTimedOut, NSURLErrorDNSLookupFailed].contains(nsError.code)
+    }
+
+    /// Records a pump-data failure (Tandem answered, but with a non-200 status
+    /// or an undecodable body), surfaces it in the popover, and escalates the
+    /// cooldown towards the once-per-hour cap.
+    @MainActor
+    private func registerFetchFailure(endpoint: String, status: Int?) {
+        consecutiveFetchFailures = min(consecutiveFetchFailures + 1, backoffIntervals.count)
+        let level = consecutiveFetchFailures - 1
+        let wait = backoffIntervals[level]
+        nextFetchAllowedAt = Date().addingTimeInterval(wait)
+
+        let detail = status.map { "HTTP \($0)" } ?? "unexpected response"
+        // User-facing text: keep it simple for non-technical users, but embed a
+        // maintainer-recognizable code so an issue report signals a likely
+        // Tandem-side API contract break (e.g. the `eventIds` -> `eventCodes`
+        // rename, 2026-10-01). The error popover pairs this with a
+        // "Report Issue on GitHub" button that prefills an issue.
+        providerIssue = "Experiencing issues with Tandem (error code: TANDEM-API-CHANGE). Your data will resume automatically once Tandem responds. If it keeps happening, report it below so we can investigate."
+        plog("\(endpoint) failed (\(detail)); next fetch in \(Int(wait))s (consecutive HTTP failures: \(consecutiveFetchFailures))", category: "tandemsource", level: .error)
+    }
+
+    /// Clears the failure state and any pending cooldown once pump data flows
+    /// again. No-op when there was nothing to reset.
+    @MainActor
+    private func registerFetchSuccess() {
+        guard consecutiveFetchFailures > 0 else { return }
+        consecutiveFetchFailures = 0
+        nextFetchAllowedAt = .distantPast
+        providerIssue = nil
+        plog("Tandem fetch recovered; backoff reset", category: "tandemsource", level: .info)
     }
 
     private func isTimeout(_ error: Error) -> Bool {
@@ -227,6 +288,7 @@ class TandemSource: Provider, @unchecked Sendable {
                 plog("fetchPumperInfo: token expired, clearing session", category: "tandemsource", level: .info)
                 loginSession = nil
             }
+            registerFetchFailure(endpoint: "pumper", status: httpResponse.statusCode)
             return
         }
 
@@ -235,6 +297,7 @@ class TandemSource: Provider, @unchecked Sendable {
             pumper = try JSONDecoder().decode(BffPumper.self, from: data)
         } catch {
             plog("fetchPumperInfo: decode failed: \(error)", category: "tandemsource", level: .error)
+            registerFetchFailure(endpoint: "pumper", status: nil)
             return
         }
 
@@ -293,14 +356,18 @@ class TandemSource: Provider, @unchecked Sendable {
         let startStr = formatter.string(from: startDate).prefix(10) // YYYY-MM-DD
         let endStr = formatter.string(from: endDate).prefix(10)
 
-        let eventIds = "229,5,28,4,26,99,279,3,16,59,21,55,20,280,64,65,66,61,33,371,171,369,460,172,370,461,372,480,399,256,213,406,477,394,212,404,214,405,486,447,313,60,14,6,90,230,140,12,11,53,13,63,203,307,191"
+        let eventCodes = "229,5,28,4,26,99,279,3,16,59,21,55,20,280,64,65,66,61,33,371,171,369,460,172,370,461,372,480,399,256,213,406,477,394,212,404,214,405,486,447,313,60,14,6,90,230,140,12,11,53,13,63,203,307,191"
 
+        // Tandem renamed the filter query param `eventIds` -> `eventCodes` on the
+        // BFF (2026-10-01). `eventIds` is now rejected with a zod 400
+        // "unrecognized_keys". Verified live: single comma-separated value only;
+        // repeated keys return 0 events.
         var components = URLComponents(url: endpoints.sourceURL.appendingPathComponent("api/reports/bff/pump-logs/\(deviceId)"), resolvingAgainstBaseURL: false)!
         components.queryItems = [
             URLQueryItem(name: "pumperId", value: pid),
             URLQueryItem(name: "startDate", value: "\(startStr)T00:00:00Z"),
             URLQueryItem(name: "endDate", value: "\(endStr)T23:59:59Z"),
-            URLQueryItem(name: "eventIds", value: eventIds)
+            URLQueryItem(name: "eventCodes", value: eventCodes)
         ]
 
         guard let requestURL = components.url else { return }
@@ -329,12 +396,14 @@ class TandemSource: Provider, @unchecked Sendable {
             if httpResponse.statusCode == 401 {
                 loginSession = nil
             }
+            registerFetchFailure(endpoint: "pump-logs", status: httpResponse.statusCode)
             return
         }
 
         let logs = try JSONDecoder().decode(PumpLogsResponse.self, from: data)
         let events = logs.events ?? []
         plog("fetchPumpLogs: received \(events.count) events", category: "tandemsource", level: .info)
+        registerFetchSuccess()
 
         if events.isEmpty { return }
 
