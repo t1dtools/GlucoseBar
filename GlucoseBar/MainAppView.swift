@@ -146,6 +146,19 @@ struct MainAppView: View {
 
                             if let providerIssue = g.provider.providerIssue {
                                 Text("Additional Info: \(providerIssue)").fixedSize(horizontal: false, vertical: true).padding(.top)
+
+                                Button(action: {
+                                    var base = URLComponents(url: URL(string: "https://github.com/t1dtools/GlucoseBar/issues/new")!, resolvingAgainstBaseURL: false)!
+                                    base.queryItems = [
+                                        URLQueryItem(name: "title", value: "GlucoseBar: \(s.cgmProvider.presentable) error: \(providerIssue.prefix(120))"),
+                                        URLQueryItem(name: "body", value: "**App version:** \(Bundle.main.appVersionLong) (\(Bundle.main.appBuild))\n\n**Source:** \(s.cgmProvider.presentable)\n\n**Error:** \(providerIssue)\n\nDescribe what you were doing when this appeared, and anything else that seems relevant.")
+                                    ]
+                                    if let url = base.url { NSWorkspace.shared.open(url) }
+                                }) {
+                                    Text("Report Issue on GitHub")
+                                }
+                                .buttonStyle(.bordered)
+                                .padding(.vertical, 8)
                             }
 
                             Button("Retry") {
