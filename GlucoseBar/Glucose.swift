@@ -96,8 +96,7 @@ class Glucose: ObservableObject, Sendable {
             }
 
             if shouldFetch {
-                fetchQueue.async { [weak self] in
-                    guard let self = self else { return }
+                fetchQueue.async { [self] in
                     Task {
                         let alreadyFetching = await MainActor.run { self.isFetching }
                         if alreadyFetching {

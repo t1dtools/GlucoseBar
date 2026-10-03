@@ -7,6 +7,9 @@
 import SwiftUI
 import Network
 import MenuBarExtraAccess
+// Linked (via auto-link on import) so Xcode 26's AppIntents metadata extraction
+// finds the framework and stops emitting "Metadata extraction skipped" warnings.
+import AppIntents
 
 class ViewState: ObservableObject, @unchecked Sendable {
     @Published var isPanePresented: Bool = false
