@@ -291,6 +291,7 @@ struct SettingsView: View {
                 if let source = sourceManager.sources.first {
                     DebugSettingsView()
                         .environmentObject(source.settings)
+                        .environmentObject(source.glucose)
                 }
             case .about:
                 AboutView()

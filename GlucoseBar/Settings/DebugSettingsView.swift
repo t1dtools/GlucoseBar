@@ -9,10 +9,17 @@ import SwiftUI
 
 struct DebugSettingsView: View {
     @EnvironmentObject var s: SettingsStore
+    @EnvironmentObject var g: Glucose
 
     @State private var showCopiedConfirmation = false
     @State private var showResetConfirmation = false
     @State private var showLeaveDebugModeConfirmation = false
+
+    /// Draft for the VCR proxy field, kept local so the address is only written
+    /// when Save is pressed. It used to be saved on every keystroke, which
+    /// persisted half-typed addresses that the providers then crashed on.
+    @State private var vcrProxyDraft: String = ""
+    @State private var vcrProxyError: String?
 
     var logPath: String {
         DebugLogger.shared.currentLogURL?.path
@@ -97,19 +104,25 @@ struct DebugSettingsView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         HStack(spacing: 8) {
                             Text("VCR proxy address")
-                            TextField("http://127.0.0.1:8787", text: $s.vcrProxyAddress)
+                            TextField("http://127.0.0.1:8787", text: $vcrProxyDraft)
                                 .textFieldStyle(.roundedBorder)
                                 .font(.system(.body, design: .monospaced))
-                                .onChange(of: s.vcrProxyAddress) {
-                                    s.save()
-                                }
+                            Button("Save") { saveVCRProxyAddress() }
+                                .disabled(vcrProxyDraft == s.vcrProxyAddress)
                         }
-                        Text("Empty = production URLs. When set, all providers route through this address (e.g. the glucosebar-vcr emulator) for recording or replay. Debug mode only.")
+                        if let vcrProxyError {
+                            Text(vcrProxyError)
+                                .font(.caption)
+                                .foregroundStyle(.red)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        Text("Empty = production URLs. When set, all providers route through this address (e.g. the glucosebar-vcr emulator) for recording or replay. Debug mode only. Saving recreates the providers so it takes effect immediately.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     .padding(6)
+                    .onAppear { vcrProxyDraft = s.vcrProxyAddress }
                 }
 
                 Text("Reset Data")
@@ -175,10 +188,39 @@ struct DebugSettingsView: View {
             Text("This will disable Debug Mode which will stop GlucoseBar writing log files to your computer and remove the Debug menu from the settings panel.")
         }
     }
+
+    /// Validates and persists the VCR proxy address, then recreates the providers
+    /// so it takes effect. The address is only read when a provider is built, so
+    /// saving without rebuilding would look like it did nothing.
+    private func saveVCRProxyAddress() {
+        let trimmed = ProviderURL.cleaned(vcrProxyDraft)
+
+        if trimmed.isEmpty {
+            vcrProxyError = nil
+            s.vcrProxyAddress = ""
+            s.save()
+            g.reset(s)
+            return
+        }
+
+        guard let url = ProviderURL.httpURL(from: trimmed),
+              let scheme = url.scheme?.lowercased(),
+              scheme == "http" || scheme == "https" else {
+            vcrProxyError = String(localized: "The VCR proxy address must start with http:// or https://", comment: "Validation message for a malformed VCR proxy address in the debug settings screen")
+            return
+        }
+
+        vcrProxyError = nil
+        s.vcrProxyAddress = url.absoluteString
+        vcrProxyDraft = url.absoluteString
+        s.save()
+        g.reset(s)
+    }
 }
 
 #Preview {
     DebugSettingsView()
         .environmentObject(SettingsStore())
+        .environmentObject(Glucose(SettingsStore()))
         .frame(width: 500)
 }
