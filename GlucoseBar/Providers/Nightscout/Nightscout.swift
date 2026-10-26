@@ -55,6 +55,10 @@ class Nightscout: Provider, @unchecked Sendable {
     private let manager: SocketManager
     private let socket: SocketIOClient
 
+    /// Stand-in socket target used when the configured address is unusable.
+    /// It is never connected to: every network path is gated on `validSettings`.
+    private static let unreachableSocketURL = URL(string: "http://127.0.0.1:1") ?? URL(fileURLWithPath: "/")
+
     private let httpTimeout = 120.0
 
     private var lastFullFetch: Date = Date()
@@ -66,28 +70,33 @@ class Nightscout: Provider, @unchecked Sendable {
 
     init(baseURL: String, token: String, aidEnabled: Bool, verifyOnly: Bool = false) {
         self.verifyOnly = verifyOnly
-
-        // Do some basic validation
-        if baseURL.isEmpty {
-            validSettings = false
-            settingsError = "Host can not be empty"
-        }
-
-        if !baseURL.hasPrefix("https://") && !baseURL.hasPrefix("http://") && !baseURL.hasPrefix("wss://") && !baseURL.hasPrefix("ws://") {
-            validSettings = false
-            settingsError = "Host must start with http://, https://, ws:// or wss://"
-        }
-
-        self.baseURL = baseURL
         self.token = token
         self.aidEnabled = aidEnabled
 
-        if baseURL.hasSuffix("/") {
-            self.baseURL = String(self.baseURL.dropLast())
+        // Validate before anything else: `SocketManager` needs a URL at init
+        // time, and force-unwrapping one built from user input used to trap here
+        // (on save, and again on every launch afterwards).
+        let parsedSocketURL: URL
+        switch ProviderURL.validate(baseURL) {
+        case .success(let url):
+            // The socket keeps the scheme the user typed — a `wss://` address is a
+            // legitimate socket target. The request paths below need the http(s)
+            // equivalent, and the trailing slash is dropped so they stay
+            // single-slashed.
+            parsedSocketURL = url
+            let normalized = ProviderURL.httpEquivalent(of: url).absoluteString
+            self.baseURL = normalized.hasSuffix("/") ? String(normalized.dropLast()) : normalized
+        case .failure(let invalid):
+            validSettings = false
+            settingsError = invalid.message
+            // Kept for logging/state readability only; nothing talks to it while
+            // `validSettings` is false.
+            self.baseURL = ProviderURL.cleaned(baseURL)
+            parsedSocketURL = Nightscout.unreachableSocketURL
         }
 
         manager = SocketManager(
-            socketURL: URL(string: self.baseURL)!,
+            socketURL: parsedSocketURL,
             config: [
                 .log(false),
                 .compress,
@@ -112,18 +121,25 @@ class Nightscout: Provider, @unchecked Sendable {
             return
         }
 
+        self.isBaseProvider = false
+        self.type = .nightscout
+
+        // An unusable address is reported straight away rather than waiting for
+        // a fetch that can never succeed.
+        guard validSettings else {
+            self.setIssue(settingsError, kind: .configuration)
+            return
+        }
+
         registerHandlers()
         if socket.status != .connected {
             connect()
         }
 
-        self.isBaseProvider = false
         Task {
             await self.fetch()
         }
         self.startTimer()
-
-        self.type = .nightscout
     }
 
     func connect() {

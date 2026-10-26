@@ -192,7 +192,9 @@ class Glucose: ObservableObject, Sendable {
 
         switch settings.cgmProvider {
         case .nightscout:
-            vs.providerURL = URL(string: VCRProxy.nightscout() ?? settings.nsURL)
+            // The liveness probe is a HEAD request, so a `ws://`/`wss://` address
+            // needs its http(s) equivalent.
+            vs.providerURL = ProviderURL.httpURL(from: VCRProxy.nightscout() ?? settings.nsURL)
         case .dexcomshare:
             vs.providerURL = URL(string: VCRProxy.dexcom(account: settings.dxEmail) ?? settings.dxServer.url)
         case .tandemsource:

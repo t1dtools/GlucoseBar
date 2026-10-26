@@ -35,7 +35,6 @@ struct CGMSettingsView: View {
         @EnvironmentObject var g: Glucose
 
         @FocusState var nsSecretFailedValidationFocus: Bool
-        @State var nsSecretFailedValidation: Bool = false
 
         var body: some View {
             VStack {
@@ -55,12 +54,6 @@ struct CGMSettingsView: View {
                         .focused($nsSecretFailedValidationFocus).onChange(of: s.nsSecret) { _, newVal in
                             s.nsSecret = newVal.trimmingCharacters(in: .whitespacesAndNewlines)
                         }
-                }
-                if nsSecretFailedValidation {
-                    HStack {
-                        Text("The Token is required for GlucoseBar to function correctly. Please ensure your Nightscout instance has one set up and use it here.").font(.footnote).foregroundColor(.red)
-                        Spacer()
-                    }
                 }
                 HStack {
                     Text("This token needs to have the permission \"readable\" in Nightscout.").font(.footnote)

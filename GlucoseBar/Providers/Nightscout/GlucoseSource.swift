@@ -101,7 +101,13 @@ struct GlucoseSource {
         let url = "\(baseURL)/api/v3/devicestatus?sort%24desc=created_at&limit=1&skip=0&fields=_all"
 
         do {
-            var request = URLRequest(url: URL(string: url)!, timeoutInterval: httpTimeout)
+            // Built from the validated base URL plus a fixed query; report a
+            // failure rather than trapping.
+            guard let requestURL = URL(string: url) else {
+                plog("Could not build devicestatus URL from base URL", level: .error)
+                return (.unknown, ProviderURL.Invalid.malformed.message)
+            }
+            var request = URLRequest(url: requestURL, timeoutInterval: httpTimeout)
             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
             request.addValue("application/json", forHTTPHeaderField: "Accept")
             request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -154,7 +160,11 @@ struct GlucoseSource {
         let url = "\(baseURL)/api/v3/devicestatus?sort%24desc=created_at&limit=1&skip=0&fields=_all"
 
         do {
-            var request = URLRequest(url: URL(string: url)!, timeoutInterval: httpTimeout)
+            guard let requestURL = URL(string: url) else {
+                plog("Could not build devicestatus URL from base URL", level: .error)
+                return empty
+            }
+            var request = URLRequest(url: requestURL, timeoutInterval: httpTimeout)
             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
             request.addValue("application/json", forHTTPHeaderField: "Accept")
             request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
