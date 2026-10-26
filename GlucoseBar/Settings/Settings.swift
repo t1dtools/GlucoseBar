@@ -13,6 +13,14 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 
     private let settingsQueue = DispatchQueue(label: "tools.t1d.GlucoseBar.settings", attributes: .concurrent)
 
+    /// The defaults store this source reads and writes. Injected so that tests
+    /// can run against a scratch suite instead of the user's real settings.
+    private let defaults: UserDefaults
+
+    /// Where provider credentials live. Injected so tests (and this app's own
+    /// previews) never touch the real keychain.
+    private let credentials: CredentialStoring
+
     // MARK: - Source identity
 
     /// The UUID that namespaces all UserDefaults keys for this source.
@@ -94,6 +102,10 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     @Published var aidChartShowCOBChart: Bool = true
 
     @Published var validSettings: Bool = false
+
+    /// Set when a credential could not be written to the keychain, so the settings
+    /// UI can say so instead of silently dropping what the user typed.
+    @Published var credentialSaveError: String?
     @Published var debugMode: Bool = false
 
     /// Debug-only VCR proxy base (empty = production URLs). Stored under a
@@ -107,8 +119,10 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 
     /// Designated initialiser. All UserDefaults keys are namespaced to `sourceId`
     /// so that multiple sources never collide.
-    public init(sourceId: UUID) {
+    public init(sourceId: UUID, defaults: UserDefaults = .standard, credentials: CredentialStoring = KeychainCredentialStore()) {
         self.sourceId = sourceId
+        self.defaults = defaults
+        self.credentials = credentials
         load()
         // Re-open the log file if debug mode was already enabled before this launch.
         // This is where file rotation happens: the previous session's debug.log gets
@@ -121,7 +135,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     /// Toggles debug mode and starts/stops the file logger accordingly.
     func setDebugMode(_ enabled: Bool) {
         debugMode = enabled
-        UserDefaults.standard.set(enabled, forKey: "debugMode")
+        defaults.set(enabled, forKey: "debugMode")
         if enabled {
             DebugLogger.shared.enable()
         } else {
@@ -132,8 +146,11 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     /// Convenience initialiser that generates a fresh UUID.
     /// Use for previews, one-off tests, and the throwaway instance inside
     /// `Glucose.init` (which is immediately replaced by `setSettings`).
+    ///
+    /// Uses the in-memory credential store on purpose: previews and the throwaway
+    /// instance must not touch the user's real keychain.
     public convenience init() {
-        self.init(sourceId: UUID())
+        self.init(sourceId: UUID(), credentials: InMemoryCredentialStore())
     }
 
     // MARK: - Key namespacing
@@ -141,6 +158,67 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     /// Returns a UserDefaults key namespaced to this source's UUID.
     private func key(_ base: String) -> String {
         "\(sourceId.uuidString).\(base)"
+    }
+
+    // MARK: - Credentials
+
+    /// Reads a credential, migrating a plaintext copy written by an earlier release
+    /// into the keychain the first time it is needed.
+    ///
+    /// The plaintext copy is only removed once the keychain write has succeeded, so
+    /// a failure (a locked keychain, say) leaves the credential working from its old
+    /// location rather than losing it. Idempotent: once the item exists it is
+    /// returned directly and the legacy key is never consulted again.
+    private func loadCredential(_ field: CredentialField) -> String {
+        do {
+            if let stored = try credentials.secret(for: field, sourceId: sourceId) {
+                return stored
+            }
+        } catch {
+            logger.dlog("Could not read \(field.label) from the keychain: \(error)", category: "settingsstore", level: .error)
+        }
+
+        let legacyKey = key(field.rawValue)
+        guard let legacy = defaults.string(forKey: legacyKey), !legacy.isEmpty else { return "" }
+
+        do {
+            try credentials.setSecret(legacy, for: field, sourceId: sourceId)
+            defaults.removeObject(forKey: legacyKey)
+            logger.dlog("Migrated \(field.label) into the keychain", category: "settingsstore", level: .default)
+        } catch {
+            // Keep the plaintext value — it still works, and the migration is retried
+            // on the next launch.
+            logger.dlog("Could not migrate \(field.label) into the keychain: \(error)", category: "settingsstore", level: .error)
+        }
+
+        return legacy
+    }
+
+    /// Writes a credential to the keychain and clears any plaintext copy left by an
+    /// older release. Never clears `credentialSaveError`: one field failing must not
+    /// be masked by the next one succeeding.
+    private func saveCredential(_ field: CredentialField, _ value: String) {
+        do {
+            if value.isEmpty {
+                try credentials.deleteSecret(for: field, sourceId: sourceId)
+            } else {
+                try credentials.setSecret(value, for: field, sourceId: sourceId)
+            }
+            defaults.removeObject(forKey: key(field.rawValue))
+        } catch {
+            credentialSaveError = String(localized: "GlucoseBar could not save your credentials to the Keychain. Check that your login keychain is unlocked, then try again.", comment: "Shown when writing a provider credential to the Keychain fails")
+            logger.dlog("Could not save \(field.label) to the keychain: \(error)", category: "settingsstore", level: .error)
+        }
+    }
+
+    /// Removes a credential from the keychain, plus any plaintext copy.
+    private func deleteCredential(_ field: CredentialField) {
+        do {
+            try credentials.deleteSecret(for: field, sourceId: sourceId)
+            defaults.removeObject(forKey: key(field.rawValue))
+        } catch {
+            logger.dlog("Could not delete \(field.label) from the keychain: \(error)", category: "settingsstore", level: .error)
+        }
     }
 
     // MARK: - Load / Save
@@ -152,8 +230,6 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     }
 
     private func loadInternal() {
-        let defaults = UserDefaults.standard
-
         defaults.register(defaults: [key("aidChartShowModeTimeline"): true])
 
         self.validSettings = defaults.bool(forKey: key("validSettings"))
@@ -173,11 +249,11 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 
         // Nightscout
         self.nsURL = defaults.string(forKey: key("nsURL")) ?? "https://my.nightscout.site"
-        self.nsSecret = defaults.string(forKey: key("nsSecret")) ?? ""
+        self.nsSecret = loadCredential(.nightscoutToken)
 
         // Dexcom Share
         self.dxEmail = defaults.string(forKey: key("dxEmail")) ?? "your@email.com"
-        self.dxPassword = defaults.string(forKey: key("dxPassword")) ?? ""
+        self.dxPassword = loadCredential(.dexcomPassword)
         let dxSrv = defaults.string(forKey: key("dxServer")) ?? DexcomServer.ous.url
         switch dxSrv {
         case DexcomServer.ous.url:
@@ -190,7 +266,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 
         // Libre LinkUp
         self.libreUsername = defaults.string(forKey: key("libreUsername")) ?? "your@email.com"
-        self.librePassword = defaults.string(forKey: key("librePassword")) ?? ""
+        self.librePassword = loadCredential(.librePassword)
         self.libreConnectionID = defaults.string(forKey: key("libreConnectionID")) ?? ""
         self.libreServer = defaults.string(forKey: key("libreServer")) ?? ""
 
@@ -289,7 +365,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 
         // Tandem Source
         self.tandemEmail = defaults.string(forKey: key("tandemEmail")) ?? "your@email.com"
-        self.tandemPassword = defaults.string(forKey: key("tandemPassword")) ?? ""
+        self.tandemPassword = loadCredential(.tandemPassword)
         self.tandemVerified = defaults.bool(forKey: key("tandemVerified"))
         let tdmRgn = defaults.string(forKey: key("tandemRegion")) ?? TandemRegion.us.rawValue
         self.tandemRegion = tdmRgn == TandemRegion.eu.rawValue ? .eu : .us
@@ -313,13 +389,17 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         }
     }
 
-    private func saveInternal() {
-        let defaults = UserDefaults.standard
+    /// Writes the current state to `defaults`. Called on the main actor by
+    /// `save()`; internal rather than private so tests can persist and then
+    /// assert without racing the async save queue.
+    func saveInternal() {
+        credentialSaveError = nil
         defaults.set(true, forKey: key("validSettings"))
         defaults.set(self.debugMode, forKey: "debugMode")
         defaults.set(self.vcrProxyAddress, forKey: "vcrProxyAddress")
-        defaults.set(self.glucoseUnit.presentable, forKey: key("glucoseUnit"))
-        defaults.set(self.cgmProvider.presentable, forKey: key("cgmProvider"))
+        // Persist stable identifiers, never localized display names.
+        defaults.set(self.glucoseUnit.rawValue, forKey: key("glucoseUnit"))
+        defaults.set(self.cgmProvider.rawValue, forKey: key("cgmProvider"))
 
 
         defaults.set(self.showTimeSince, forKey: key("showTimeSince"))
@@ -349,21 +429,21 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 
         // Nightscout
         defaults.set(self.nsURL, forKey: key("nsURL"))
-        defaults.set(self.nsSecret, forKey: key("nsSecret"))
+        saveCredential(.nightscoutToken, self.nsSecret)
 
         // Dexcom Share
         defaults.set(self.dxServer.url, forKey: key("dxServer"))
         defaults.set(self.dxEmail, forKey: key("dxEmail"))
-        defaults.set(self.dxPassword, forKey: key("dxPassword"))
+        saveCredential(.dexcomPassword, self.dxPassword)
 
         // Libre LinkUp
         defaults.set(self.libreServer, forKey: key("libreServer"))
         defaults.set(self.libreUsername, forKey: key("libreUsername"))
-        defaults.set(self.librePassword, forKey: key("librePassword"))
+        saveCredential(.librePassword, self.librePassword)
         defaults.set(self.libreConnectionID, forKey: key("libreConnectionID"))
 
         defaults.set(self.glucoseTarget, forKey: key("glucoseTarget"))
-        defaults.set(self.glucoseColorScheme.displayName, forKey: key("glucoseColorScheme"))
+        defaults.set(self.glucoseColorScheme.rawValue, forKey: key("glucoseColorScheme"))
         defaults.set(self.showHighThreshold, forKey: key("showHighThreshold"))
         defaults.set(self.showLowThreshold, forKey: key("showLowThreshold"))
         defaults.set(self.showTarget, forKey: key("showTarget"))
@@ -387,7 +467,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 
         // Tandem Source
         defaults.set(self.tandemEmail, forKey: key("tandemEmail"))
-        defaults.set(self.tandemPassword, forKey: key("tandemPassword"))
+        saveCredential(.tandemPassword, self.tandemPassword)
         defaults.set(self.tandemVerified, forKey: key("tandemVerified"))
         defaults.set(self.tandemRegion.rawValue, forKey: key("tandemRegion"))
         defaults.set(self.tandemPumpAssignmentId, forKey: key("tandemPumpAssignmentId"))
@@ -413,14 +493,27 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     func resetToDefaults() {
         settingsQueue.async(flags: .barrier) { [weak self] in
             Task { @MainActor in
-                guard let self = self else { return }
-                let prefix = "\(self.sourceId.uuidString)."
-                for k in UserDefaults.standard.dictionaryRepresentation().keys where k.hasPrefix(prefix) {
-                    UserDefaults.standard.removeObject(forKey: k)
-                }
-                self.loadInternal()
+                self?.resetToDefaultsInternal()
             }
         }
+    }
+
+    /// Internal so tests can run it synchronously; the body must remove the
+    /// source's keychain credentials as well as its `UserDefaults` keys.
+    func resetToDefaultsInternal() {
+        let prefix = "\(self.sourceId.uuidString)."
+        for k in self.defaults.dictionaryRepresentation().keys where k.hasPrefix(prefix) {
+            self.defaults.removeObject(forKey: k)
+        }
+        // The keychain entries are not part of the settings store, so they
+        // have to be removed explicitly — otherwise "reset this source"
+        // leaves the credentials behind forever.
+        do {
+            try self.credentials.deleteAll(for: self.sourceId)
+        } catch {
+            self.logger.dlog("Could not delete credentials for this source: \(error)", category: "settingsstore", level: .error)
+        }
+        self.loadInternal()
     }
 
     func deleteCGMProvider() {
@@ -432,28 +525,28 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         }
     }
 
-    private func deleteCGMProviderInternal() {
-        let defaults = UserDefaults.standard
-
+    /// Internal rather than private so tests can run it synchronously instead of
+    /// racing the settings queue.
+    func deleteCGMProviderInternal() {
         switch self.cgmProvider {
         case .nightscout:
             self.nsURL = ""
             self.nsSecret = ""
             defaults.removeObject(forKey: key("nsURL"))
-            defaults.removeObject(forKey: key("nsSecret"))
+            deleteCredential(.nightscoutToken)
         case .dexcomshare:
             self.dxServer = .ous
             self.dxEmail = ""
             self.dxPassword = ""
             defaults.removeObject(forKey: key("dxServer"))
             defaults.removeObject(forKey: key("dxEmail"))
-            defaults.removeObject(forKey: key("dxPassword"))
+            deleteCredential(.dexcomPassword)
         case .tandemsource:
             self.tandemEmail = ""
             self.tandemPassword = ""
             self.tandemVerified = false
             defaults.removeObject(forKey: key("tandemEmail"))
-            defaults.removeObject(forKey: key("tandemPassword"))
+            deleteCredential(.tandemPassword)
             defaults.removeObject(forKey: key("tandemVerified"))
         default:
             // noop
@@ -516,7 +609,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
     }
 
     func disableDebugMode() async -> Bool {
-        UserDefaults.standard.set(false, forKey: "debugMode")
+        defaults.set(false, forKey: "debugMode")
         load()
         return true
     }

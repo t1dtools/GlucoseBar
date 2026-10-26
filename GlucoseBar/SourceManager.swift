@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import SwiftUI
 
 /// App-level coordinator that owns the list of active `SourceState` instances.
@@ -13,11 +14,12 @@ final class SourceManager: ObservableObject {
     @Published var pendingSelectedSourceId: UUID? = nil
 
     private let defaults = UserDefaults.standard
-    private let sourceIdsKey = "sourceIds"
-    private let migrationFlagKey = "migratedToMultiSource"
+
+    static let sourceIdsKey = "sourceIds"
+    static let migrationFlagKey = "migratedToMultiSource"
 
     // All flat UserDefaults keys that existed before multi-source support.
-    private let legacyKeys: [String] = [
+    static let legacyFlatKeys: [String] = [
         "nsURL", "nsSecret",
         "dxServer", "dxEmail", "dxPassword",
         "libreServer", "libreUsername", "librePassword", "libreConnectionID",
@@ -94,7 +96,7 @@ final class SourceManager: ObservableObject {
 
     private func loadSourceIds() -> [UUID] {
         guard
-            let data = defaults.data(forKey: sourceIdsKey),
+            let data = defaults.data(forKey: Self.sourceIdsKey),
             let strings = try? JSONDecoder().decode([String].self, from: data)
         else { return [] }
         return strings.compactMap { UUID(uuidString: $0) }
@@ -103,15 +105,25 @@ final class SourceManager: ObservableObject {
     private func persistSourceIds() {
         let strings = sources.map { $0.id.uuidString }
         if let data = try? JSONEncoder().encode(strings) {
-            defaults.set(data, forKey: sourceIdsKey)
+            defaults.set(data, forKey: Self.sourceIdsKey)
         }
     }
 
-    /// Removes all `"\(id).*"` UserDefaults keys belonging to a deleted source.
+    /// Removes all `"\(id).*"` UserDefaults keys belonging to a deleted source, and
+    /// the source's credentials.
     private func removeUserDefaultsKeys(for id: UUID) {
         let prefix = "\(id.uuidString)."
         for key in defaults.dictionaryRepresentation().keys where key.hasPrefix(prefix) {
             defaults.removeObject(forKey: key)
+        }
+
+        // Credentials live in the keychain, a separate store, so they have to be
+        // deleted explicitly or they outlive the source that owned them.
+        do {
+            try KeychainCredentialStore().deleteAll(for: id)
+        } catch {
+            Logger(subsystem: "tools.t1d.GlucoseBar", category: "credentials")
+                .dlog("Could not delete credentials for a removed source: \(error)", category: "credentials", level: .error)
         }
     }
 
@@ -125,14 +137,34 @@ final class SourceManager: ObservableObject {
     /// - Sets `"migratedToMultiSource"` to prevent re-running on next launch.
     /// - Old flat keys are left in place and can be pruned in a future release.
     private func migrateFromLegacyIfNeeded() {
+        Self.migrateLegacyKeys(
+            in: defaults,
+            legacyKeys: Self.legacyFlatKeys,
+            sourceIdsKey: Self.sourceIdsKey,
+            migrationFlagKey: Self.migrationFlagKey
+        )
+    }
+
+    /// The migration itself, taking the `UserDefaults` to operate on so it can be
+    /// exercised against a scratch suite without a `SourceManager` (and therefore
+    /// without standing up live providers).
+    ///
+    /// Returns the id of the migrated source, or `nil` when nothing was migrated.
+    @discardableResult
+    static func migrateLegacyKeys(
+        in defaults: UserDefaults,
+        legacyKeys: [String],
+        sourceIdsKey: String,
+        migrationFlagKey: String,
+        newId: UUID = UUID()
+    ) -> UUID? {
         // Already migrated, or sourceIds already written by a previous run.
-        guard !defaults.bool(forKey: migrationFlagKey) else { return }
+        guard !defaults.bool(forKey: migrationFlagKey) else { return nil }
         guard defaults.data(forKey: sourceIdsKey) == nil else {
             defaults.set(true, forKey: migrationFlagKey)
-            return
+            return nil
         }
 
-        let newId = UUID()
         let prefix = "\(newId.uuidString)."
 
         for key in legacyKeys {
@@ -145,5 +177,7 @@ final class SourceManager: ObservableObject {
             defaults.set(data, forKey: sourceIdsKey)
         }
         defaults.set(true, forKey: migrationFlagKey)
+
+        return newId
     }
 }
