@@ -131,7 +131,10 @@ final class DebugLogger: @unchecked Sendable {
         case .fault:   levelTag = "FAULT  "
         default:       levelTag = "NOTICE "
         }
-        let line = "\(isoNow()) [\(levelTag)] [\(category)] \(message)\n"
+        // Redacted on the way to disk as well as in `Logger.dlog`: this file is
+        // the artefact users attach to public issue reports, so it has to be safe
+        // even for a caller that bypasses the logging extension.
+        let line = "\(isoNow()) [\(levelTag)] [\(category)] \(LogRedactor.redact(message))\n"
         handle.write(Data(line.utf8))
     }
 
@@ -147,6 +150,10 @@ final class DebugLogger: @unchecked Sendable {
 extension Logger {
     /// Logs to OSLog and, when debug mode is enabled, also writes to the debug log file.
     func dlog(_ message: String, category: String, level: OSLogType = .default) {
+        // The single choke point for both sinks. Everything the app logs goes
+        // through here, so credentials and personal data are stripped once, for
+        // OSLog and for the log file that gets attached to public issue reports.
+        let message = LogRedactor.redact(message)
         switch level {
         case .debug:
             self.debug("\(message, privacy: .public)")

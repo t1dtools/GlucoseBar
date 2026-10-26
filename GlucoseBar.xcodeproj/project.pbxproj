@@ -38,6 +38,8 @@
 		83BB00032B00000300000000 /* BasalRateSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83BB00042B00000400000000 /* BasalRateSettingsView.swift */; };
 		83CA4BBA2DE26ED3003E5A24 /* DeviceStatusResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CA4BB92DE26ECA003E5A24 /* DeviceStatusResponse.swift */; };
 		83CC00022F0000010000CC00 /* CodableColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC00012F0000010000CC00 /* CodableColor.swift */; };
+		8317A0022F0000010000A003 /* ProviderURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8317A0012F0000010000A002 /* ProviderURL.swift */; };
+		8317A0082F0000010000A009 /* LogRedactor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8317A0072F0000010000A008 /* LogRedactor.swift */; };
 		83CC00042F0000010000CC00 /* SourceConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC00032F0000010000CC00 /* SourceConfiguration.swift */; };
 		83CC00062F0000010000CC00 /* SourceState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC00052F0000010000CC00 /* SourceState.swift */; };
 		83CC00082F0000010000CC00 /* SourceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC00072F0000010000CC00 /* SourceManager.swift */; };
@@ -141,6 +143,8 @@
 		83BB00042B00000400000000 /* BasalRateSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasalRateSettingsView.swift; sourceTree = "<group>"; };
 		83CA4BB92DE26ECA003E5A24 /* DeviceStatusResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusResponse.swift; sourceTree = "<group>"; };
 		83CC00012F0000010000CC00 /* CodableColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodableColor.swift; sourceTree = "<group>"; };
+		8317A0012F0000010000A002 /* ProviderURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderURL.swift; sourceTree = "<group>"; };
+		8317A0072F0000010000A008 /* LogRedactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogRedactor.swift; sourceTree = "<group>"; };
 		83CC00032F0000010000CC00 /* SourceConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceConfiguration.swift; sourceTree = "<group>"; };
 		83CC00052F0000010000CC00 /* SourceState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceState.swift; sourceTree = "<group>"; };
 		83CC00072F0000010000CC00 /* SourceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceManager.swift; sourceTree = "<group>"; };
@@ -298,6 +302,7 @@
 				836313732ABF99210047C99D /* DispatchTimer.swift */,
 				836313752AC0808E0047C99D /* Glucose.swift */,
 				AA000001DEBUGLOGGER00001B /* DebugLogger.swift */,
+				8317A0072F0000010000A008 /* LogRedactor.swift */,
 				8381599C2BE4257F00A228F3 /* MainAppView.swift */,
 				838B25DE2BF0146F00D10DDA /* WelcomeView.swift */,
 				83CC00032F0000010000CC00 /* SourceConfiguration.swift */,
@@ -378,6 +383,7 @@
 				83DB10EE2DFF4118001ADCE7 /* LoopColor.swift */,
 				83DB10EC2DFF40AF001ADCE7 /* RelativeTime.swift */,
 				83CC00012F0000010000CC00 /* CodableColor.swift */,
+				8317A0012F0000010000A002 /* ProviderURL.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -645,6 +651,8 @@
 				AA000001DEBUGLOGGER00001A /* DebugLogger.swift in Sources */,
 				AA000002DEBUGSETTINGS001A /* DebugSettingsView.swift in Sources */,
 				83CC00022F0000010000CC00 /* CodableColor.swift in Sources */,
+				8317A0022F0000010000A003 /* ProviderURL.swift in Sources */,
+				8317A0082F0000010000A009 /* LogRedactor.swift in Sources */,
 				83CC00042F0000010000CC00 /* SourceConfiguration.swift in Sources */,
 				83CC00062F0000010000CC00 /* SourceState.swift in Sources */,
 				83CC00082F0000010000CC00 /* SourceManager.swift in Sources */,

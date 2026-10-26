@@ -107,13 +107,16 @@ struct TandemEndpoints {
     let redirectURI: String
 
     init(region: TandemRegion, vcrBase: String?) {
-        if let base = vcrBase {
-            let b = base.hasSuffix("/") ? base : base + "/"
-            loginPageURL = URL(string: b + "tandem")!
-            loginAPIURL = URL(string: b + "tandem/accounts/api/login")!
-            authorizeURL = URL(string: b + "tandem/accounts/api/connect/authorize")!
-            tokenURL = URL(string: b + "tandem/accounts/api/connect/token")!
-            sourceURL = URL(string: b + "tandem")!
+        // The base is validated in `VCRProxy` before it reaches here, so these joins
+        // always succeed. `appending(path:)` keeps that guarantee without a force
+        // unwrap: a malformed debug address used to trap in this initialiser and,
+        // with a Tandem source, crash-loop the app on launch.
+        if let base = vcrBase, let baseURL = URL(string: base) {
+            loginPageURL = baseURL.appending(path: "tandem")
+            loginAPIURL = baseURL.appending(path: "tandem/accounts/api/login")
+            authorizeURL = baseURL.appending(path: "tandem/accounts/api/connect/authorize")
+            tokenURL = baseURL.appending(path: "tandem/accounts/api/connect/token")
+            sourceURL = baseURL.appending(path: "tandem")
         } else {
             loginPageURL = region.loginPageURL
             loginAPIURL = region.loginAPIURL
