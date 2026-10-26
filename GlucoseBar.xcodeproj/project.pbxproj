@@ -78,6 +78,7 @@
 		83E198172DEF269F00B0F995 /* AidSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E198162DEF269F00B0F995 /* AidSettingsView.swift */; };
 		83E323812AC21DDD00CB5206 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E323802AC21DDD00CB5206 /* Settings.swift */; };
 		83E3C8112DFF300300B0F996 /* PreferencesController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E3C8102DFF300000B0F996 /* PreferencesController.swift */; };
+		8317A0062F0000010000A007 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 8317A0052F0000010000A006 /* PrivacyInfo.xcprivacy */; };
 		83F2FC602FDFEE13000B7ACD /* GlucoseThresholdsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F2FC5F2FDFEE0C000B7ACD /* GlucoseThresholdsView.swift */; };
 		83F850282E429F2A00F8699F /* GlucoseDeltaSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F850272E429F2400F8699F /* GlucoseDeltaSettingsView.swift */; };
 		83F8502A2E42A02400F8699F /* GlucoseTrendSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F850292E42A01F00F8699F /* GlucoseTrendSettingsView.swift */; };
@@ -181,6 +182,7 @@
 		83E198162DEF269F00B0F995 /* AidSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AidSettingsView.swift; sourceTree = "<group>"; };
 		83E323802AC21DDD00CB5206 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		83E3C8102DFF300000B0F996 /* PreferencesController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesController.swift; sourceTree = "<group>"; };
+		8317A0052F0000010000A006 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xcprivacy; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		83F2FC5F2FDFEE0C000B7ACD /* GlucoseThresholdsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseThresholdsView.swift; sourceTree = "<group>"; };
 		83F850272E429F2400F8699F /* GlucoseDeltaSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseDeltaSettingsView.swift; sourceTree = "<group>"; };
 		83F850292E42A01F00F8699F /* GlucoseTrendSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseTrendSettingsView.swift; sourceTree = "<group>"; };
@@ -290,6 +292,7 @@
 				836351832ABF6A9000BDAA96 /* GlucoseBarApp.swift */,
 				836351872ABF6A9000BDAA96 /* Assets.xcassets */,
 				8363518C2ABF6A9000BDAA96 /* GlucoseBar.entitlements */,
+				8317A0052F0000010000A006 /* PrivacyInfo.xcprivacy */,
 				836351892ABF6A9000BDAA96 /* Preview Content */,
 				8363136D2ABF8CAA0047C99D /* GlucoseEntry.swift */,
 				836313732ABF99210047C99D /* DispatchTimer.swift */,
@@ -563,6 +566,7 @@
 				83849C072E5CF18200BFD090 /* Localizable.xcstrings in Resources */,
 				836351882ABF6A9000BDAA96 /* Assets.xcassets in Resources */,
 				83849C052E5CF18200BFD090 /* InfoPlist.xcstrings in Resources */,
+				8317A0062F0000010000A007 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
