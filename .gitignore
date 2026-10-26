@@ -2,3 +2,12 @@ GlucoseBar.xcodeproj/xcuserdata/
 GoogleService-Info.plist
 
 build/
+
+# Captured Tandem Source API responses, used while developing the pump-log
+# parser. They contain real pump data (basal rates, boluses, CGM readings) and
+# device identifiers, so they must never be committed.
+tandemsource.json
+
+# Node version pin. The app has no Node component; this is a leftover from the
+# local tooling that used to live in .opencode/.
+.nvmrc
