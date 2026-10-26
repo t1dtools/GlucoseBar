@@ -1,1 +1,62 @@
+name: ci
 
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    # Explicit rather than macos-latest so a runner image change cannot silently
+    # change the toolchain under a release. Bump deliberately.
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Build
+        run: |
+          xcodebuild \
+            -project GlucoseBar.xcodeproj \
+            -scheme GlucoseBar \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            -derivedDataPath build/ci \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Test
+        run: |
+          xcodebuild \
+            -project GlucoseBar.xcodeproj \
+            -scheme GlucoseBar \
+            -destination 'platform=macOS' \
+            -derivedDataPath build/ci \
+            CODE_SIGNING_ALLOWED=NO \
+            test
+
+      # The shipping configuration is Release, so build it too: it is the only
+      # thing that catches code hidden behind `#if DEBUG` and Release-only
+      # optimization problems.
+      - name: Release build
+        run: |
+          xcodebuild \
+            -project GlucoseBar.xcodeproj \
+            -scheme GlucoseBar \
+            -configuration Release \
+            -destination 'platform=macOS' \
+            -derivedDataPath build/ci \
+            CODE_SIGNING_ALLOWED=NO \
+            build
