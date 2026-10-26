@@ -68,6 +68,20 @@ git clone https://github.com/t1dtools/GlucoseBar.git
 open GlucoseBar/GlucoseBar.xcodeproj
 ```
 
+### Running the tests
+
+The `GlucoseBarTests` target covers provider response decoding, settings
+persistence and migration, and URL validation. Run it with:
+
+```
+xcodebuild -project GlucoseBar.xcodeproj -scheme GlucoseBar \
+  -destination 'platform=macOS' test
+```
+
+The tests run against a scratch `UserDefaults` suite, so they never touch your
+own GlucoseBar settings. The same build and test run happens in CI on every pull
+request (see `.github/workflows/ci.yml`).
+
 ## Disclaimer
 
 GlucoseBar is for monitoring purposes only. Do not use the data from GlucoseBar for medical decisions.
