@@ -80,6 +80,7 @@
 		83E198172DEF269F00B0F995 /* AidSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E198162DEF269F00B0F995 /* AidSettingsView.swift */; };
 		83E323812AC21DDD00CB5206 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E323802AC21DDD00CB5206 /* Settings.swift */; };
 		83E3C8112DFF300300B0F996 /* PreferencesController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E3C8102DFF300000B0F996 /* PreferencesController.swift */; };
+		8317A0042F0000010000A005 /* SettingsIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8317A0032F0000010000A004 /* SettingsIdentifier.swift */; };
 		8317A0062F0000010000A007 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 8317A0052F0000010000A006 /* PrivacyInfo.xcprivacy */; };
 		83F2FC602FDFEE13000B7ACD /* GlucoseThresholdsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F2FC5F2FDFEE0C000B7ACD /* GlucoseThresholdsView.swift */; };
 		83F850282E429F2A00F8699F /* GlucoseDeltaSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F850272E429F2400F8699F /* GlucoseDeltaSettingsView.swift */; };
@@ -186,6 +187,7 @@
 		83E198162DEF269F00B0F995 /* AidSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AidSettingsView.swift; sourceTree = "<group>"; };
 		83E323802AC21DDD00CB5206 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		83E3C8102DFF300000B0F996 /* PreferencesController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesController.swift; sourceTree = "<group>"; };
+		8317A0032F0000010000A004 /* SettingsIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsIdentifier.swift; sourceTree = "<group>"; };
 		8317A0052F0000010000A006 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xcprivacy; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		83F2FC5F2FDFEE0C000B7ACD /* GlucoseThresholdsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseThresholdsView.swift; sourceTree = "<group>"; };
 		83F850272E429F2400F8699F /* GlucoseDeltaSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseDeltaSettingsView.swift; sourceTree = "<group>"; };
@@ -439,6 +441,7 @@
 				83E323802AC21DDD00CB5206 /* Settings.swift */,
 				83CC000B2F0000010000CC00 /* SymbolPickerView.swift */,
 				83E3C8102DFF300000B0F996 /* PreferencesController.swift */,
+				8317A0032F0000010000A004 /* SettingsIdentifier.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -660,6 +663,7 @@
 				83CC000C2F0000010000CC00 /* SymbolPickerView.swift in Sources */,
 				83CC000E2F0000010000CC00 /* MenuBarCoordinator.swift in Sources */,
 				83E3C8112DFF300300B0F996 /* PreferencesController.swift in Sources */,
+				8317A0042F0000010000A005 /* SettingsIdentifier.swift in Sources */,
 				83DEAD0126DEAD0100000000 /* TandemSource.swift in Sources */,
 				83DEAD0226DEAD0200000000 /* TandemLogin.swift in Sources */,
 				83DEAD0326DEAD0300000000 /* TandemResponseModels.swift in Sources */,

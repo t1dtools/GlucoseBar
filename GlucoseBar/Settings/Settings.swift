@@ -235,33 +235,23 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
 
         self.zenMode = defaults.bool(forKey: key("zenMode"))
 
+        // Legacy values were stored as localized display names, so resolve those
+        // too — otherwise changing the app language silently reset the provider.
+        // See SettingsIdentifier.
         let cgmProv = defaults.string(forKey: key("cgmProvider")) ?? ""
-        switch cgmProv {
-        case CGMProvider.simulator.presentable:
-            self.cgmProvider = .simulator
-            self.logger.dlog("cgmProvider was simulator", category: "settingsstore", level: .default)
-        case CGMProvider.nightscout.presentable:
-            self.cgmProvider = .nightscout
-            self.logger.dlog("cgmProvider was nightscout", category: "settingsstore", level: .default)
-        case CGMProvider.dexcomshare.presentable:
-            self.cgmProvider = .dexcomshare
-            self.logger.dlog("cgmProvider was dexcomshare", category: "settingsstore", level: .default)
-        case CGMProvider.tandemsource.presentable:
-            self.cgmProvider = .tandemsource
-            self.logger.dlog("cgmProvider was tandemsource", category: "settingsstore", level: .default)
-        default:
+        if let stored = SettingsIdentifier.resolve(cgmProv, in: CGMProvider.self, sourceName: { $0.presentable }) {
+            self.cgmProvider = stored
+            self.logger.dlog("cgmProvider was \(stored.rawValue)", category: "settingsstore", level: .default)
+        } else {
             self.cgmProvider = .null
-            self.logger.dlog("cgmProvider was default", category: "settingsstore", level: .default)
+            self.logger.dlog("cgmProvider was unset or unrecognised, defaulting to none", category: "settingsstore", level: .default)
         }
 
-        let gunit = defaults.string(forKey: key("glucoseUnit")) ?? GlucoseUnit.mmoll.presentable
-        switch gunit {
-        case GlucoseUnit.mmoll.presentable:
+        // An absent unit has always meant mmol/L; an unrecognised one means mg/dL.
+        if let storedUnit = defaults.string(forKey: key("glucoseUnit")) {
+            self.glucoseUnit = SettingsIdentifier.resolve(storedUnit, in: GlucoseUnit.self, sourceName: { $0.presentable }) ?? .mgdl
+        } else {
             self.glucoseUnit = .mmoll
-        case GlucoseUnit.mgdl.presentable:
-            self.glucoseUnit = .mgdl
-        default:
-            self.glucoseUnit = .mgdl
         }
 
         self.glucoseTarget = defaults.double(forKey: key("glucoseTarget"))
@@ -269,15 +259,8 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
             self.glucoseTarget = 100.0
         }
 
-        let colorScheme = defaults.string(forKey: key("glucoseColorScheme")) ?? GlucoseColorScheme.dynamicColor.displayName
-        switch colorScheme {
-        case GlucoseColorScheme.staticColor.displayName:
-            self.glucoseColorScheme = .staticColor
-        case GlucoseColorScheme.dynamicColor.displayName:
-            self.glucoseColorScheme = .dynamicColor
-        default:
-            self.glucoseColorScheme = .dynamicColor
-        }
+        let colorScheme = defaults.string(forKey: key("glucoseColorScheme")) ?? ""
+        self.glucoseColorScheme = SettingsIdentifier.resolve(colorScheme, in: GlucoseColorScheme.self, sourceName: { $0.displayName }) ?? .dynamicColor
 
         self.showHighThreshold = defaults.bool(forKey: key("showHighThreshold"))
         self.showLowThreshold = defaults.bool(forKey: key("showLowThreshold"))
@@ -290,15 +273,8 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         self.trioBarShowEventualGlucose = defaults.bool(forKey: key("trioBarShowEventualGlucose"))
 
         self.aidChartShowForecast = defaults.bool(forKey: key("trioChartShowForecast"))
-        let forecastDisplay = defaults.string(forKey: key("trioChartForecastDisplay")) ?? ForecastDisplay.lines.presentable
-        switch forecastDisplay {
-        case ForecastDisplay.lines.presentable:
-            self.aidChartForecastDisplay = .lines
-        case ForecastDisplay.cone.presentable:
-            self.aidChartForecastDisplay = .cone
-        default:
-            self.aidChartForecastDisplay = .lines
-        }
+        let forecastDisplay = defaults.string(forKey: key("trioChartForecastDisplay")) ?? ""
+        self.aidChartForecastDisplay = SettingsIdentifier.resolve(forecastDisplay, in: ForecastDisplay.self, sourceName: { $0.presentable }) ?? .lines
 
         self.aidChartShowIOB = defaults.bool(forKey: key("trioChartShowIOB"))
         self.aidChartShowCOB = defaults.bool(forKey: key("trioChartShowCOB"))
@@ -397,7 +373,7 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         defaults.set(self.trioBarShowCOB, forKey: key("trioBarShowCOB"))
         defaults.set(self.trioBarShowEventualGlucose, forKey: key("trioBarShowEventualGlucose"))
         defaults.set(self.aidChartShowForecast, forKey: key("trioChartShowForecast"))
-        defaults.set(self.aidChartForecastDisplay.presentable, forKey: key("trioChartForecastDisplay"))
+        defaults.set(self.aidChartForecastDisplay.rawValue, forKey: key("trioChartForecastDisplay"))
         defaults.set(self.aidChartShowIOB, forKey: key("trioChartShowIOB"))
         defaults.set(self.aidChartShowCOB, forKey: key("trioChartShowCOB"))
         defaults.set(self.aidChartShowEventualGlucose, forKey: key("trioChartShowEventualGlucose"))
