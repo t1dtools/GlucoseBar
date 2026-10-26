@@ -138,14 +138,58 @@ struct CGMSettingsView: View {
         @State var isDeletingCGMProvider: Bool = false
         @State var cgmCredentialsError: Bool = false
         @State var cgmCredentialsSuccess: Bool = false
+        @State var cgmValidationIssue: ProviderIssueKind = .none
         @State var validatedProvider: CGMProvider = .null
 
-        @FocusState var nsSecretFailedValidationFocus: Bool
-        @State var nsSecretFailedValidation: Bool = false
+        /// Message shown under the Save button when a field can not be used.
+        /// Validation owns the Save button, so the reason has to be rendered
+        /// here: the `nsSecretFailedValidation` flag this used to set lived in a
+        /// sibling view and never reached the screen.
+        @State var settingsSaveError: String?
+
+        /// Result copy keyed off the failure classification, so a wrong password
+        /// reads differently from a temporary outage.
+        private var validationErrorMessage: String {
+            switch cgmValidationIssue {
+            case .credentials: return String(localized: "Invalid credentials — check the details above")
+            case .configuration: return String(localized: "Check the settings above")
+            case .apiChange: return String(localized: "This service changed and is temporarily unavailable")
+            default: return String(localized: "Service unreachable")
+            }
+        }
+
+        private var validationErrorIcon: String {
+            cgmValidationIssue == .credentials ? "key.slash" : "exclamationmark.triangle"
+        }
+
+        /// Validates the fields that both Save and Test Connection depend on,
+        /// and normalises the server URL so what gets stored is exactly what was
+        /// checked. Returns false (with `settingsSaveError` set) when the user
+        /// still has something to fix.
+        private func validateFields() -> Bool {
+            settingsSaveError = nil
+
+            guard s.cgmProvider == .nightscout else { return true }
+
+            switch ProviderURL.validate(s.nsURL) {
+            case .success(let url):
+                s.nsURL = url.absoluteString
+            case .failure(let invalid):
+                settingsSaveError = invalid.message
+                return false
+            }
+
+            guard s.nsSecret.count > 0 else {
+                settingsSaveError = String(localized: "The Token is required for GlucoseBar to function correctly. Please ensure your Nightscout instance has one set up and use it here.", comment: "Validation message shown when the Nightscout token field is left blank")
+                return false
+            }
+
+            return true
+        }
 
         var body: some View {
             if let providerIssue = g.provider.providerIssue {
-                Text("Provider issue: \(providerIssue)")
+                Text("Provider issue: \(providerIssue)").fixedSize(horizontal: false, vertical: true)
             }
             HStack {
                 if s.cgmProvider != .simulator {
@@ -169,30 +213,29 @@ struct CGMSettingsView: View {
                     }
 
                     Button(action: {
-                        nsSecretFailedValidation = false
-                        if s.cgmProvider == .nightscout && s.nsSecret.count == 0 {
-                            nsSecretFailedValidation = true
-                            return
-                        }
+                        guard validateFields() else { return }
 
                         isValidating = true
                         Task {
                             validatedProvider = s.cgmProvider
                             g.reset(s)
-                            let providerTest = await s.testCGMProvider()
+                            let providerIssue = await s.testCGMProvider()
 
-                            cgmCredentialsError = !providerTest
-                            cgmCredentialsSuccess = providerTest
+                            cgmValidationIssue = providerIssue
+                            cgmCredentialsError = providerIssue != .none
+                            cgmCredentialsSuccess = providerIssue == .none
                             isValidating = false
-                            s.validSettings = providerTest
+                            s.validSettings = providerIssue == .none
                         }
                     }) {
                         Text("Test Connection")
                     }.disabled(isValidating)
                 }
                 if !isValidating && cgmCredentialsError && s.cgmProvider == validatedProvider {
-                    Text("Invalid credentials or service unreachable").foregroundColor(.orange)
-                    Image(systemName: "exclamationmark.triangle").foregroundColor(.orange)
+                    HStack {
+                        Text(validationErrorMessage).foregroundColor(.orange)
+                        Image(systemName: validationErrorIcon).foregroundColor(.orange)
+                    }
                 }
                 if !isValidating && cgmCredentialsSuccess && s.cgmProvider == validatedProvider {
                     HStack {
@@ -208,14 +251,27 @@ struct CGMSettingsView: View {
                 }
                 Spacer()
                 Button("Save") {
-                    nsSecretFailedValidation = false
-                    if s.cgmProvider == .nightscout && s.nsSecret.count == 0 {
-                        nsSecretFailedValidation = true
-                        return
-                    }
+                    guard validateFields() else { return }
                     s.save()
                     g.reset(s)
                 }.disabled(isValidating)
+            }
+
+            if let settingsSaveError {
+                HStack {
+                    Text(settingsSaveError).font(.footnote).foregroundColor(.red).fixedSize(horizontal: false, vertical: true)
+                    Spacer()
+                }
+            }
+
+            // A credential that could not be written to the Keychain has to be said
+            // out loud: silently keeping only the old value would look like the save
+            // worked.
+            if let credentialSaveError = s.credentialSaveError {
+                HStack {
+                    Text(credentialSaveError).font(.footnote).foregroundColor(.red).fixedSize(horizontal: false, vertical: true)
+                    Spacer()
+                }
             }
         }
     }

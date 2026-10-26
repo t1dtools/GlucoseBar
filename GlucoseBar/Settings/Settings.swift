@@ -554,7 +554,11 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         }
     }
 
-    func testCGMProvider() async -> Bool {
+    /// Runs the provider's credential check and returns the classified issue.
+    /// `.none` means the credentials were accepted. Providers set their own
+    /// `issueKind` on failure; `.transient` is the safe fallback when one does
+    /// not classify.
+    func testCGMProvider() async -> ProviderIssueKind {
         var provider: Provider
         self.logger.dlog("testCGMProvider: \(self.cgmProvider.presentable)", category: "settingsstore", level: .default)
         switch self.cgmProvider {
@@ -572,18 +576,27 @@ class SettingsStore: ObservableObject, @unchecked Sendable {
         }
 
         self.logger.dlog("testCGMProvider calling verifyCredentials with provider: \(provider.type.presentable)", category: "settingsstore", level: .default)
-        return await provider.verifyCredentials()
+        let verified = await provider.verifyCredentials()
+        if verified { return .none }
+        return provider.issueKind == .none ? .transient : provider.issueKind
     }
 
     func resetApplication() async {
-        let installID = UserDefaults.standard.string(forKey: "GlucoseBar.installID")
+        let installID = defaults.string(forKey: "GlucoseBar.installID")
         if let id = Bundle.main.bundleIdentifier {
-            UserDefaults.standard.removePersistentDomain(forName: id)
+            defaults.removePersistentDomain(forName: id)
+        }
+        // Every source's credentials, not just this one: the whole settings store is
+        // being wiped, so the keychain has to follow.
+        do {
+            try credentials.deleteAllSecrets()
+        } catch {
+            logger.dlog("Could not delete credentials during a full reset: \(error)", category: "settingsstore", level: .error)
         }
         if let installID {
-            UserDefaults.standard.set(installID, forKey: "GlucoseBar.installID")
+            defaults.set(installID, forKey: "GlucoseBar.installID")
         }
-        UserDefaults.standard.set(true, forKey: "debugMode")
+        defaults.set(true, forKey: "debugMode")
         restartApp()
     }
 

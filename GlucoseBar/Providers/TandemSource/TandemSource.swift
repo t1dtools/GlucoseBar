@@ -105,18 +105,25 @@ class TandemSource: Provider, @unchecked Sendable {
     @MainActor
     private func authenticate() async -> Bool {
         if isAuthenticating { return false }
+
+        // Check the fields before spending a network round-trip on them.
+        if email.isEmpty || password.isEmpty {
+            setIssue(String(localized: "Tandem Source email and password are required."), kind: .configuration)
+            return false
+        }
+
         if unsuccessfulAuthAttempts > maxAuthAttempts {
             if Date().timeIntervalSince(lastAuthAttempt) > 900 {
                 unsuccessfulAuthAttempts = 0
             } else {
                 plog("Auth locked: \(unsuccessfulAuthAttempts) failed attempts", category: "tandemsource", level: .error)
-                providerIssue = "Unable to connect to Tandem Source after \(maxAuthAttempts) attempts. Please check your credentials."
+                setIssue(String(localized: "Tandem Source rejected your sign-in several times. Check your email and password in Settings."), kind: .credentials)
                 return false
             }
         }
 
         isAuthenticating = true
-        providerIssue = nil
+        clearIssue()
         plog("Authenticating (attempt \(unsuccessfulAuthAttempts + 1))...", category: "tandemsource", level: .info)
 
         do {
@@ -144,9 +151,11 @@ class TandemSource: Provider, @unchecked Sendable {
             if !isNetworkError { unsuccessfulAuthAttempts += 1 }
             lastAuthAttempt = Date()
             if unsuccessfulAuthAttempts > maxAuthAttempts {
-                providerIssue = "Unable to connect to Tandem Source after \(maxAuthAttempts) attempts. Please check your credentials."
+                setIssue(String(localized: "Tandem Source rejected your sign-in several times. Check your email and password in Settings."), kind: .credentials)
+            } else if (error as? TandemLoginError) == .invalidCredentials {
+                setIssue(String(localized: "Tandem Source rejected your sign-in. Check your email and password in Settings."), kind: .credentials)
             } else {
-                providerIssue = "Tandem Source: \(error.localizedDescription)"
+                setIssue(String(localized: "Tandem Source: ") + error.localizedDescription, kind: .transient)
             }
             isAuthenticating = false
             return false
@@ -235,7 +244,7 @@ class TandemSource: Provider, @unchecked Sendable {
         // Tandem-side API contract break (e.g. the `eventIds` -> `eventCodes`
         // rename, 2026-10-01). The error popover pairs this with a
         // "Report Issue on GitHub" button that prefills an issue.
-        providerIssue = "Experiencing issues with Tandem (error code: TANDEM-API-CHANGE). Your data will resume automatically once Tandem responds. If it keeps happening, report it below so we can investigate."
+        setIssue(String(localized: "Experiencing issues with Tandem (error code: TANDEM-API-CHANGE). Your data will resume automatically once Tandem responds. If it keeps happening, report it below so we can investigate."), kind: .apiChange)
         plog("\(endpoint) failed (\(detail)); next fetch in \(Int(wait))s (consecutive HTTP failures: \(consecutiveFetchFailures))", category: "tandemsource", level: .error)
     }
 
@@ -246,7 +255,7 @@ class TandemSource: Provider, @unchecked Sendable {
         guard consecutiveFetchFailures > 0 else { return }
         consecutiveFetchFailures = 0
         nextFetchAllowedAt = .distantPast
-        providerIssue = nil
+        clearIssue()
         plog("Tandem fetch recovered; backoff reset", category: "tandemsource", level: .info)
     }
 

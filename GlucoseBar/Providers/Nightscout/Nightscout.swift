@@ -324,8 +324,8 @@ class Nightscout: Provider, @unchecked Sendable {
             return
         }
 
-        if !baseURL.hasPrefix("http://") && !baseURL.hasPrefix("https://") {
-            self.providerIssue = "Invalid Nightscout URL. It must start with http:// or https://"
+        guard validSettings else {
+            self.setIssue(settingsError, kind: .configuration)
             return
         }
 
@@ -336,7 +336,7 @@ class Nightscout: Provider, @unchecked Sendable {
                 unsuccessfulAuthAttempts = 0
                 lastAuthFailureDate = nil
             } else {
-                self.providerIssue = "Unable to connect to Nightscout after 5 attempts. Please check your credentials."
+                self.setIssue(String(localized: "Nightscout rejected your sign-in several times. Check your Nightscout URL and access token in Settings."), kind: .credentials)
                 return
             }
         }
@@ -346,11 +346,15 @@ class Nightscout: Provider, @unchecked Sendable {
         }
 
         if !isAuthValid() {
-            self.providerIssue = "Unable to fetch due to unknown issue. Please ensure the Nightscout Server URL is correct and begins with http:// or https://"
+            // Do not clobber a more specific classification (e.g. a credential
+            // rejection) set by authenticate() just above.
+            if issueKind == .none {
+                self.setIssue(String(localized: "Unable to fetch from Nightscout. Please ensure the Nightscout Server URL is correct and begins with http:// or https://, and that your access token is valid."), kind: .configuration)
+            }
             return
         }
 
-        self.providerIssue = nil
+        self.clearIssue()
 
         var url = "\(baseURL)/api/v3/entries?sort%24desc=date&fields=sgv%2Ctrend%2Cdirection%2Cdate%2Cidentifier"
 
@@ -377,8 +381,15 @@ class Nightscout: Provider, @unchecked Sendable {
         lastFetch = Date()
 
         let lim = limit // Needs to be a constant to not be "Reference to captured var 'limit' in concurrently-executing code"
+        // `url` is built from the validated base URL plus a fixed query, so a
+        // failure here is a programming error rather than user input — still,
+        // report it instead of trapping.
+        guard let entriesURL = URL(string: url) else {
+            self.setIssue(ProviderURL.Invalid.malformed.message, kind: .configuration)
+            return
+        }
         do {
-            var request = URLRequest(url: URL(string: url)!, timeoutInterval: httpTimeout)
+            var request = URLRequest(url: entriesURL, timeoutInterval: httpTimeout)
             request.cachePolicy = .reloadIgnoringLocalCacheData
             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
             request.addValue("application/json", forHTTPHeaderField: "Accept")
@@ -396,7 +407,7 @@ class Nightscout: Provider, @unchecked Sendable {
                 noteTransportFailure()
                 self.plog("Unable to cast response to HTTPURLResponse", category: "nightscout", level: .error)
                 Task { @MainActor in
-                    self.providerIssue = "Unable to get glucose data: Empty response from server."
+                    self.setIssue(String(localized: "Unable to get glucose data: Empty response from server."), kind: .transient)
                 }
                 return
             }
@@ -450,32 +461,33 @@ class Nightscout: Provider, @unchecked Sendable {
                 } catch DecodingError.dataCorrupted(_) {
                     Task { @MainActor [weak self] in
                         guard let self = self else { return }
-                        self.providerIssue = "Unable to read data from Nightscout: Data corrupted."
+                        self.setIssue(String(localized: "Unable to read data from Nightscout: Data corrupted."), kind: .transient)
                     }
                 } catch let DecodingError.keyNotFound(key, _) {
                     Task { @MainActor [weak self] in
                         guard let self = self else { return }
-                        self.providerIssue = "Unable to read data from Nightscout: Missing key \(key)"
+                        self.setIssue(String(localized: "Unable to read data from Nightscout: Missing key ") + "\(key)", kind: .transient)
                     }
                 } catch DecodingError.valueNotFound(_, _) {
                     Task { @MainActor [weak self] in
                         guard let self = self else { return }
-                        self.providerIssue = "Unable to read data from Nightscout: Missing required value"
+                        self.setIssue(String(localized: "Unable to read data from Nightscout: Missing required value"), kind: .transient)
                     }
                 } catch DecodingError.typeMismatch(_, _) {
                     Task { @MainActor [weak self] in
                         guard let self = self else { return }
-                        self.providerIssue = "Unable to read data from Nightscout: Value type mismatch. Is this a new version of Nightscout?"
+                        self.setIssue(String(localized: "Unable to read data from Nightscout: Value type mismatch. Is this a new version of Nightscout?"), kind: .transient)
                     }
                 } catch {
                     self.plog("Error parsing NS response: \(String(describing: error))", category: "nightscout", level: .error)
                     Task { @MainActor [weak self] in
                         guard let self = self else { return }
-                        self.providerIssue = "Unable to parse glucose data from nightscout: Error unknown."
+                        self.setIssue(String(localized: "Unable to parse glucose data from nightscout: Error unknown."), kind: .transient)
                     }
                 }
-            } else if res!.statusCode == 401 {
+            } else if res!.statusCode == 401 || res!.statusCode == 403 {
                 self.auth = nil
+                self.setIssue(String(localized: "Nightscout rejected your sign-in. Check your Nightscout URL and access token in Settings."), kind: .credentials)
 
                 return
             } else {
@@ -483,7 +495,7 @@ class Nightscout: Provider, @unchecked Sendable {
                     let result = try JSONDecoder().decode(NightscoutEntriesErrorResponse.self, from: data)
                     Task { @MainActor [weak self] in
                         guard let self = self else { return }
-                        self.providerIssue = "Error from Nightscout: \(result.message)"
+                        self.setIssue(String(localized: "Error from Nightscout: ") + result.message, kind: .transient)
                     }
                 } catch {
                     self.plog("Error parsing NS error response: \(String(describing: error))", category: "nightscout", level: .error)
@@ -500,7 +512,7 @@ class Nightscout: Provider, @unchecked Sendable {
                     err = "Request timed out"
                 }
 
-                self.providerIssue = err
+                self.setIssue(err, kind: .transient)
             }
         }
     }
@@ -580,17 +592,32 @@ class Nightscout: Provider, @unchecked Sendable {
         }
 
         isAuthenticating = true
+        // Every exit path below — rejection, transport error, decode error — has
+        // to clear this. It previously leaked on the rejection paths, which left
+        // the provider stuck as "already authenticating" until relaunch and made
+        // it impossible to recover by fixing the token in Settings.
+        defer { isAuthenticating = false }
 
-        if !baseURL.hasPrefix("https://") && !baseURL.hasPrefix("http://") {
-            self.providerIssue = "Invalid Nightscout URL. Must start with either http:// or https://"
+        guard validSettings else {
+            self.setIssue(settingsError, kind: .configuration)
             return
         }
 
-        self.providerIssue = nil
-        self.isAuthenticating = true
+        self.clearIssue()
 
         self.plog("Nightscout.authenticate", category: "nightscout", level: .debug)
-        var request = URLRequest(url: URL(string: "\(baseURL)/api/v2/authorization/request/\(token)")!, timeoutInterval: httpTimeout)
+
+        // The token is a path segment here, so encode it: a token containing a
+        // space or a slash used to make the URL unparseable (a hard crash when
+        // the result was force-unwrapped, and a silent failure once guarded).
+        var allowedTokenCharacters = CharacterSet.alphanumerics
+        allowedTokenCharacters.insert(charactersIn: "-._~")
+        let encodedToken = token.addingPercentEncoding(withAllowedCharacters: allowedTokenCharacters) ?? token
+        guard let requestURL = URL(string: "\(baseURL)/api/v2/authorization/request/\(encodedToken)") else {
+            self.setIssue(ProviderURL.Invalid.malformed.message, kind: .configuration)
+            return
+        }
+        var request = URLRequest(url: requestURL, timeoutInterval: httpTimeout)
         request.httpMethod = "GET"
         request.cachePolicy = .reloadIgnoringLocalCacheData
 
@@ -599,32 +626,37 @@ class Nightscout: Provider, @unchecked Sendable {
 
             guard let res = response as? HTTPURLResponse else {
                 noteTransportFailure()
-                self.providerIssue = "Invalid response from Nightscout"
+                self.setIssue(String(localized: "Invalid response from Nightscout"), kind: .transient)
                 return
             }
             noteResponseReceived()
             if res.statusCode > 299 {
                 unsuccessfulAuthAttempts += 1
                 lastAuthFailureDate = Date()
-                self.plog("status code over 299: \(res.statusCode). Body: \(data)", category: "nightscout", level: .debug)
-                var providerError = ""
-                do {
-                    let result = try JSONDecoder().decode(NightscoutAuthErrorResponse.self, from: data)
-                    providerError = "\(result.message): \(result.description)"
-                } catch {
-                    providerError = "Unknown Nightscout Issue"
+                // Body shape only: the payload carries the token.
+                self.plog("Auth endpoint rejected (HTTP \(res.statusCode)). \(LogRedactor.payloadShape(of: data))", category: "nightscout", level: .debug)
+
+                // A 401/403 is a definitive credential rejection; anything else
+                // (5xx, 429, unknown) is transient and may recover on its own.
+                if res.statusCode == 401 || res.statusCode == 403 {
+                    self.setIssue(String(localized: "Nightscout rejected your sign-in. Check your Nightscout URL and access token in Settings."), kind: .credentials)
+                } else {
+                    var providerError = "Unknown Nightscout Issue"
+                    if let result = try? JSONDecoder().decode(NightscoutAuthErrorResponse.self, from: data) {
+                        providerError = "\(result.message): \(result.description)"
+                    }
+                    self.setIssue(providerError, kind: .transient)
                 }
-                self.providerIssue = providerError
                 return
             } else {
-                self.plog("status code under 300: \(res.statusCode). Body: \(data)", category: "nightscout", level: .debug)
+                // Body shape only: the success payload carries the access token.
+                self.plog("status code under 300: \(res.statusCode). \(LogRedactor.payloadShape(of: data))", category: "nightscout", level: .debug)
                 do {
                     let result = try JSONDecoder().decode(NightscoutAuthResponse.self, from: data)
 
                     self.auth = ProviderAuth(token: result.token, expiry: result.exp)
 
                     self.plog("Authentication is successful.", category: "nightscout", level: .debug)
-                    isAuthenticating = false
                     isAuthenticated = true
                     unsuccessfulAuthAttempts = 0
 
@@ -641,8 +673,7 @@ class Nightscout: Provider, @unchecked Sendable {
                     return
                 } catch {
                     self.plog("Unable to parse response from Nightscout: \(String(describing: error))", category: "nightscout", level: .error)
-                    self.providerIssue = "Unable to parse response from Nightscout: \(String(describing: error))"
-                    isAuthenticating = false
+                    self.setIssue(String(localized: "Unable to parse response from Nightscout: ") + String(describing: error), kind: .transient)
                     return
                 }
             }
@@ -654,14 +685,18 @@ class Nightscout: Provider, @unchecked Sendable {
             }
             self.unsuccessfulAuthAttempts += 1
             lastAuthFailureDate = Date()
-            self.providerIssue = err
+            self.setIssue(err, kind: .transient)
         }
-
-        isAuthenticating = false
     }
 
     override internal func verifyCredentials() async -> Bool {
         self.plog("nightscout.verifyCredentials", category: "nightscout", level: .debug)
+
+        // Check the fields before spending a network round-trip on them.
+        guard validSettings else {
+            self.setIssue(settingsError, kind: .configuration)
+            return false
+        }
 
         // If an auth is already in flight (e.g. the live fetch cycle),
         // authenticate() early-returns and isAuthenticated stays stale,

@@ -37,6 +37,32 @@ struct ProviderAuth: Decodable {
     var expiry: Double
 }
 
+/// Classifies a provider issue so the UI can present a tailored, actionable
+/// message instead of a generic error. Set alongside `providerIssue` via
+/// `setIssue(_:kind:)`.
+///
+/// Credential rejections are deliberately distinguished from transient
+/// failures: only the former should prompt the user to revisit their sign-in
+/// details in Settings, and only the former warrant pausing the normal fetch
+/// cadence while the settings are unchanged.
+enum ProviderIssueKind: String, Equatable, Sendable {
+    case none
+    /// The provider definitively rejected our sign-in (bad username, password,
+    /// or token). The user must fix their credentials in Settings.
+    case credentials
+    /// Required settings are invalid or missing (empty field, malformed URL).
+    case configuration
+    /// Reachable and authenticated, but the provider has no measurements to
+    /// offer (e.g. Dexcom Share with no follower / sensor warm-up).
+    case noData
+    /// The provider's API contract changed under us. The user cannot fix it;
+    /// GlucoseBar must ship an update.
+    case apiChange
+    /// Network, server, rate-limit, or decoding problem that may recover on its
+    /// own without any user action.
+    case transient
+}
+
 struct GlucoseSourceExtraProperties {
     var aid: GlucoseSourceDevice = .null
     var iob: Double? = nil
@@ -99,6 +125,10 @@ class Provider: ObservableObject, @unchecked Sendable {
 
     @Published var GlucoseSourceExtras: GlucoseSourceExtraProperties = GlucoseSourceExtraProperties()
     @Published public var providerIssue: String?
+    /// Classification of `providerIssue`, for views that need to tell a bad
+    /// password apart from a temporary outage. `.none` whenever there is no
+    /// issue (or, for providers that predate this, when unset).
+    @Published public var issueKind: ProviderIssueKind = .none
     @Published public var lastFetch: Date = Date().addingTimeInterval(TimeInterval(-5*60))
     @Published public var isAuthenticating: Bool = false
     @Published var auth: ProviderAuth?
@@ -111,6 +141,36 @@ class Provider: ObservableObject, @unchecked Sendable {
     /// reachable. Drives the per-source online indicator; a source is only
     /// considered offline after several transport failures in a row.
     @Published public var consecutiveTransportFailures: Int = 0
+
+    // MARK: - Issues
+
+    /// Sets the user-facing issue message and its classification together.
+    /// Nonisolated (like the rest of `Provider`) so providers can call it from
+    /// their own worker contexts; the `@Published` update is carried to the
+    /// main actor by Combine.
+    func setIssue(_ message: String?, kind: ProviderIssueKind) {
+        if let message {
+            providerIssue = message
+            issueKind = kind
+        } else {
+            providerIssue = nil
+            issueKind = .none
+        }
+    }
+
+    /// Clears any current issue.
+    func clearIssue() {
+        setIssue(nil, kind: .none)
+    }
+
+    /// Backwards-compatible setter for call sites that only know the message.
+    /// Classifies the issue as `.transient` (the safe default for network,
+    /// server, rate-limit, and decoding problems). Use `setIssue(_:kind:)`
+    /// when the failure is a credential, configuration, no-data, or API-change
+    /// problem so the UI can present it appropriately.
+    func setProviderIssue(_ value: String?) {
+        setIssue(value, kind: value == nil ? .none : .transient)
+    }
 
     /// Call when a request yielded any HTTP response (any status code).
     func noteResponseReceived() {
@@ -149,6 +209,9 @@ class Provider: ObservableObject, @unchecked Sendable {
         let _ = Timer.publish(every: readingInterval, on: .main, in: .default)
     }
 
+    /// Verifies the provider's credentials. Returning `false` should leave a
+    /// classified `providerIssue`/`issueKind` behind; callers fall back to
+    /// `.transient` when a provider forgets to set one.
     func verifyCredentials() async -> Bool {
         return true
     }

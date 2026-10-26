@@ -37,7 +37,17 @@ struct SourceMenuBarLabel: View {
                     }
                 }
             } else if g.error != "" && s.validSettings && g.sourceOnline {
-                if g.provider.providerIssue == DexcomShare.noDataIssue {
+                if g.provider.issueKind == .credentials {
+                    Label(
+                        title: { Text("Sign in") },
+                        icon: { Image(systemName: "key.slash") }
+                    ).labelStyle(.titleAndIcon)
+                } else if g.provider.issueKind == .configuration {
+                    Label(
+                        title: { Text("Set up") },
+                        icon: { Image(systemName: "gearshape.badge.exclamationmark") }
+                    ).labelStyle(.titleAndIcon)
+                } else if g.provider.providerIssue == DexcomShare.noDataIssue {
                     Label(
                         title: { Text(" No data") },
                         icon: { Image(systemName: "bolt.trianglebadge.exclamationmark") }

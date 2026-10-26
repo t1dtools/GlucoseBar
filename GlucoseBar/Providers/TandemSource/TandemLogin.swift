@@ -9,7 +9,7 @@ import Foundation
 import OSLog
 import CryptoKit
 
-enum TandemLoginError: Error, LocalizedError {
+enum TandemLoginError: Error, LocalizedError, Equatable {
     case invalidCredentials
     case parseError(String)
     case httpError(Int)

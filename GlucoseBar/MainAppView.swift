@@ -77,9 +77,69 @@ struct MainAppView: View {
         .focusEffectDisabled()
     }
 
+    /// Dedicated state for sign-in and configuration problems, so a wrong
+    /// password is not buried under a generic "Error". Gives the user one
+    /// obvious next action: open Settings, fix the fields, come back.
+    func CredentialsIssueView() -> some View {
+        let isCredentials = g.provider.issueKind == .credentials
+        return VStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 10) {
+                        Image(systemName: isCredentials ? "key.slash" : "gearshape.badge.exclamationmark")
+                            .resizable()
+                            .frame(width: 40, height: 40)
+                            .foregroundColor(.orange)
+                        Text(isCredentials ? "Sign-in problem" : "Settings problem")
+                            .font(.headline)
+                            .foregroundColor(.orange)
+                    }
+
+                    Text(isCredentials
+                         ? "\(s.cgmProvider.presentable) would not accept your sign-in details."
+                         : "\(s.cgmProvider.presentable) is not configured correctly.")
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    if let issue = g.provider.providerIssue {
+                        Text(issue).fixedSize(horizontal: false, vertical: true).padding(.top, 2)
+                    }
+
+                    Text("Open Settings, check the \(s.cgmProvider.presentable) details, then come back and tap Retry.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Button("Retry") {
+                        g.reset(s)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .padding(.top, 8)
+                }
+                .padding()
+            }
+            .frame(maxWidth: .infinity, minHeight: 300, maxHeight: 300)
+
+            HStack {
+                SettingsButton()
+                QuitButton()
+            }
+            .padding(.top, 8)
+        }
+        .padding()
+        .frame(width: 500, alignment: .leading)
+        .focusable()
+        .focusEffectDisabled()
+    }
+
     func NightscoutButton() -> some View {
         Button(action: {
-            var url = URL(string: s.nsURL)!
+            // Never force-unwrap the user-entered URL: a stray space used to
+            // crash the app the moment this button was tapped. The http(s) form is
+            // used so a `ws://` address still opens a usable web page.
+            guard var url = ProviderURL.httpURL(from: s.nsURL) else {
+                self.logger.dlog("Nightscout URL is not usable, not opening it", category: "main", level: .error)
+                return
+            }
             if s.nsSecret != "" {
                 url.append(queryItems: [URLQueryItem(name: "token", value: s.nsSecret)])
             }
@@ -100,7 +160,9 @@ struct MainAppView: View {
 
     var body: some View {
         if g.error != "" && s.validSettings && g.sourceOnline {
-            if g.provider.providerIssue == DexcomShare.noDataIssue {
+            if g.provider.issueKind == .credentials || g.provider.issueKind == .configuration {
+                CredentialsIssueView()
+            } else if g.provider.providerIssue == DexcomShare.noDataIssue {
                 VStack {
                     ScrollView {
                         VStack {
