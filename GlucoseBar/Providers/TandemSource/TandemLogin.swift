@@ -230,16 +230,14 @@ final class TandemLoginHelper: @unchecked Sendable {
         }
 
         if httpResponse.statusCode != 200 {
-            let body = String(data: data, encoding: .utf8)?.prefix(500) ?? ""
-            plog("TandemLogin: login API returned HTTP \(httpResponse.statusCode), body: \(body)", level: .error)
+            plog("TandemLogin: login API returned HTTP \(httpResponse.statusCode), \(LogRedactor.payloadShape(of: data))", level: .error)
             throw TandemLoginError.httpError(httpResponse.statusCode)
         }
 
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let status = json["status"] as? String,
               status == "SUCCESS" else {
-            let body = String(data: data, encoding: .utf8) ?? ""
-            plog("TandemLogin: login API unexpected response: \(body)", level: .error)
+            plog("TandemLogin: login API unexpected response: \(LogRedactor.payloadShape(of: data))", level: .error)
             throw TandemLoginError.invalidCredentials
         }
 
@@ -275,16 +273,18 @@ final class TandemLoginHelper: @unchecked Sendable {
 
         guard let httpResponse = response as? HTTPURLResponse,
               httpResponse.statusCode / 100 == 2 else {
-            let body = String(data: data, encoding: .utf8)?.prefix(500) ?? ""
             let status = (response as? HTTPURLResponse)?.statusCode ?? -1
-            plog("TandemLogin: OIDC authorize returned HTTP \(status), body: \(body)", level: .error)
+            // The authorize response body carries the authorization code.
+            plog("TandemLogin: OIDC authorize returned HTTP \(status), \(LogRedactor.payloadShape(of: data))", level: .error)
             throw TandemLoginError.parseError("OIDC authorize failed")
         }
 
         guard let finalURL = httpResponse.url,
               let components = URLComponents(url: finalURL, resolvingAgainstBaseURL: false),
               let code = components.queryItems?.first(where: { $0.name == "code" })?.value else {
-            plog("TandemLogin: no code in OIDC redirect URL: \(httpResponse.url?.absoluteString ?? "nil")", level: .error)
+            // The redirect URL carries the authorization code in its query string,
+            // so log it through the URL-safe helper.
+            plog("TandemLogin: no code in OIDC redirect URL: \(LogRedactor.safeURL(httpResponse.url))", level: .error)
             throw TandemLoginError.parseError("No authorization code in OIDC response")
         }
 
@@ -322,9 +322,9 @@ final class TandemLoginHelper: @unchecked Sendable {
 
         guard let httpResponse = response as? HTTPURLResponse,
               httpResponse.statusCode / 100 == 2 else {
-            let body = String(data: data, encoding: .utf8)?.prefix(500) ?? ""
             let status = (response as? HTTPURLResponse)?.statusCode ?? -1
-            plog("TandemLogin: OIDC token returned HTTP \(status), body: \(body)", level: .error)
+            // Never log this body: it is the access/id/refresh token response.
+            plog("TandemLogin: OIDC token returned HTTP \(status), \(LogRedactor.payloadShape(of: data))", level: .error)
             throw TandemLoginError.parseError("OIDC token exchange failed")
         }
 
@@ -332,8 +332,8 @@ final class TandemLoginHelper: @unchecked Sendable {
               let accessToken = json["access_token"] as? String,
               let idToken = json["id_token"] as? String,
               let expiresIn = json["expires_in"] as? Int else {
-            let body = String(data: data, encoding: .utf8) ?? ""
-            plog("TandemLogin: OIDC token response missing fields: \(body)", level: .error)
+            // Never log this body: it is the access/id/refresh token response.
+            plog("TandemLogin: OIDC token response missing fields: \(LogRedactor.payloadShape(of: data))", level: .error)
             throw TandemLoginError.noAccessToken
         }
 

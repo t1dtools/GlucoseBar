@@ -85,8 +85,12 @@ final class DebugLogger: @unchecked Sendable {
             let handle = try FileHandle(forWritingTo: live)
             fileHandle = handle
             currentLogURL = live
-            let header = "--- GlucoseBar debug log opened \(isoNow()) ---\n"
+            // The header always records the running build's identity, so a log
+            // pasted into an issue can be tied to a version without guessing.
+            let header = "--- GlucoseBar \(Bundle.main.appVersionLong) (\(Bundle.main.appBuild)) · \(DistributionChannel.detect().displayName) · macOS \(osVersionString()) · debug log opened \(isoNow()) ---\n"
             handle.write(Data(header.utf8))
+            let sources = "--- Active sources: \(sourceSummary()) ---\n"
+            handle.write(Data(sources.utf8))
         } catch {
             // Can't write to log file — silently bail
             fileHandle = nil
@@ -142,6 +146,26 @@ final class DebugLogger: @unchecked Sendable {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return f.string(from: Date())
+    }
+
+    private func osVersionString() -> String {
+        let v = ProcessInfo.processInfo.operatingSystemVersion
+        return "\(v.majorVersion).\(v.minorVersion).\(v.patchVersion)"
+    }
+
+    /// "0: My CGM, 1: Desk" for the persisted source list, or "none" before
+    /// the first source has been registered. SourceManager stores the ids as
+    /// JSON-encoded `[String]` data (not a native array), hence the decode.
+    private func sourceSummary() -> String {
+        guard let data = UserDefaults.standard.data(forKey: "sourceIds"),
+              let ids = try? JSONDecoder().decode([String].self, from: data),
+              !ids.isEmpty else {
+            return "none"
+        }
+        return ids.enumerated().map { index, id in
+            let name = UserDefaults.standard.string(forKey: "\(id).sourceName") ?? "Unnamed"
+            return "\(index): \(name)"
+        }.joined(separator: ", ")
     }
 }
 

@@ -329,12 +329,12 @@ class TandemSource: Provider, @unchecked Sendable {
             if let overrideId = selectedPumpAssignmentIdOverride,
                let match = pumps.first(where: { $0.assignmentId == overrideId }) {
                 selected = match
-                plog("Pumper: using user-selected pump \(match.serialNumber ?? "?")", category: "tandemsource", level: .info)
+                plog("Pumper: using user-selected pump", category: "tandemsource", level: .info)
             } else {
                 selected = pumps.max(by: { a, b in
                     (a.availableDataRange?.end ?? "") < (b.availableDataRange?.end ?? "")
                 }) ?? pumps.first!
-                plog("Pumper: auto-selected pump \(selected.serialNumber ?? "?"), \(pumps.count) pumps on account", category: "tandemsource", level: .info)
+                plog("Pumper: auto-selected pump, \(pumps.count) pumps on account", category: "tandemsource", level: .info)
             }
 
             pumpAssignmentId = selected.assignmentId
@@ -345,7 +345,9 @@ class TandemSource: Provider, @unchecked Sendable {
                 pumpDIAHours = diaMin / 60
             }
             let dataEnd = selected.availableDataRange?.end ?? "never uploaded"
-            plog("Pumper: serial=\(selected.serialNumber ?? "?"), model=\(selected.modelName ?? "?"), CIQ=\(hasControlIQ), targets=\(lowThreshold)-\(highThreshold), data till \(dataEnd)", category: "tandemsource", level: .info)
+            // No serial number (device identifier) and no target range (therapy
+            // setting): both would end up in a public issue report.
+            plog("Pumper: model=\(selected.modelName ?? "?"), CIQ=\(hasControlIQ), data till \(dataEnd)", category: "tandemsource", level: .info)
         } else {
             availablePumps = []
         }
@@ -466,25 +468,29 @@ class TandemSource: Provider, @unchecked Sendable {
             return Date()
         }
 
-        func propStr(_ p: PumpLogProperty) -> String {
+        /// Names the type of a property rather than rendering its value. The pump
+        /// log carries CGM readings, basal rates and boluses, and the debug log is
+        /// attached to public issue reports, so values must not be written out. The
+        /// type is what diagnoses a vendor schema change anyway.
+        func propTypeName(_ p: PumpLogProperty) -> String {
             switch p {
-            case .int(let v): return "\(v)"
-            case .double(let v): return "\(v)"
-            case .string(let v): return v
-            case .bool(let v): return "\(v)"
-            case .array(let v): return "[\(v.map(propStr).joined(separator: ","))]"
-            case .dictionary(let v): return "{\(v.map { "\($0.key):\(propStr($0.value))" }.joined(separator: ","))}"
+            case .int: return "int"
+            case .double: return "double"
+            case .string: return "string"
+            case .bool: return "bool"
+            case .array(let v): return "[\(v.first.map(propTypeName) ?? "")]"
+            case .dictionary(let v): return "{\(v.keys.sorted().joined(separator: ","))}"
             case .null: return "null"
             }
         }
 
-        // --- Debug dump: raw CGM-related events to diagnose duplicate readings ---
+        // --- Debug dump: CGM-related event structure, for diagnosing duplicate readings ---
         let evtFmt = ISO8601DateFormatter()
         evtFmt.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         for event in events {
             guard let code = event.eventCode, code == 399 || code == 16 else { continue }
             let props = event.eventProperties?.sorted(by: { $0.key < $1.key })
-                .map { "\($0.key)=\(propStr($0.value))" }
+                .map { "\($0.key):\(propTypeName($0.value))" }
                 .joined(separator: " ") ?? "none"
             plog("CGM_EVENT code=\(code) group=\(event.sequenceGroup ?? -1) num=\(event.sequenceNumber ?? -1) est=\(event.estimatedDateTime ?? "nil") pump=\(event.pumpDateTime ?? "nil") props={\(props)}", category: "tandemsource", level: .info)
         }
@@ -805,9 +811,12 @@ class TandemSource: Provider, @unchecked Sendable {
 
     // MARK: - Helpers
 
+    /// Logs only the shape of a response — status, byte count, key names and array
+    /// lengths. Bodies are never written out: the pump-logs payload is measurement
+    /// data (basal rates, boluses, CGM readings) and the pumper payload identifies
+    /// the device, and this log is attached to public issue reports.
     private func logResponse(_ label: String, status: Int, body data: Data) {
-        let preview = String(data: data, encoding: .utf8)?.prefix(500) ?? "<binary>"
-        plog("\(label): HTTP \(status), body: \(preview)", category: "tandemsource", level: .info)
+        plog("\(label): HTTP \(status), \(LogRedactor.payloadShape(of: data))", category: "tandemsource", level: .info)
     }
 }
 

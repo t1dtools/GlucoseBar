@@ -224,11 +224,8 @@ class DexcomShare: Provider, @unchecked Sendable {
                     providerError = String(localized: "Unknown Dexcom Share Issue: \(res.statusCode)")
                     self.plog("Unknown Dexcom Share Issue: \(String(describing: error))", category: "dexcomshare", level: .error)
                     self.plog("Request info: Status Code: \(res.statusCode)", category: "dexcomshare", level: .error)
-                    if let str = String(data: data, encoding: .utf8) {
-                        self.plog("Request info: Response Body: \(str)", category: "dexcomshare", level: .error)
-                    } else {
-                        self.plog("Request info: No response body.", category: "dexcomshare", level: .error)
-                    }
+                    // Shape only: never the body, which may contain readings.
+                    self.plog("Request info: Response Body: \(LogRedactor.payloadShape(of: data))", category: "dexcomshare", level: .error)
                 }
 
                 self.setProviderIssue(providerError)

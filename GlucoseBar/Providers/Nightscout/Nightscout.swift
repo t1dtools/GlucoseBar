@@ -206,7 +206,7 @@ class Nightscout: Provider, @unchecked Sendable {
     @MainActor
     func handleDataUpdate(_ data: [Any]) async {
         guard let dict = data.first as? [String: Any] else {
-            self.plog("handleDataUpdate: unexpected format: \(data)", category: "nightscout", level: .error)
+            self.plog("handleDataUpdate: unexpected format (\(data.count) items)", category: "nightscout", level: .error)
             return
         }
 
@@ -257,10 +257,11 @@ class Nightscout: Provider, @unchecked Sendable {
                 updatedEntries.insert(contentsOf: newEntries, at: 0)
 
                 if updatedEntries.count > 288 {
-                    self.plog("removing entry from glucoseentries: \(updatedEntries.last!.glucose)", category: "nightscout", level: .debug)
+                    // The entry's value is a measurement, so log its identity instead.
+                    self.plog("removing last entry from cache (id \(updatedEntries.last?.id ?? "?"))", category: "nightscout", level: .debug)
                     updatedEntries.removeLast()
                 }
-                self.plog("Latest glucose entry: \(String(describing: updatedEntries.first?.glucose))", category: "nightscout", level: .debug)
+                self.plog("Latest glucose entry: id \(updatedEntries.first?.id ?? "none")", category: "nightscout", level: .debug)
                 self.setGlucoseEntries(updatedEntries)
             }
         }
@@ -296,20 +297,6 @@ class Nightscout: Provider, @unchecked Sendable {
 
         return ge
     }
-
-    private func handleSGV(_ payload: [String: Any]) {
-        guard
-            let mgdl = payload["mgdl"] as? Int,
-            let timestamp = payload["datetime"] as? TimeInterval
-        else {
-            return
-        }
-
-        let date = Date(timeIntervalSince1970: timestamp / 1000)
-
-        self.plog("SGV: \(mgdl) at \(date)", category: "nightscout", level: .debug)
-    }
-
 
     struct NightscoutEntriesErrorResponse: Codable {
         let status: Int
@@ -456,10 +443,11 @@ class Nightscout: Provider, @unchecked Sendable {
                             updatedEntries.insert(contentsOf: newEntries, at: 0)
 
                             if updatedEntries.count > 288 {
-                                self.plog("removing entry from glucoseentries: \(updatedEntries.last!.glucose)", category: "nightscout", level: .debug)
+                                // The entry's value is a measurement, so log its identity instead.
+                                self.plog("removing last entry from cache (id \(updatedEntries.last?.id ?? "?"))", category: "nightscout", level: .debug)
                                 updatedEntries.removeLast()
                             }
-                            self.plog("Latest glucose entry: \(String(describing: updatedEntries.first?.glucose))", category: "nightscout", level: .debug)
+                            self.plog("Latest glucose entry: id \(updatedEntries.first?.id ?? "none")", category: "nightscout", level: .debug)
                             self.setGlucoseEntries(updatedEntries)
                         }
                     }
