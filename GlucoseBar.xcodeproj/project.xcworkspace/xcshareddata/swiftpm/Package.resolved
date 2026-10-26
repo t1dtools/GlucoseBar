@@ -1,12 +1,11 @@
 {
-  "originHash" : "053962048526b7f10e7f0dde82e5e0debf5506611cc8a6b5b54eb4ead0bc003b",
+  "originHash" : "a2a5c8cedd42650924e9a7e748b3e121e855416add4cecb7f42a89fd55c7926c",
   "pins" : [
     {
       "identity" : "launchatlogin-modern",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sindresorhus/LaunchAtLogin-Modern",
       "state" : {
-        "branch" : "main",
         "revision" : "9c41991631605c8ccfe0347bbcb5c659169f2ec5"
       }
     },
@@ -24,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/socketio/socket.io-client-swift",
       "state" : {
-        "branch" : "master",
-        "revision" : "42da871d9369f290d6ec4930636c40672143905b"
+        "revision" : "42da871d9369f290d6ec4930636c40672143905b",
+        "version" : "16.1.1"
       }
     },
     {

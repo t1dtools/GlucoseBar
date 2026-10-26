@@ -89,7 +89,25 @@
 		AA000001DEBUGLOGGER00001A /* DebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001DEBUGLOGGER00001B /* DebugLogger.swift */; };
 		AA000002DEBUGSETTINGS001A /* DebugSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002DEBUGSETTINGS001B /* DebugSettingsView.swift */; };
 		F980A384747E421CBF8C88147BC961E2 /* ActiveInsulinChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BB04858EDB645A1B421F8A5C9A07830 /* ActiveInsulinChart.swift */; };
+		8317C0202F0000010000C020 /* ProviderURLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8317C0102F0000010000C010 /* ProviderURLTests.swift */; };
+		8317C0212F0000010000C021 /* SettingsIdentityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8317C0112F0000010000C011 /* SettingsIdentityTests.swift */; };
+		8317C0222F0000010000C022 /* SettingsStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8317C0122F0000010000C012 /* SettingsStoreTests.swift */; };
+		8317C0232F0000010000C023 /* SourceMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8317C0132F0000010000C013 /* SourceMigrationTests.swift */; };
+		8317C0242F0000010000C024 /* ProviderParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8317C0142F0000010000C014 /* ProviderParsingTests.swift */; };
+		8317C0252F0000010000C025 /* LogRedactorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8317C0152F0000010000C015 /* LogRedactorTests.swift */; };
+		8317C0262F0000010000C026 /* CredentialMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8317C0162F0000010000C016 /* CredentialMigrationTests.swift */; };
+		8317C0272F0000010000C027 /* KeychainStoreIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8317C0172F0000010000C017 /* KeychainStoreIntegrationTests.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		8317C00B2F0000010000C00B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 836351782ABF6A9000BDAA96 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8363517F2ABF6A9000BDAA96;
+			remoteInfo = GlucoseBar;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		0FD07E1B22AA4C509A1D6887 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
@@ -174,6 +192,15 @@
 		8FFFE5B8105447ABAF90DDABC042A54F /* CarbsOnBoardChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbsOnBoardChart.swift; sourceTree = "<group>"; };
 		AA000001DEBUGLOGGER00001B /* DebugLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogger.swift; sourceTree = "<group>"; };
 		AA000002DEBUGSETTINGS001B /* DebugSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSettingsView.swift; sourceTree = "<group>"; };
+		8317C0022F0000010000C002 /* GlucoseBarTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GlucoseBarTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		8317C0102F0000010000C010 /* ProviderURLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderURLTests.swift; sourceTree = "<group>"; };
+		8317C0112F0000010000C011 /* SettingsIdentityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsIdentityTests.swift; sourceTree = "<group>"; };
+		8317C0122F0000010000C012 /* SettingsStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStoreTests.swift; sourceTree = "<group>"; };
+		8317C0132F0000010000C013 /* SourceMigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceMigrationTests.swift; sourceTree = "<group>"; };
+		8317C0142F0000010000C014 /* ProviderParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderParsingTests.swift; sourceTree = "<group>"; };
+		8317C0152F0000010000C015 /* LogRedactorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogRedactorTests.swift; sourceTree = "<group>"; };
+		8317C0162F0000010000C016 /* CredentialMigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialMigrationTests.swift; sourceTree = "<group>"; };
+		8317C0172F0000010000C017 /* KeychainStoreIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStoreIntegrationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -184,6 +211,13 @@
 				83B737A22BE9728F00B84A75 /* LaunchAtLogin in Frameworks */,
 				8330335D2FD6099E00C7ACF9 /* MenuBarExtraAccess in Frameworks */,
 				8381E1942F1C349800002B77 /* SocketIO in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8317C0042F0000010000C004 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -224,6 +258,7 @@
 			isa = PBXGroup;
 			children = (
 				836351822ABF6A9000BDAA96 /* GlucoseBar */,
+				8317C0092F0000010000C009 /* GlucoseBarTests */,
 				836351812ABF6A9000BDAA96 /* Products */,
 				83B7379E2BE4420F00B84A75 /* Frameworks */,
 			);
@@ -233,6 +268,7 @@
 			isa = PBXGroup;
 			children = (
 				836351802ABF6A9000BDAA96 /* GlucoseBar.app */,
+				8317C0022F0000010000C002 /* GlucoseBarTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -414,6 +450,21 @@
 			path = Updates;
 			sourceTree = "<group>";
 		};
+		8317C0092F0000010000C009 /* GlucoseBarTests */ = {
+			isa = PBXGroup;
+			children = (
+				8317C0102F0000010000C010 /* ProviderURLTests.swift */,
+				8317C0112F0000010000C011 /* SettingsIdentityTests.swift */,
+				8317C0122F0000010000C012 /* SettingsStoreTests.swift */,
+				8317C0132F0000010000C013 /* SourceMigrationTests.swift */,
+				8317C0142F0000010000C014 /* ProviderParsingTests.swift */,
+				8317C0152F0000010000C015 /* LogRedactorTests.swift */,
+				8317C0162F0000010000C016 /* CredentialMigrationTests.swift */,
+				8317C0172F0000010000C017 /* KeychainStoreIntegrationTests.swift */,
+			);
+			path = GlucoseBarTests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -439,6 +490,24 @@
 			productReference = 836351802ABF6A9000BDAA96 /* GlucoseBar.app */;
 			productType = "com.apple.product-type.application";
 		};
+		8317C0012F0000010000C001 /* GlucoseBarTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8317C0062F0000010000C006 /* Build configuration list for PBXNativeTarget "GlucoseBarTests" */;
+			buildPhases = (
+				8317C0032F0000010000C003 /* Sources */,
+				8317C0042F0000010000C004 /* Frameworks */,
+				8317C0052F0000010000C005 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8317C00A2F0000010000C00A /* PBXTargetDependency */,
+			);
+			name = GlucoseBarTests;
+			productName = GlucoseBarTests;
+			productReference = 8317C0022F0000010000C002 /* GlucoseBarTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -451,6 +520,10 @@
 				TargetAttributes = {
 					8363517F2ABF6A9000BDAA96 = {
 						CreatedOnToolsVersion = 15.0;
+					};
+					8317C0012F0000010000C001 = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = 8363517F2ABF6A9000BDAA96;
 					};
 				};
 			};
@@ -476,6 +549,7 @@
 			projectRoot = "";
 			targets = (
 				8363517F2ABF6A9000BDAA96 /* GlucoseBar */,
+				8317C0012F0000010000C001 /* GlucoseBarTests */,
 			);
 		};
 /* End PBXProject section */
@@ -489,6 +563,13 @@
 				83849C072E5CF18200BFD090 /* Localizable.xcstrings in Resources */,
 				836351882ABF6A9000BDAA96 /* Assets.xcassets in Resources */,
 				83849C052E5CF18200BFD090 /* InfoPlist.xcstrings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8317C0052F0000010000C005 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -577,7 +658,30 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		8317C0032F0000010000C003 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8317C0202F0000010000C020 /* ProviderURLTests.swift in Sources */,
+				8317C0212F0000010000C021 /* SettingsIdentityTests.swift in Sources */,
+				8317C0222F0000010000C022 /* SettingsStoreTests.swift in Sources */,
+				8317C0232F0000010000C023 /* SourceMigrationTests.swift in Sources */,
+				8317C0242F0000010000C024 /* ProviderParsingTests.swift in Sources */,
+				8317C0252F0000010000C025 /* LogRedactorTests.swift in Sources */,
+				8317C0262F0000010000C026 /* CredentialMigrationTests.swift in Sources */,
+				8317C0272F0000010000C027 /* KeychainStoreIntegrationTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		8317C00A2F0000010000C00A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8363517F2ABF6A9000BDAA96 /* GlucoseBar */;
+			targetProxy = 8317C00B2F0000010000C00B /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		8363518D2ABF6A9000BDAA96 /* Debug */ = {
@@ -791,6 +895,42 @@
 			};
 			name = Release;
 		};
+		8317C0072F0000010000C007 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = t1d.tools.GlucoseBarTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GlucoseBar.app/Contents/MacOS/GlucoseBar";
+			};
+			name = Debug;
+		};
+		8317C0082F0000010000C008 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = t1d.tools.GlucoseBarTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GlucoseBar.app/Contents/MacOS/GlucoseBar";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -812,6 +952,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		8317C0062F0000010000C006 /* Build configuration list for PBXNativeTarget "GlucoseBarTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8317C0072F0000010000C007 /* Debug */,
+				8317C0082F0000010000C008 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -819,8 +968,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sindresorhus/LaunchAtLogin-Modern";
 			requirement = {
-				branch = main;
-				kind = branch;
+				kind = revision;
+				revision = 9c41991631605c8ccfe0347bbcb5c659169f2ec5;
 			};
 		};
 		8330335B2FD6099E00C7ACF9 /* XCRemoteSwiftPackageReference "MenuBarExtraAccess" */ = {
@@ -835,8 +984,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/socketio/socket.io-client-swift";
 			requirement = {
-				branch = master;
-				kind = branch;
+				kind = exactVersion;
+				version = 16.1.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
